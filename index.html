@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#2E7D32">
+    <meta name="description" content="Explore biodiversity by location with species photos and information">
+    
+    <title>Biodiversity Explorer</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="assets/icon-192.png">
+    <link rel="apple-touch-icon" href="assets/icon-192.png">
+    
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/mobile.css">
+</head>
+<body>
+    <div id="app">
+        <header class="app-header">
+            <div class="header-content">
+                <h1 class="app-title">
+                    <span id="location-name">Loading location...</span>
+                </h1>
+                <div class="header-controls">
+                    <button id="location-btn" class="icon-btn" aria-label="Change location">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                        </svg>
+                    </button>
+                    <select id="language-select" class="language-select">
+                        <option value="en">🇺🇸 EN</option>
+                        <option value="es">🇪🇸 ES</option>
+                        <option value="fr">🇫🇷 FR</option>
+                        <option value="de">🇩🇪 DE</option>
+                    </select>
+                    <button id="share-btn" class="icon-btn" aria-label="Share location">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.50-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <nav class="life-group-filter">
+                <div class="filter-container">
+                    <button class="filter-btn active" data-group="all">
+                        <span class="filter-icon">🌍</span>
+                        <span class="filter-text">All</span>
+                    </button>
+                    <button class="filter-btn" data-group="3">
+                        <span class="filter-icon">🐦</span>
+                        <span class="filter-text">Birds</span>
+                    </button>
+                    <button class="filter-btn" data-group="20978">
+                        <span class="filter-icon">🐸</span>
+                        <span class="filter-text">Amphibians</span>
+                    </button>
+                    <button class="filter-btn" data-group="26036">
+                        <span class="filter-icon">🦎</span>
+                        <span class="filter-text">Reptiles</span>
+                    </button>
+                    <button class="filter-btn" data-group="40151">
+                        <span class="filter-icon">🐺</span>
+                        <span class="filter-text">Mammals</span>
+                    </button>
+                    <button class="filter-btn" data-group="47178">
+                        <span class="filter-icon">🐟</span>
+                        <span class="filter-text">Fishes</span>
+                    </button>
+                    <button class="filter-btn" data-group="47126">
+                        <span class="filter-icon">🌱</span>
+                        <span class="filter-text">Plants</span>
+                    </button>
+                    <button class="filter-btn" data-group="47170">
+                        <span class="filter-icon">🍄</span>
+                        <span class="filter-text">Fungi</span>
+                    </button>
+                    <button class="filter-btn" data-group="47158">
+                        <span class="filter-icon">🐛</span>
+                        <span class="filter-text">Insects</span>
+                    </button>
+                    <button class="filter-btn" data-group="47119">
+                        <span class="filter-icon">🕷️</span>
+                        <span class="filter-text">Arachnids</span>
+                    </button>
+                    <button class="filter-btn" data-group="47115">
+                        <span class="filter-icon">🐚</span>
+                        <span class="filter-text">Molluscs</span>
+                    </button>
+                </div>
+            </nav>
+
+            <div id="loading" class="loading-state">
+                <div class="loading-spinner"></div>
+                <p>Loading species data...</p>
+            </div>
+
+            <div id="species-grid" class="species-grid">
+                <!-- Species cards will be populated by JavaScript -->
+            </div>
+
+            <div id="error-state" class="error-state" style="display: none;">
+                <p>Unable to load species data. Please check your connection and try again.</p>
+                <button id="retry-btn" class="retry-btn">Retry</button>
+            </div>
+        </main>
+    </div>
+
+    <!-- Species Detail Modal -->
+    <div id="species-modal" class="species-modal">
+        <div class="modal-content">
+            <button class="modal-close" aria-label="Close">&times;</button>
+            <div id="modal-body" class="modal-body">
+                <!-- Species details populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Location Search Modal -->
+    <div id="location-modal" class="location-modal">
+        <div class="modal-content">
+            <button class="modal-close" aria-label="Close">&times;</button>
+            <div class="modal-body">
+                <h2>Choose Location</h2>
+                <input type="text" id="location-search" placeholder="Search for a location..." />
+                <div id="location-results" class="location-results">
+                    <!-- Search results populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- QR Share Modal -->
+    <div id="share-modal" class="share-modal">
+        <div class="modal-content">
+            <button class="modal-close" aria-label="Close">&times;</button>
+            <div class="modal-body">
+                <h2>Share This Location</h2>
+                <div id="qr-code" class="qr-code-container"></div>
+                <p class="share-url" id="share-url"></p>
+                <button id="copy-url" class="copy-btn">Copy URL</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/i18n.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/location.js"></script>
+    <script src="js/species.js"></script>
+    <script src="js/qr.js"></script>
+    <script src="js/app.js"></script>
+
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(registration => console.log('SW registered:', registration))
+                .catch(error => console.log('SW registration failed:', error));
+        }
+    </script>
+</body>
+</html>

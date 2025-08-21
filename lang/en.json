@@ -1,0 +1,59 @@
+{
+  "app.title": "Biodiversity Explorer",
+  "loading.species": "Loading species data...",
+  "loading.location": "Loading location...",
+  "error.network": "Unable to load data. Please check your connection and try again.",
+  "error.location": "Location unavailable",
+  "error.species": "Unable to load species data",
+  "error.retry": "Retry",
+  
+  "filter.all": "All",
+  "filter.birds": "Birds",
+  "filter.amphibians": "Amphibians", 
+  "filter.reptiles": "Reptiles",
+  "filter.mammals": "Mammals",
+  "filter.fishes": "Fishes",
+  "filter.plants": "Plants",
+  "filter.fungi": "Fungi",
+  "filter.arthropods": "Arthropods",
+  "filter.molluscs": "Molluscs",
+  "filter.arachnids": "Arachnids",
+  
+  "location.search.placeholder": "Search for a location...",
+  "location.search.title": "Choose Location",
+  "location.change": "Change location",
+  "location.results.empty": "No locations found",
+  "location.results.error": "Unable to search locations. Please try again.",
+  
+  "share.location": "Share location",
+  "share.title": "Share This Location", 
+  "share.url.copy": "Copy URL",
+  "share.qr.unavailable": "QR code not available",
+  
+  "species.observations": "observations",
+  "species.observation": "observation",
+  "species.rank": "Taxonomic rank",
+  "species.empty": "No species found for this location and filter.",
+  "species.empty.try": "Try Different Filter",
+  
+  "modal.close": "Close",
+  "modal.wikipedia": "Wikipedia",
+  "modal.inaturalist": "iNaturalist",
+  "modal.photo.credit": "Photo",
+  
+  "notification.copied": "URL copied to clipboard!",
+  "notification.copy.failed": "Copy failed. Please copy manually.",
+  "notification.offline": "You are offline", 
+  "notification.online": "Connection restored",
+  "notification.refreshing": "Refreshing data...",
+  "notification.refresh.success": "Data refreshed successfully",
+  "notification.refresh.failed": "Refresh failed. Please try again.",
+  "notification.error": "An error occurred. Please refresh the page.",
+  
+  "update.available": "A new version is available!",
+  "update.button": "Update",
+  
+  "app.failed.title": "App Failed to Load",
+  "app.failed.message": "There was a problem starting the application. Please refresh the page.",
+  "app.failed.reload": "Reload App"
+}

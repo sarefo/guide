@@ -1,0 +1,303 @@
+/* Mobile-First Enhancements */
+
+/* Touch-friendly interactions */
+@media (pointer: coarse) {
+    .filter-btn,
+    .species-card,
+    .location-result,
+    .icon-btn,
+    .language-select,
+    .retry-btn,
+    .copy-btn {
+        min-height: 44px;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        user-select: none;
+    }
+}
+
+/* iOS Safari specific fixes */
+@supports (-webkit-touch-callout: none) {
+    body {
+        -webkit-text-size-adjust: 100%;
+    }
+    
+    .app-header {
+        padding-top: max(1rem, env(safe-area-inset-top));
+        padding-left: max(1rem, env(safe-area-inset-left));
+        padding-right: max(1rem, env(safe-area-inset-right));
+    }
+    
+    .main-content {
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+    
+    input[type="text"] {
+        -webkit-appearance: none;
+        border-radius: 0.5rem;
+    }
+    
+    .species-card {
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0);
+    }
+}
+
+/* Prevent zoom on input focus (iOS) */
+@media screen and (max-width: 767px) {
+    input[type="text"] {
+        font-size: 16px;
+    }
+}
+
+/* High-DPI screens */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .species-image {
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+    }
+}
+
+/* Landscape orientation on mobile */
+@media screen and (max-height: 500px) and (orientation: landscape) {
+    .app-header {
+        padding: 0.5rem 1rem;
+    }
+    
+    .app-title {
+        font-size: 1rem;
+    }
+    
+    .life-group-filter {
+        padding: 0.25rem 0;
+    }
+    
+    .filter-btn {
+        padding: 0.5rem;
+        min-width: 55px;
+    }
+    
+    .filter-icon {
+        font-size: 1.1rem;
+    }
+    
+    .filter-text {
+        font-size: 0.7rem;
+    }
+    
+    .species-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 0.5rem;
+        padding: 0.5rem;
+    }
+    
+    .species-overlay {
+        padding: 1rem 0.5rem 0.5rem;
+    }
+    
+    .species-name {
+        font-size: 0.9rem;
+    }
+    
+    .species-scientific {
+        font-size: 0.75rem;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    :root {
+        color-scheme: dark;
+    }
+    
+    body {
+        background-color: #121212;
+        color: #ffffff;
+    }
+    
+    .species-card {
+        background: #1e1e1e;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+    
+    .life-group-filter {
+        background: #1e1e1e;
+        border-bottom-color: #333;
+    }
+    
+    .filter-btn {
+        color: #aaa;
+    }
+    
+    .filter-btn:hover {
+        background: rgba(46, 125, 50, 0.2);
+    }
+    
+    .filter-btn.active {
+        background: rgba(46, 125, 50, 0.3);
+        color: #4CAF50;
+    }
+    
+    .modal-content {
+        background: #1e1e1e;
+        color: #ffffff;
+    }
+    
+    .modal-close {
+        background: rgba(255, 255, 255, 0.1);
+    }
+    
+    .modal-close:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+    
+    #location-search {
+        background: #2a2a2a;
+        border-color: #444;
+        color: #ffffff;
+    }
+    
+    #location-search::placeholder {
+        color: #aaa;
+    }
+    
+    .location-result {
+        background: #2a2a2a;
+        border-color: #444;
+    }
+    
+    .location-result:hover {
+        background: rgba(46, 125, 50, 0.1);
+    }
+    
+    .share-url {
+        background: #2a2a2a;
+        color: #ffffff;
+    }
+    
+    .loading-spinner {
+        border-color: #444;
+        border-top-color: #4CAF50;
+    }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+    
+    .loading-spinner {
+        animation: none;
+        border: 3px solid #2E7D32;
+    }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    .species-overlay {
+        background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
+    }
+    
+    .species-name,
+    .species-scientific {
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+    }
+    
+    .filter-btn.active {
+        border-color: #000;
+        background: #fff;
+        color: #000;
+    }
+    
+    .app-header {
+        background: #000;
+    }
+}
+
+/* Scroll enhancements for mobile */
+.life-group-filter {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.life-group-filter::-webkit-scrollbar {
+    display: none;
+}
+
+/* Pull-to-refresh indicator space */
+@media screen and (max-width: 767px) {
+    .main-content {
+        overscroll-behavior-y: contain;
+    }
+}
+
+/* Improved touch targets for small screens */
+@media (max-width: 360px) {
+    .header-controls {
+        gap: 0.25rem;
+    }
+    
+    .icon-btn,
+    .language-select {
+        min-width: 36px;
+        min-height: 36px;
+        padding: 0.3rem;
+    }
+    
+    .species-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .filter-container {
+        gap: 0.25rem;
+    }
+    
+    .filter-btn {
+        min-width: 50px;
+        padding: 0.4rem 0.2rem;
+    }
+    
+    .filter-text {
+        font-size: 0.7rem;
+    }
+}
+
+/* PWA display mode adjustments */
+@media all and (display-mode: standalone) {
+    .app-header {
+        padding-top: max(1rem, env(safe-area-inset-top));
+        -webkit-app-region: drag;
+    }
+    
+    .header-controls {
+        -webkit-app-region: no-drag;
+    }
+    
+    .app-title {
+        -webkit-app-region: no-drag;
+    }
+}
+
+/* Tablet landscape optimizations */
+@media screen and (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
+    .species-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+        padding: 1rem;
+    }
+    
+    .filter-container {
+        justify-content: center;
+        max-width: 100%;
+        flex-wrap: wrap;
+    }
+    
+    .main-content {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+}

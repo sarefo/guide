@@ -45,7 +45,6 @@
   "notification.copy.failed": "Copy failed. Please copy manually.",
   "notification.offline": "You are offline", 
   "notification.online": "Connection restored",
-  "notification.refreshing": "Refreshing data...",
   "notification.refresh.success": "Data refreshed successfully",
   "notification.refresh.failed": "Refresh failed. Please try again.",
   "notification.error": "An error occurred. Please refresh the page.",

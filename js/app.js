@@ -236,8 +236,6 @@ class BiodiversityApp {
     async refreshData() {
         console.log('🔄 Refreshing data...');
         
-        this.showNotification('Refreshing data...');
-        
         try {
             if (window.speciesManager) {
                 await window.speciesManager.loadSpecies();

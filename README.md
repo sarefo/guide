@@ -9,6 +9,9 @@
 + check + fix console log
 + why don't the flags appear on chrome for windows?
 + improve location search
++ italics for taxon (if vernacular not available)
++ sometimes gets stuck on "cargando ubicación"
++ flickering on reload after new location
 + dark background in dark mode only for first scrolling page :p
 + tapping on location does same as location pin icon
 + make sure dark mode looks nice

@@ -1,0 +1,59 @@
+{
+  "app.title": "Explorador de Biodiversidad",
+  "loading.species": "Cargando datos de especies...",
+  "loading.location": "Cargando ubicación...",
+  "error.network": "No se pudieron cargar los datos. Verifica tu conexión e inténtalo de nuevo.",
+  "error.location": "Ubicación no disponible",
+  "error.species": "No se pudieron cargar los datos de especies",
+  "error.retry": "Reintentar",
+  
+  "filter.all": "Todos",
+  "filter.birds": "Aves",
+  "filter.amphibians": "Anfibios", 
+  "filter.reptiles": "Reptiles",
+  "filter.mammals": "Mamíferos",
+  "filter.fishes": "Peces",
+  "filter.plants": "Plantas",
+  "filter.fungi": "Hongos",
+  "filter.arthropods": "Artrópodos",
+  "filter.molluscs": "Moluscos",
+  "filter.arachnids": "Arácnidos",
+  
+  "location.search.placeholder": "Buscar una ubicación...",
+  "location.search.title": "Elegir Ubicación",
+  "location.change": "Cambiar ubicación",
+  "location.results.empty": "No se encontraron ubicaciones",
+  "location.results.error": "No se pueden buscar ubicaciones. Inténtalo de nuevo.",
+  
+  "share.location": "Compartir ubicación",
+  "share.title": "Compartir Esta Ubicación", 
+  "share.url.copy": "Copiar URL",
+  "share.qr.unavailable": "Código QR no disponible",
+  
+  "species.observations": "observaciones",
+  "species.observation": "observación",
+  "species.rank": "Rango taxonómico",
+  "species.empty": "No se encontraron especies para esta ubicación y filtro.",
+  "species.empty.try": "Probar Filtro Diferente",
+  
+  "modal.close": "Cerrar",
+  "modal.wikipedia": "Wikipedia",
+  "modal.inaturalist": "iNaturalist",
+  "modal.photo.credit": "Foto",
+  
+  "notification.copied": "¡URL copiada al portapapeles!",
+  "notification.copy.failed": "Copia falló. Por favor copia manualmente.",
+  "notification.offline": "Estás desconectado", 
+  "notification.online": "Conexión restaurada",
+  "notification.refreshing": "Actualizando datos...",
+  "notification.refresh.success": "Datos actualizados exitosamente",
+  "notification.refresh.failed": "Actualización falló. Inténtalo de nuevo.",
+  "notification.error": "Ocurrió un error. Por favor actualiza la página.",
+  
+  "update.available": "¡Una nueva versión está disponible!",
+  "update.button": "Actualizar",
+  
+  "app.failed.title": "La App Falló al Cargar",
+  "app.failed.message": "Hubo un problema iniciando la aplicación. Por favor actualiza la página.",
+  "app.failed.reload": "Recargar App"
+}

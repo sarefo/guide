@@ -1,0 +1,59 @@
+{
+  "app.title": "Explorateur de Biodiversité",
+  "loading.species": "Chargement des données d'espèces...",
+  "loading.location": "Chargement de l'emplacement...",
+  "error.network": "Impossible de charger les données. Vérifiez votre connexion et réessayez.",
+  "error.location": "Emplacement indisponible",
+  "error.species": "Impossible de charger les données d'espèces",
+  "error.retry": "Réessayer",
+  
+  "filter.all": "Tous",
+  "filter.birds": "Oiseaux",
+  "filter.amphibians": "Amphibiens", 
+  "filter.reptiles": "Reptiles",
+  "filter.mammals": "Mammifères",
+  "filter.fishes": "Poissons",
+  "filter.plants": "Plantes",
+  "filter.fungi": "Champignons",
+  "filter.arthropods": "Arthropodes",
+  "filter.molluscs": "Mollusques",
+  "filter.arachnids": "Arachnides",
+  
+  "location.search.placeholder": "Rechercher un emplacement...",
+  "location.search.title": "Choisir l'Emplacement",
+  "location.change": "Changer d'emplacement",
+  "location.results.empty": "Aucun emplacement trouvé",
+  "location.results.error": "Impossible de rechercher les emplacements. Réessayez.",
+  
+  "share.location": "Partager l'emplacement",
+  "share.title": "Partager Cet Emplacement", 
+  "share.url.copy": "Copier l'URL",
+  "share.qr.unavailable": "Code QR non disponible",
+  
+  "species.observations": "observations",
+  "species.observation": "observation",
+  "species.rank": "Rang taxonomique",
+  "species.empty": "Aucune espèce trouvée pour cet emplacement et filtre.",
+  "species.empty.try": "Essayer un Filtre Différent",
+  
+  "modal.close": "Fermer",
+  "modal.wikipedia": "Wikipédia",
+  "modal.inaturalist": "iNaturalist",
+  "modal.photo.credit": "Photo",
+  
+  "notification.copied": "URL copiée dans le presse-papiers !",
+  "notification.copy.failed": "Copie échouée. Veuillez copier manuellement.",
+  "notification.offline": "Vous êtes hors ligne", 
+  "notification.online": "Connexion rétablie",
+  "notification.refreshing": "Actualisation des données...",
+  "notification.refresh.success": "Données actualisées avec succès",
+  "notification.refresh.failed": "Actualisation échouée. Réessayez.",
+  "notification.error": "Une erreur s'est produite. Veuillez actualiser la page.",
+  
+  "update.available": "Une nouvelle version est disponible !",
+  "update.button": "Mettre à jour",
+  
+  "app.failed.title": "L'App n'a pas Réussi à Charger",
+  "app.failed.message": "Il y a eu un problème lors du démarrage de l'application. Veuillez actualiser la page.",
+  "app.failed.reload": "Recharger l'App"
+}

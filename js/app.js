@@ -276,8 +276,6 @@ class BiodiversityApp {
     }
 
     onAppVisible() {
-        console.log('👁️ App became visible');
-        
         if (this.initialized && navigator.onLine) {
             const timeSinceLastUpdate = Date.now() - (this.lastUpdateTime || 0);
             const updateInterval = 5 * 60 * 1000; // 5 minutes
@@ -289,7 +287,6 @@ class BiodiversityApp {
     }
 
     onAppHidden() {
-        console.log('👁️ App hidden');
         this.lastUpdateTime = Date.now();
     }
 

@@ -1,0 +1,59 @@
+{
+  "app.title": "Biodiversitäts-Explorer",
+  "loading.species": "Lade Artendaten...",
+  "loading.location": "Lade Standort...",
+  "error.network": "Daten konnten nicht geladen werden. Überprüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
+  "error.location": "Standort nicht verfügbar",
+  "error.species": "Artendaten konnten nicht geladen werden",
+  "error.retry": "Wiederholen",
+  
+  "filter.all": "Alle",
+  "filter.birds": "Vögel",
+  "filter.amphibians": "Amphibien", 
+  "filter.reptiles": "Reptilien",
+  "filter.mammals": "Säugetiere",
+  "filter.fishes": "Fische",
+  "filter.plants": "Pflanzen",
+  "filter.fungi": "Pilze",
+  "filter.arthropods": "Gliederfüßer",
+  "filter.molluscs": "Weichtiere",
+  "filter.arachnids": "Spinnentiere",
+  
+  "location.search.placeholder": "Nach einem Standort suchen...",
+  "location.search.title": "Standort Wählen",
+  "location.change": "Standort ändern",
+  "location.results.empty": "Keine Standorte gefunden",
+  "location.results.error": "Standortsuche nicht möglich. Bitte versuchen Sie es erneut.",
+  
+  "share.location": "Standort teilen",
+  "share.title": "Diesen Standort Teilen", 
+  "share.url.copy": "URL Kopieren",
+  "share.qr.unavailable": "QR-Code nicht verfügbar",
+  
+  "species.observations": "Beobachtungen",
+  "species.observation": "Beobachtung",
+  "species.rank": "Taxonomischer Rang",
+  "species.empty": "Keine Arten für diesen Standort und Filter gefunden.",
+  "species.empty.try": "Anderen Filter Probieren",
+  
+  "modal.close": "Schließen",
+  "modal.wikipedia": "Wikipedia",
+  "modal.inaturalist": "iNaturalist",
+  "modal.photo.credit": "Foto",
+  
+  "notification.copied": "URL in Zwischenablage kopiert!",
+  "notification.copy.failed": "Kopieren fehlgeschlagen. Bitte manuell kopieren.",
+  "notification.offline": "Sie sind offline", 
+  "notification.online": "Verbindung wiederhergestellt",
+  "notification.refreshing": "Daten werden aktualisiert...",
+  "notification.refresh.success": "Daten erfolgreich aktualisiert",
+  "notification.refresh.failed": "Aktualisierung fehlgeschlagen. Bitte erneut versuchen.",
+  "notification.error": "Ein Fehler ist aufgetreten. Bitte laden Sie die Seite neu.",
+  
+  "update.available": "Eine neue Version ist verfügbar!",
+  "update.button": "Aktualisieren",
+  
+  "app.failed.title": "App Konnte Nicht Geladen Werden",
+  "app.failed.message": "Es gab ein Problem beim Starten der Anwendung. Bitte laden Sie die Seite neu.",
+  "app.failed.reload": "App Neu Laden"
+}

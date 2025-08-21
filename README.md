@@ -7,6 +7,7 @@
     + as we can't do server-side, let's add a script that writes a file with the links to the respective photos for each location, maybe as JSON? save these location files in a dedicated folder. name each file with the location id
 
 + check + fix console log
++ tapping on location does same as location pin icon
 + make sure dark mode looks nice
 + add "other" to species picker, which allows user to enter a taxon (eg. "monkey")
 + add "here" to "choose location"

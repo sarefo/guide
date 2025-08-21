@@ -12,7 +12,6 @@ const STATIC_ASSETS = [
     '/js/location.js',
     '/js/species.js',
     '/js/i18n.js',
-    '/js/qr.js',
     '/assets/icons.svg',
     '/lang/en.json',
     '/lang/es.json',

@@ -1,69 +1,20 @@
 class QRManager {
     constructor() {
         this.qrCodeLibLoaded = false;
-        this.init();
     }
 
     async init() {
-        await this.loadQRCodeLibrary();
+        // QR functionality disabled - modern browsers handle URL sharing natively
     }
 
     async loadQRCodeLibrary() {
-        if (window.QRCode) {
-            this.qrCodeLibLoaded = true;
-            return;
-        }
-
-        try {
-            const script = document.createElement('script');
-            script.src = 'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js';
-            script.crossOrigin = 'anonymous';
-            
-            await new Promise((resolve, reject) => {
-                script.onload = resolve;
-                script.onerror = reject;
-                document.head.appendChild(script);
-            });
-
-            this.qrCodeLibLoaded = true;
-            console.log('✅ QR code library loaded');
-        } catch (error) {
-            console.warn('⚠️ QR code library failed to load:', error);
-            this.qrCodeLibLoaded = false;
-        }
+        // QR library loading disabled
+        this.qrCodeLibLoaded = false;
     }
 
     async generateQRCode(text, container) {
-        if (!this.qrCodeLibLoaded) {
-            await this.loadQRCodeLibrary();
-        }
-
-        if (!this.qrCodeLibLoaded || !window.QRCode) {
-            this.showQRFallback(text, container);
-            return;
-        }
-
-        try {
-            const canvas = document.createElement('canvas');
-            
-            await window.QRCode.toCanvas(canvas, text, {
-                width: 200,
-                height: 200,
-                margin: 1,
-                color: {
-                    dark: '#2E7D32',
-                    light: '#FFFFFF'
-                },
-                errorCorrectionLevel: 'M'
-            });
-
-            container.innerHTML = '';
-            container.appendChild(canvas);
-
-        } catch (error) {
-            console.error('QR code generation failed:', error);
-            this.showQRFallback(text, container);
-        }
+        // Always show fallback - QR generation disabled
+        this.showQRFallback(text, container);
     }
 
     showQRFallback(text, container) {
@@ -81,9 +32,9 @@ class QRManager {
                 color: #666;
                 background: #f9f9f9;
             ">
-                <div style="font-size: 2rem; margin-bottom: 0.5rem;">📱</div>
-                <div style="font-size: 0.9rem;">QR code not available</div>
-                <div style="font-size: 0.8rem; margin-top: 0.5rem;">Copy URL below to share</div>
+                <div style="font-size: 2rem; margin-bottom: 0.5rem;">🔗</div>
+                <div style="font-size: 0.9rem;">Use native browser sharing</div>
+                <div style="font-size: 0.8rem; margin-top: 0.5rem;">Copy URL below or use share button</div>
             </div>
         `;
     }

@@ -7,8 +7,8 @@
     + as we can't do server-side, let's add a script that writes a file with the links to the respective photos for each location, maybe as JSON? save these location files in a dedicated folder. name each file with the location id
 
 + make sure dark mode looks nice
-+ only show vernacular names
-+ upper case vernacular names
++ move "choose location" dialog up so it does not get obscured by keyboard
++ add "other" to species picker, which allows user to enter a taxon (eg. "monkey")
 
 ## Future Functions
 + show most common animals/plants/…

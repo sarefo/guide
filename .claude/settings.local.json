@@ -6,7 +6,11 @@
       "WebFetch(domain:api.inaturalist.org)",
       "WebFetch(domain:www.inaturalist.org)",
       "Bash(mkdir:*)",
-      "Bash(cp:*)"
+      "Bash(cp:*)",
+      "mcp__puppeteer__puppeteer_navigate",
+      "mcp__puppeteer__puppeteer_screenshot",
+      "mcp__puppeteer__puppeteer_click",
+      "mcp__puppeteer__puppeteer_select"
     ],
     "deny": [],
     "ask": []

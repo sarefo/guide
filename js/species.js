@@ -121,13 +121,18 @@ class SpeciesManager {
         const photoUrl = species.photo?.thumbUrl || species.photo?.url;
         const hasPhoto = photoUrl && photoUrl !== 'null';
         
+        // Capitalize first letter of vernacular name
+        const vernacularName = species.name ? 
+            species.name.charAt(0).toUpperCase() + species.name.slice(1) : 
+            'Unknown species';
+        
         return `
             <div class="species-card" data-species-id="${species.id}">
                 ${hasPhoto ? `
                     <img 
                         class="species-image" 
                         data-src="${photoUrl}"
-                        alt="${species.name}"
+                        alt="${vernacularName}"
                         loading="lazy"
                     />
                 ` : `
@@ -136,12 +141,8 @@ class SpeciesManager {
                     </div>
                 `}
                 <div class="species-overlay">
-                    <div class="species-name">${species.name}</div>
-                    ${species.scientificName !== species.name ? 
-                        `<div class="species-scientific">${species.scientificName}</div>` : ''
-                    }
+                    <div class="species-name">${vernacularName}</div>
                 </div>
-                <div class="species-count">${species.count}</div>
             </div>
         `;
     }

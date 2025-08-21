@@ -86,7 +86,7 @@
     }
     
     .species-grid {
-        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
         gap: 0.5rem;
         padding: 0.5rem;
     }
@@ -263,7 +263,7 @@
     }
     
     .species-grid {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     }
     
     .filter-container {

@@ -3,10 +3,10 @@
 ## Project Overview
 Mobile-optimized PWA for displaying location-based biodiversity using iNaturalist API. Features image-heavy species displays with text overlays, multi-language support, and modern mobile UX.
 
-## Current Status: **CORE APP IMPLEMENTED - READY FOR TESTING**
+## Current Status: **MOBILE OPTIMIZATION COMPLETE - READY FOR TESTING**
 
-### Last Session Date: 2025-01-21
-### Current Phase: **Phase 1 - Core Infrastructure Complete**
+### Last Session Date: 2025-01-21 (Modal Optimization Session)
+### Current Phase: **Phase 1.5 - Mobile UX Optimization Complete**
 ### Next Phase: **Phase 2 - Testing & Refinement**
 
 ## Implementation Progress
@@ -31,18 +31,28 @@ Mobile-optimized PWA for displaying location-based biodiversity using iNaturalis
 - [x] **Life group filtering system**
 - [x] **Species modal with Wikipedia/iNaturalist links**
 
+### ✅ Completed - Phase 1.5: Mobile UX Optimization
+- [x] **Modal positioning optimization for mobile devices**
+  - Location/share dialogs moved higher to prevent keyboard obstruction
+  - Species modal positioned at viewport top on mobile screens
+  - Responsive image sizing in species modal (250px→200px→180px→150px)
+  - Progressive modal padding reduction for smaller screens
+  - Landscape mode optimizations for limited vertical space
+  - Full visibility ensured on phones as small as 360px
+
 ### 🔄 Current Status
-- **App is functional and ready for testing**
-- All core features implemented
+- **App is fully functional and mobile-optimized**
+- All core features implemented with mobile UX refinements
 - PWA installable with offline capabilities
-- Mobile-optimized with touch interactions
+- Mobile-first design with optimized modal interactions
 
 ### 📋 Next Session Priorities
 1. **Test the app** in browser to verify functionality
-2. **Add missing assets** (app icons for PWA)
-3. **Fix any runtime issues** discovered during testing
+2. **Fix any console errors or runtime issues** discovered during testing
+3. **Add missing assets** (app icons for PWA)
 4. **Optimize performance** and loading states
 5. **Add additional language files** (es.json, fr.json, de.json)
+6. **Address any remaining mobile UX issues** found during testing
 
 ## Technical Decisions Made
 
@@ -123,4 +133,4 @@ From icons.svg: birds, amphibians, reptiles, mammals, fishes, molluscs, arachnid
 - Location history and favorites
 
 ---
-**Next Session Goal**: Complete Phase 1 core infrastructure and begin location functionality.
+**Next Session Goal**: Test complete application functionality and fix any runtime issues discovered.

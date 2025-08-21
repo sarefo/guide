@@ -1,20 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#2E7D32">
     <meta name="description" content="Explore biodiversity by location with species photos and information">
-    
+
     <title>Biodiversity Explorer</title>
-    
+
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="assets/icon-192.png">
     <link rel="apple-touch-icon" href="assets/icon-192.png">
-    
+
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/mobile.css">
 </head>
+
 <body>
     <div id="app">
         <header class="app-header">
@@ -25,18 +27,20 @@
                 <div class="header-controls">
                     <button id="location-btn" class="icon-btn" aria-label="Change location">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                            <path
+                                d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
                         </svg>
                     </button>
                     <select id="language-select" class="language-select">
-                        <option value="en">🇺🇸 EN</option>
+                        <option value="en">🇬🇧 EN</option>
                         <option value="es">🇪🇸 ES</option>
                         <option value="fr">🇫🇷 FR</option>
                         <option value="de">🇩🇪 DE</option>
                     </select>
                     <button id="share-btn" class="icon-btn" aria-label="Share location">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.50-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/>
+                            <path
+                                d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.50-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z" />
                         </svg>
                     </button>
                 </div>
@@ -54,37 +58,37 @@
                         <span class="filter-icon">🐦</span>
                         <span class="filter-text">Birds</span>
                     </button>
-                    <button class="filter-btn" data-group="20978">
-                        <span class="filter-icon">🐸</span>
-                        <span class="filter-text">Amphibians</span>
-                    </button>
-                    <button class="filter-btn" data-group="26036">
-                        <span class="filter-icon">🦎</span>
-                        <span class="filter-text">Reptiles</span>
-                    </button>
                     <button class="filter-btn" data-group="40151">
-                        <span class="filter-icon">🐺</span>
+                        <span class="filter-icon">🐯</span>
                         <span class="filter-text">Mammals</span>
-                    </button>
-                    <button class="filter-btn" data-group="47178">
-                        <span class="filter-icon">🐟</span>
-                        <span class="filter-text">Fishes</span>
                     </button>
                     <button class="filter-btn" data-group="47126">
                         <span class="filter-icon">🌱</span>
                         <span class="filter-text">Plants</span>
                     </button>
-                    <button class="filter-btn" data-group="47170">
-                        <span class="filter-icon">🍄</span>
-                        <span class="filter-text">Fungi</span>
-                    </button>
                     <button class="filter-btn" data-group="47158">
-                        <span class="filter-icon">🐛</span>
+                        <span class="filter-icon">🦋</span>
                         <span class="filter-text">Insects</span>
                     </button>
                     <button class="filter-btn" data-group="47119">
                         <span class="filter-icon">🕷️</span>
                         <span class="filter-text">Arachnids</span>
+                    </button>
+                    <button class="filter-btn" data-group="26036">
+                        <span class="filter-icon">🦎</span>
+                        <span class="filter-text">Reptiles</span>
+                    </button>
+                    <button class="filter-btn" data-group="20978">
+                        <span class="filter-icon">🐸</span>
+                        <span class="filter-text">Amphibians</span>
+                    </button>
+                    <button class="filter-btn" data-group="47178">
+                        <span class="filter-icon">🐟</span>
+                        <span class="filter-text">Fishes</span>
+                    </button>
+                    <button class="filter-btn" data-group="47170">
+                        <span class="filter-icon">🍄</span>
+                        <span class="filter-text">Fungi</span>
                     </button>
                     <button class="filter-btn" data-group="47115">
                         <span class="filter-icon">🐚</span>
@@ -163,4 +167,5 @@
         }
     </script>
 </body>
+
 </html>

@@ -15,6 +15,7 @@ class LocationManager {
         const locationModal = document.getElementById('location-modal');
         const searchInput = document.getElementById('location-search');
         const modalCloses = document.querySelectorAll('.modal-close');
+        const languageSelect = document.getElementById('language-select');
 
         locationBtn?.addEventListener('click', () => this.openLocationModal());
         
@@ -32,15 +33,36 @@ class LocationManager {
         window.addEventListener('popstate', () => {
             this.loadLocationFromURL();
         });
+        
+        languageSelect?.addEventListener('change', (e) => {
+            this.changeLanguage(e.target.value);
+        });
     }
 
-    loadLocationFromURL() {
+    async loadLocationFromURL() {
         const urlParams = new URLSearchParams(window.location.search);
         const placeId = urlParams.get('place_id') || this.defaultPlaceId;
         const lang = urlParams.get('lang') || 'en';
         
+        await this.waitForDependencies();
         this.setLanguage(lang);
         this.loadLocation(placeId);
+    }
+    
+    async waitForDependencies() {
+        const maxWait = 3000; // 3 seconds
+        const checkInterval = 50;
+        let waited = 0;
+
+        while (waited < maxWait) {
+            if (window.api && window.speciesManager && window.i18n) {
+                return;
+            }
+            await new Promise(resolve => setTimeout(resolve, checkInterval));
+            waited += checkInterval;
+        }
+        
+        console.warn('Dependencies not fully loaded, proceeding anyway');
     }
 
     async loadLocation(placeId) {
@@ -88,11 +110,24 @@ class LocationManager {
         const langSelect = document.getElementById('language-select');
         if (langSelect) {
             langSelect.value = lang;
-            langSelect.addEventListener('change', (e) => {
-                this.updateURL();
-                window.location.reload();
-            });
         }
+        
+        if (window.api) {
+            window.api.setLocale(lang);
+        }
+        
+        if (window.speciesManager) {
+            window.speciesManager.setLocale(lang);
+        }
+        
+        if (window.i18n) {
+            window.i18n.setLanguage(lang);
+        }
+    }
+    
+    changeLanguage(lang) {
+        this.setLanguage(lang);
+        this.updateURL();
     }
 
     openLocationModal() {

@@ -4,6 +4,7 @@ class iNaturalistAPI {
         this.requestCount = 0;
         this.lastRequestTime = 0;
         this.minRequestInterval = 100; // Minimum 100ms between requests
+        this.currentLocale = 'en';
     }
 
     async makeRequest(endpoint, params = {}) {
@@ -155,9 +156,21 @@ class iNaturalistAPI {
         const taxon = speciesCount.taxon;
         const photos = taxon.default_photo || (taxon.photos && taxon.photos[0]);
         
+        let vernacularName = taxon.preferred_common_name || taxon.english_common_name || taxon.name;
+        
+        if (!taxon.preferred_common_name && taxon.names && taxon.names.length > 0) {
+            const localName = taxon.names.find(name => 
+                name.locale === this.currentLocale || 
+                name.locale?.startsWith(this.currentLocale)
+            );
+            if (localName) {
+                vernacularName = localName.name;
+            }
+        }
+        
         return {
             id: taxon.id,
-            name: taxon.preferred_common_name || taxon.name,
+            name: vernacularName,
             scientificName: taxon.name,
             count: speciesCount.count,
             rank: taxon.rank,
@@ -237,6 +250,11 @@ class iNaturalistAPI {
     buildWikipediaSearchURL(scientificName, commonName) {
         const searchTerm = commonName || scientificName;
         return `https://en.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(searchTerm)}`;
+    }
+
+    setLocale(locale) {
+        this.currentLocale = locale;
+        console.log(`API locale updated to: ${locale}`);
     }
 
     getRequestStats() {

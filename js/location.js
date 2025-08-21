@@ -43,10 +43,18 @@ class LocationManager {
         const urlParams = new URLSearchParams(window.location.search);
         const placeId = urlParams.get('place_id') || this.defaultPlaceId;
         const lang = urlParams.get('lang') || 'en';
+        const lifeGroup = urlParams.get('life_group');
         
         await this.waitForDependencies();
         this.setLanguage(lang);
         this.loadLocation(placeId);
+        
+        // Notify about life group selection if present
+        if (lifeGroup) {
+            window.dispatchEvent(new CustomEvent('lifeGroupFromURL', {
+                detail: { lifeGroup }
+            }));
+        }
     }
     
     async waitForDependencies() {
@@ -75,7 +83,11 @@ class LocationManager {
             };
             
             this.updateLocationDisplay();
-            this.updateURL();
+            
+            // Preserve life_group parameter when updating URL during location load
+            const urlParams = new URLSearchParams(window.location.search);
+            const currentLifeGroup = urlParams.get('life_group');
+            this.updateURL(currentLifeGroup);
             
             window.dispatchEvent(new CustomEvent('locationChanged', {
                 detail: this.currentLocation
@@ -94,13 +106,20 @@ class LocationManager {
         }
     }
 
-    updateURL() {
+    updateURL(lifeGroup = null) {
         const url = new URL(window.location);
         url.searchParams.set('place_id', this.currentLocation.id);
         
         const langSelect = document.getElementById('language-select');
         if (langSelect) {
             url.searchParams.set('lang', langSelect.value);
+        }
+        
+        // Handle life_group parameter
+        if (lifeGroup && lifeGroup !== 'all') {
+            url.searchParams.set('life_group', lifeGroup);
+        } else {
+            url.searchParams.delete('life_group');
         }
         
         window.history.replaceState({}, '', url);
@@ -127,7 +146,10 @@ class LocationManager {
     
     changeLanguage(lang) {
         this.setLanguage(lang);
-        this.updateURL();
+        // Preserve current life group when changing language
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentLifeGroup = urlParams.get('life_group');
+        this.updateURL(currentLifeGroup);
     }
 
     openLocationModal() {
@@ -254,6 +276,15 @@ class LocationManager {
 
     getCurrentPlaceId() {
         return this.currentLocation?.id || this.defaultPlaceId;
+    }
+    
+    updateURLWithLifeGroup(lifeGroup) {
+        this.updateURL(lifeGroup);
+    }
+    
+    getCurrentLifeGroup() {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get('life_group');
     }
 }
 

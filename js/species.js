@@ -18,6 +18,11 @@ class SpeciesManager {
             this.currentPlaceId = event.detail.id;
             this.loadSpecies();
         });
+        
+        window.addEventListener('lifeGroupFromURL', (event) => {
+            this.currentFilter = event.detail.lifeGroup;
+            this.pendingLifeGroupFromURL = event.detail.lifeGroup;
+        });
 
         const filterButtons = document.querySelectorAll('.filter-btn');
         filterButtons.forEach(btn => {
@@ -75,6 +80,11 @@ class SpeciesManager {
             );
 
             this.displaySpecies();
+            
+            // Handle pending life group from URL
+            if (this.pendingLifeGroupFromURL) {
+                this.handlePendingLifeGroupFromURL();
+            }
             
         } catch (error) {
             console.error('Failed to load species:', error);
@@ -156,6 +166,11 @@ class SpeciesManager {
         filterButtons.forEach(btn => {
             btn.classList.toggle('active', btn.dataset.group === group);
         });
+        
+        // Update URL with new life group
+        if (window.locationManager) {
+            window.locationManager.updateURLWithLifeGroup(group);
+        }
 
         this.loadSpecies();
     }
@@ -306,6 +321,18 @@ class SpeciesManager {
 
     getCurrentFilter() {
         return this.currentFilter;
+    }
+    
+    handlePendingLifeGroupFromURL() {
+        if (!this.pendingLifeGroupFromURL) return;
+        
+        // Set the filter UI state without reloading species (already loaded)
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        filterButtons.forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.group === this.pendingLifeGroupFromURL);
+        });
+        
+        this.pendingLifeGroupFromURL = null;
     }
 }
 

@@ -96,6 +96,7 @@ class QRManager {
 
         if (!modal) return;
 
+        // Get current URL which includes place_id, lang, and taxon_id parameters
         const currentUrl = window.location.href;
         
         if (qrContainer) {

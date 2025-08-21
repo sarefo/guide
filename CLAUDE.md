@@ -40,4 +40,9 @@ This is a **mobile-first Progressive Web App** for displaying location-based bio
 - QRCode.js for sharing functionality
 - Service Worker for offline capability
 
+## Development Environment
+- **Local server already running** on port 8000 (python3 -m http.server 8000)
+- Access app at: http://localhost:8000
+- No need to start new server unless explicitly stopped
+
 Always maintain session continuity by updating status files and using TodoWrite tool.

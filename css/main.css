@@ -528,4 +528,25 @@ body {
         padding-top: 10vh;
         align-items: flex-start;
     }
+    
+    /* Optimize species modal for small screens */
+    .species-modal {
+        padding: 0.5rem;
+        padding-top: 5vh;
+        align-items: flex-start;
+    }
+    
+    .species-modal .modal-content {
+        max-height: 85vh;
+        margin: 0;
+    }
+    
+    .species-modal .modal-body {
+        padding: 1rem;
+    }
+    
+    /* Responsive modal image on mobile */
+    .species-modal-image {
+        max-height: 200px !important;
+    }
 }

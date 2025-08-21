@@ -102,6 +102,20 @@
     .species-scientific {
         font-size: 0.75rem;
     }
+    
+    /* Modal optimizations for landscape */
+    .species-modal {
+        padding: 0.25rem;
+        padding-top: 1vh;
+    }
+    
+    .species-modal .modal-content {
+        max-height: 95vh;
+    }
+    
+    .species-modal-image {
+        max-height: 150px !important;
+    }
 }
 
 /* Dark mode support */
@@ -263,6 +277,26 @@
     
     .filter-text {
         font-size: 0.7rem;
+    }
+    
+    /* Very small screen modal optimizations */
+    .species-modal {
+        padding: 0.25rem;
+        padding-top: 2vh;
+    }
+    
+    .species-modal .modal-content {
+        max-height: 90vh;
+        border-radius: 0.5rem;
+    }
+    
+    .species-modal .modal-body {
+        padding: 0.75rem;
+    }
+    
+    /* Responsive image sizing in modal */
+    .species-modal-image {
+        max-height: 180px !important;
     }
 }
 

@@ -224,7 +224,8 @@ class SpeciesManager {
                 <img 
                     src="${photoUrl}" 
                     alt="${species.name}"
-                    style="width: 100%; height: 300px; object-fit: cover; border-radius: 0.5rem; margin-bottom: 1rem;"
+                    class="species-modal-image"
+                    style="width: 100%; max-height: 250px; object-fit: cover; border-radius: 0.5rem; margin-bottom: 1rem;"
                 />
             ` : ''}
             <h2>${species.name}</h2>

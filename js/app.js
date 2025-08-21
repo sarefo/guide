@@ -243,7 +243,7 @@ class BiodiversityApp {
                 await window.speciesManager.loadSpecies();
             }
             
-            this.showNotification('Data refreshed successfully', 'success');
+            // Data refreshed silently
         } catch (error) {
             console.error('Refresh failed:', error);
             this.showNotification('Refresh failed. Please try again.', 'error');

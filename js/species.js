@@ -213,9 +213,9 @@ class SpeciesManager {
         if (grid) {
             grid.innerHTML = `
                 <div class="empty-state">
-                    <p>No species found for this location and filter.</p>
+                    <p>${window.i18n.t('species.empty')}</p>
                     <button class="retry-btn" onclick="window.speciesManager.loadSpecies()">
-                        Try Different Filter
+                        ${window.i18n.t('species.empty.try')}
                     </button>
                 </div>
             `;
@@ -248,24 +248,24 @@ class SpeciesManager {
                 `<p style="font-style: italic; color: #666; margin-bottom: 1rem;">${species.scientificName}</p>` : ''
             }
             <div style="margin-bottom: 1rem;">
-                <strong>Observations in this location:</strong> ${species.count}
+                <strong>${species.count === 1 ? window.i18n.t('species.observation') : window.i18n.t('species.observations')}:</strong> ${species.count}
             </div>
             ${species.rank ? `
                 <div style="margin-bottom: 1rem;">
-                    <strong>Taxonomic rank:</strong> ${species.rank}
+                    <strong>${window.i18n.t('species.rank')}:</strong> ${species.rank}
                 </div>
             ` : ''}
             <div class="modal-actions" style="display: flex; gap: 1rem; flex-wrap: wrap;">
                 <a href="${wikipediaUrl}" target="_blank" class="modal-action-btn">
-                    📖 Wikipedia
+                    📖 ${window.i18n.t('modal.wikipedia')}
                 </a>
                 <a href="${species.inatUrl}" target="_blank" class="modal-action-btn">
-                    🔍 iNaturalist
+                    🔍 ${window.i18n.t('modal.inaturalist')}
                 </a>
             </div>
             ${species.photo?.attribution ? `
                 <div style="margin-top: 1rem; font-size: 0.8rem; color: #666;">
-                    Photo: ${species.photo.attribution}
+                    ${window.i18n.t('modal.photo.credit')}: ${species.photo.attribution}
                 </div>
             ` : ''}
         `;

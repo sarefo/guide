@@ -15,6 +15,7 @@
   "filter.fishes": "Peces",
   "filter.plants": "Plantas",
   "filter.fungi": "Hongos",
+  "filter.insects": "Insectos",
   "filter.arthropods": "Artrópodos",
   "filter.molluscs": "Moluscos",
   "filter.arachnids": "Arácnidos",
@@ -31,6 +32,7 @@
   "share.qr.unavailable": "Código QR no disponible",
   
   "species.observations": "observaciones",
+  "species.observation": "observación",
   "species.observation": "observación",
   "species.rank": "Rango taxonómico",
   "species.empty": "No se encontraron especies para esta ubicación y filtro.",

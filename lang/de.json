@@ -15,6 +15,7 @@
   "filter.fishes": "Fische",
   "filter.plants": "Pflanzen",
   "filter.fungi": "Pilze",
+  "filter.insects": "Insekten",
   "filter.arthropods": "Gliederfüßer",
   "filter.molluscs": "Weichtiere",
   "filter.arachnids": "Spinnentiere",
@@ -31,6 +32,7 @@
   "share.qr.unavailable": "QR-Code nicht verfügbar",
   
   "species.observations": "Beobachtungen",
+  "species.observation": "Beobachtung",
   "species.observation": "Beobachtung",
   "species.rank": "Taxonomischer Rang",
   "species.empty": "Keine Arten für diesen Standort und Filter gefunden.",

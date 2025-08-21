@@ -195,7 +195,7 @@ class LocationManager {
         if (!resultsContainer) return;
 
         if (!places || places.length === 0) {
-            resultsContainer.innerHTML = '<p class="no-results">No locations found</p>';
+            resultsContainer.innerHTML = `<p class="no-results">${window.i18n.t('location.results.empty')}</p>`;
             return;
         }
 
@@ -243,14 +243,14 @@ class LocationManager {
     displayLocationError() {
         const resultsContainer = document.getElementById('location-results');
         if (resultsContainer) {
-            resultsContainer.innerHTML = '<p class="error">Unable to search locations. Please try again.</p>';
+            resultsContainer.innerHTML = `<p class="error">${window.i18n.t('location.results.error')}</p>`;
         }
     }
 
     handleLocationError() {
         const locationNameEl = document.getElementById('location-name');
         if (locationNameEl) {
-            locationNameEl.textContent = 'Location unavailable';
+            locationNameEl.textContent = window.i18n.t('error.location');
         }
         
         setTimeout(() => {

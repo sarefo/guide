@@ -65,12 +65,23 @@ class I18nManager {
     }
 
     translatePage() {
+        // Translate text content
         const elements = document.querySelectorAll('[data-i18n]');
         elements.forEach(el => {
             const key = el.getAttribute('data-i18n');
             const translation = this.t(key);
             if (translation !== key) {
                 el.textContent = translation;
+            }
+        });
+
+        // Translate placeholders
+        const placeholderElements = document.querySelectorAll('[data-i18n-placeholder]');
+        placeholderElements.forEach(el => {
+            const key = el.getAttribute('data-i18n-placeholder');
+            const translation = this.t(key);
+            if (translation !== key) {
+                el.placeholder = translation;
             }
         });
     }
@@ -93,6 +104,11 @@ class I18nManager {
             detail: { language: lang }
         });
         window.dispatchEvent(event);
+        
+        // Trigger re-rendering of dynamic content
+        if (window.speciesManager && window.speciesManager.currentSpecies) {
+            window.speciesManager.displaySpecies(window.speciesManager.currentSpecies);
+        }
     }
 }
 

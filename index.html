@@ -21,7 +21,7 @@
         <header class="app-header">
             <div class="header-content">
                 <h1 class="app-title">
-                    <span id="location-name">Loading location...</span>
+                    <span id="location-name" data-i18n="loading.location">Loading location...</span>
                 </h1>
                 <div class="header-controls">
                     <button id="location-btn" class="icon-btn" aria-label="Change location">
@@ -51,54 +51,54 @@
                 <div class="filter-container">
                     <button class="filter-btn active" data-group="all">
                         <span class="filter-icon">🌍</span>
-                        <span class="filter-text">All</span>
+                        <span class="filter-text" data-i18n="filter.all">All</span>
                     </button>
                     <button class="filter-btn" data-group="3">
                         <span class="filter-icon">🐦</span>
-                        <span class="filter-text">Birds</span>
+                        <span class="filter-text" data-i18n="filter.birds">Birds</span>
                     </button>
                     <button class="filter-btn" data-group="40151">
                         <span class="filter-icon">🐯</span>
-                        <span class="filter-text">Mammals</span>
+                        <span class="filter-text" data-i18n="filter.mammals">Mammals</span>
                     </button>
                     <button class="filter-btn" data-group="47126">
                         <span class="filter-icon">🌱</span>
-                        <span class="filter-text">Plants</span>
+                        <span class="filter-text" data-i18n="filter.plants">Plants</span>
                     </button>
                     <button class="filter-btn" data-group="47158">
                         <span class="filter-icon">🦋</span>
-                        <span class="filter-text">Insects</span>
+                        <span class="filter-text" data-i18n="filter.insects">Insects</span>
                     </button>
                     <button class="filter-btn" data-group="47119">
                         <span class="filter-icon">🕷️</span>
-                        <span class="filter-text">Arachnids</span>
+                        <span class="filter-text" data-i18n="filter.arachnids">Arachnids</span>
                     </button>
                     <button class="filter-btn" data-group="26036">
                         <span class="filter-icon">🦎</span>
-                        <span class="filter-text">Reptiles</span>
+                        <span class="filter-text" data-i18n="filter.reptiles">Reptiles</span>
                     </button>
                     <button class="filter-btn" data-group="20978">
                         <span class="filter-icon">🐸</span>
-                        <span class="filter-text">Amphibians</span>
+                        <span class="filter-text" data-i18n="filter.amphibians">Amphibians</span>
                     </button>
                     <button class="filter-btn" data-group="47178">
                         <span class="filter-icon">🐟</span>
-                        <span class="filter-text">Fishes</span>
+                        <span class="filter-text" data-i18n="filter.fishes">Fishes</span>
                     </button>
                     <button class="filter-btn" data-group="47170">
                         <span class="filter-icon">🍄</span>
-                        <span class="filter-text">Fungi</span>
+                        <span class="filter-text" data-i18n="filter.fungi">Fungi</span>
                     </button>
                     <button class="filter-btn" data-group="47115">
                         <span class="filter-icon">🐚</span>
-                        <span class="filter-text">Molluscs</span>
+                        <span class="filter-text" data-i18n="filter.molluscs">Molluscs</span>
                     </button>
                 </div>
             </nav>
 
             <div id="loading" class="loading-state">
                 <div class="loading-spinner"></div>
-                <p>Loading species data...</p>
+                <p data-i18n="loading.species">Loading species data...</p>
             </div>
 
             <div id="species-grid" class="species-grid">
@@ -106,8 +106,8 @@
             </div>
 
             <div id="error-state" class="error-state" style="display: none;">
-                <p>Unable to load species data. Please check your connection and try again.</p>
-                <button id="retry-btn" class="retry-btn">Retry</button>
+                <p data-i18n="error.species">Unable to load species data. Please check your connection and try again.</p>
+                <button id="retry-btn" class="retry-btn" data-i18n="error.retry">Retry</button>
             </div>
         </main>
     </div>
@@ -127,8 +127,8 @@
         <div class="modal-content">
             <button class="modal-close" aria-label="Close">&times;</button>
             <div class="modal-body">
-                <h2>Choose Location</h2>
-                <input type="text" id="location-search" placeholder="Search for a location..." />
+                <h2 data-i18n="location.search.title">Choose Location</h2>
+                <input type="text" id="location-search" data-i18n-placeholder="location.search.placeholder" placeholder="Search for a location..." />
                 <div id="location-results" class="location-results">
                     <!-- Search results populated by JavaScript -->
                 </div>
@@ -141,10 +141,10 @@
         <div class="modal-content">
             <button class="modal-close" aria-label="Close">&times;</button>
             <div class="modal-body">
-                <h2>Share This Location</h2>
+                <h2 data-i18n="share.title">Share This Location</h2>
                 <div id="qr-code" class="qr-code-container"></div>
                 <p class="share-url" id="share-url"></p>
-                <button id="copy-url" class="copy-btn">Copy URL</button>
+                <button id="copy-url" class="copy-btn" data-i18n="share.url.copy">Copy URL</button>
             </div>
         </div>
     </div>

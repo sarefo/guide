@@ -15,6 +15,7 @@
   "filter.fishes": "Poissons",
   "filter.plants": "Plantes",
   "filter.fungi": "Champignons",
+  "filter.insects": "Insectes",
   "filter.arthropods": "Arthropodes",
   "filter.molluscs": "Mollusques",
   "filter.arachnids": "Arachnides",
@@ -31,6 +32,7 @@
   "share.qr.unavailable": "Code QR non disponible",
   
   "species.observations": "observations",
+  "species.observation": "observation",
   "species.observation": "observation",
   "species.rank": "Rang taxonomique",
   "species.empty": "Aucune espèce trouvée pour cet emplacement et filtre.",

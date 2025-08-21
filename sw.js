@@ -2,21 +2,21 @@ const CACHE_NAME = 'biodiversity-explorer-v1';
 const API_CACHE_NAME = 'biodiversity-api-v1';
 
 const STATIC_ASSETS = [
-    '/',
-    '/index.html',
-    '/manifest.json',
-    '/css/main.css',
-    '/css/mobile.css',
-    '/js/app.js',
-    '/js/api.js',
-    '/js/location.js',
-    '/js/species.js',
-    '/js/i18n.js',
-    '/assets/icons.svg',
-    '/lang/en.json',
-    '/lang/es.json',
-    '/lang/fr.json',
-    '/lang/de.json'
+    './',
+    './index.html',
+    './manifest.json',
+    './css/main.css',
+    './css/mobile.css',
+    './js/app.js',
+    './js/api.js',
+    './js/location.js',
+    './js/species.js',
+    './js/i18n.js',
+    './assets/icons.svg',
+    './lang/en.json',
+    './lang/es.json',
+    './lang/fr.json',
+    './lang/de.json'
 ];
 
 const API_ENDPOINTS = [
@@ -141,7 +141,7 @@ async function handleNavigation(request) {
         return networkResponse;
     } catch (error) {
         console.log('Network failed for navigation, serving index.html');
-        const cachedResponse = await cache.match('/index.html');
+        const cachedResponse = await cache.match('./index.html');
         return cachedResponse || new Response('Offline', {
             status: 503,
             statusText: 'Service Unavailable'

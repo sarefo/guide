@@ -9,6 +9,8 @@
 + make sure dark mode looks nice
 + move "choose location" dialog up so it does not get obscured by keyboard
 + add "other" to species picker, which allows user to enter a taxon (eg. "monkey")
++ check + fix console log
++ what's with the "data refreshed successfully" toast?
 
 ## Future Functions
 + show most common animals/plants/…

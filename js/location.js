@@ -12,12 +12,14 @@ class LocationManager {
 
     setupEventListeners() {
         const locationBtn = document.getElementById('location-btn');
+        const locationName = document.getElementById('location-name');
         const locationModal = document.getElementById('location-modal');
         const searchInput = document.getElementById('location-search');
         const modalCloses = document.querySelectorAll('.modal-close');
         const languageSelect = document.getElementById('language-select');
 
         locationBtn?.addEventListener('click', () => this.openLocationModal());
+        locationName?.addEventListener('click', () => this.openLocationModal());
         
         modalCloses.forEach(close => {
             close.addEventListener('click', (e) => {

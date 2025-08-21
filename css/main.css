@@ -58,6 +58,12 @@ body {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+#location-name:hover {
+    opacity: 0.8;
 }
 
 .header-controls {

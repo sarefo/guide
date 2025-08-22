@@ -54,7 +54,7 @@
   "help.usage": "Touchez les photos d'espèces pour en savoir plus • Utilisez les filtres pour parcourir par groupe • Partagez des lieux avec le bouton partager",
   "help.data.source": "Données d'espèces d'iNaturalist - une communauté de millions de naturalistes dans le monde.",
   "help.version": "Version :",
-  "help.checkUpdates": "Vérifier les mises à jour",
+  "help.checkUpdates": "Mettre à jour",
   "help.lastCheck.now": "Vient de vérifier",
   "help.lastCheck.minutes": "il y a {{minutes}}m",
   "help.lastCheck.hours": "il y a {{hours}}h",

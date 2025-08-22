@@ -237,7 +237,7 @@ class iNaturalistAPI {
                 thumbUrl: this.getPhotoURL(photos, 'small'),
                 attribution: photos.attribution
             } : null,
-            inatUrl: `https://www.inaturalist.org/taxa/${taxon.id}`
+            inatUrl: `https://www.inaturalist.org/taxa/${taxon.id}#map-tab`
         };
     }
 

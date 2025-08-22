@@ -237,7 +237,7 @@ class iNaturalistAPI {
                 thumbUrl: this.getPhotoURL(photos, 'small'),
                 attribution: photos.attribution
             } : null,
-            inatUrl: `https://www.inaturalist.org/taxa/${taxon.id}#map-tab`
+            inatUrl: this.buildINaturalistURL(taxon.id)
         };
     }
 
@@ -329,6 +329,17 @@ class iNaturalistAPI {
         
         // Convert to target language, with fallback handling
         return `https://${lang}.wikipedia.org/wiki/${articleTitle}`;
+    }
+
+    buildINaturalistURL(taxonId) {
+        const lang = window.i18n ? window.i18n.getCurrentLang() : 'en';
+        
+        // Add locale parameter if not English
+        if (lang !== 'en') {
+            return `https://www.inaturalist.org/taxa/${taxonId}?locale=${lang}#map-tab`;
+        }
+        
+        return `https://www.inaturalist.org/taxa/${taxonId}#map-tab`;
     }
 
     setLocale(locale) {

@@ -35,7 +35,6 @@
   "share.location": "Compartir ubicación",
   "share.title": "Compartir Esta Ubicación", 
   "share.url.copy": "Copiar URL",
-  "share.qr.unavailable": "Código QR no disponible",
   
   "species.observations": "observaciones",
   "species.observation": "observación",
@@ -50,7 +49,7 @@
   "modal.photo.credit": "Foto",
   
   "help.title": "Acerca de LocNat",
-  "help.description": "Descubre vida silvestre local con fotos. Escanea códigos QR en sitios naturales o busca cualquier ubicación.",
+  "help.description": "Descubre vida silvestre local con fotos en cualquier ubicación.",
   "help.usage": "Toca fotos de especies para aprender más • Usa filtros para explorar por grupo • Comparte ubicaciones con el botón compartir",
   "help.data.source": "Datos de especies de iNaturalist - una comunidad de millones de naturalistas en todo el mundo.",
   "help.version": "Versión:",

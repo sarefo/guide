@@ -35,7 +35,6 @@
   "share.location": "Share location",
   "share.title": "Share This Location", 
   "share.url.copy": "Copy URL",
-  "share.qr.unavailable": "QR code not available",
   
   "species.observations": "observations",
   "species.observation": "observation",
@@ -50,7 +49,7 @@
   "modal.photo.credit": "Photo",
   
   "help.title": "About LocNat",
-  "help.description": "Discover local wildlife through photos. Scan QR codes at nature spots or search any location.",
+  "help.description": "Discover local wildlife through photos at any location.",
   "help.usage": "Tap species photos to learn more • Use filters to browse by group • Share locations with the share button",
   "help.data.source": "Species data from iNaturalist - a community of millions of naturalists worldwide.",
   "help.version": "Version:",

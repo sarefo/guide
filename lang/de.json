@@ -35,7 +35,6 @@
   "share.location": "Standort teilen",
   "share.title": "Diesen Standort Teilen", 
   "share.url.copy": "URL Kopieren",
-  "share.qr.unavailable": "QR-Code nicht verfügbar",
   
   "species.observations": "Beobachtungen",
   "species.observation": "Beobachtung",
@@ -50,7 +49,7 @@
   "modal.photo.credit": "Foto",
   
   "help.title": "Über LocNat",
-  "help.description": "Entdecken Sie lokale Tierwelt mit Fotos. Scannen Sie QR-Codes in der Natur oder suchen Sie jeden Ort.",
+  "help.description": "Entdecken Sie lokale Tierwelt mit Fotos an jedem Ort.",
   "help.usage": "Tippen Sie auf Artenfotos für mehr Infos • Nutzen Sie Filter zum Durchsuchen nach Gruppen • Teilen Sie Orte mit dem Teilen-Button",
   "help.data.source": "Artendaten von iNaturalist - einer Gemeinschaft von Millionen Naturforschern weltweit.",
   "help.version": "Version:",

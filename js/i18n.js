@@ -72,7 +72,24 @@ class I18nManager {
             const key = el.getAttribute('data-i18n');
             const translation = this.t(key);
             if (translation !== key) {
-                el.textContent = translation;
+                // Special handling for filter buttons to preserve structure
+                if (el.classList.contains('filter-text') || 
+                    (el.tagName === 'SPAN' && el.parentElement && el.parentElement.classList.contains('filter-btn'))) {
+                    // Only update text content for filter text spans to preserve button structure
+                    el.textContent = translation;
+                } else if (el.classList.contains('filter-btn')) {
+                    // If somehow the button itself has data-i18n, find the filter-text span and update it
+                    const filterTextSpan = el.querySelector('.filter-text');
+                    if (filterTextSpan) {
+                        filterTextSpan.textContent = translation;
+                    } else {
+                        // Fallback for buttons without proper structure
+                        el.textContent = translation;
+                    }
+                } else {
+                    // Normal text content update for non-filter elements
+                    el.textContent = translation;
+                }
             }
         });
 

@@ -1,5 +1,3 @@
-+ still sometimes flicker when loading life group
-
 + improve location search
   + add location picker
   + add region fallback if no taxa found for location (eg. because too small)
@@ -15,3 +13,7 @@
 + search by name?
 
 + add hierarchical tree?
+
+## Bugs
++ still sometimes flicker when loading life group
+

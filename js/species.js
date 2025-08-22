@@ -35,17 +35,30 @@ class SpeciesManager {
             }
         });
 
-        const filterButtons = document.querySelectorAll('.filter-btn');
-        filterButtons.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const group = e.currentTarget.dataset.group;
+        // Use event delegation for filter buttons (handles dynamic buttons too)
+        const filterContainer = document.querySelector('.filter-container');
+        if (filterContainer) {
+            filterContainer.addEventListener('click', (e) => {
+                const filterBtn = e.target.closest('.filter-btn');
+                if (!filterBtn) return;
+                
+                // Handle remove custom button clicks
+                if (e.target.classList.contains('remove-custom')) {
+                    e.stopPropagation();
+                    const taxonId = filterBtn.dataset.group;
+                    this.removeCustomTaxon(taxonId);
+                    return;
+                }
+                
+                // Handle filter button clicks
+                const group = filterBtn.dataset.group;
                 if (group === 'other') {
                     this.openTaxonModal();
                 } else {
                     this.setFilter(group);
                 }
             });
-        });
+        }
 
         const retryBtn = document.getElementById('retry-btn');
         if (retryBtn) {
@@ -268,6 +281,9 @@ class SpeciesManager {
         filterButtons.forEach(btn => {
             btn.classList.toggle('active', btn.dataset.group === group);
         });
+        
+        // Ensure filter button content is preserved after class changes
+        this.ensureFilterButtonsTranslated();
         
         // Update URL with new life group
         if (window.locationManager) {
@@ -738,20 +754,9 @@ class SpeciesManager {
 
             // Insert before the "Other" button
             filterContainer.insertBefore(customBtn, otherBtn);
-
-            // Add click handler for the main button
-            customBtn.addEventListener('click', (e) => {
-                if (!e.target.classList.contains('remove-custom')) {
-                    this.setFilter(taxonId);
-                }
-            });
-
-            // Add click handler for the remove button
-            const removeBtn = customBtn.querySelector('.remove-custom');
-            removeBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                this.removeCustomTaxon(taxonId);
-            });
+            
+            // Ensure all filter button translations are preserved after DOM manipulation
+            this.ensureFilterButtonsTranslated();
         }
     }
 
@@ -772,6 +777,9 @@ class SpeciesManager {
         if (this.currentFilter === taxonId) {
             this.setFilter('all');
         }
+        
+        // Ensure all filter button translations are preserved after DOM manipulation
+        this.ensureFilterButtonsTranslated();
     }
 
     async restoreCustomTaxonFromURL(taxonId) {
@@ -876,6 +884,47 @@ class SpeciesManager {
         // Create buttons for all stored custom taxa
         this.customTaxa.forEach((data, taxonId) => {
             this.addCustomFilterButton(data.name, data.rank, taxonId);
+        });
+        
+        // Ensure all filter button translations are properly applied
+        this.ensureFilterButtonsTranslated();
+    }
+
+    ensureFilterButtonsTranslated() {
+        // Ensure all filter buttons have proper text content
+        // This prevents the "All" button and others from becoming empty
+        const filterButtons = document.querySelectorAll('.filter-btn[data-group]');
+        filterButtons.forEach(btn => {
+            const filterTextSpan = btn.querySelector('.filter-text[data-i18n]');
+            if (filterTextSpan) {
+                const key = filterTextSpan.getAttribute('data-i18n');
+                if (window.i18n && key) {
+                    const translation = window.i18n.t(key);
+                    if (translation && translation !== key && filterTextSpan.textContent !== translation) {
+                        filterTextSpan.textContent = translation;
+                    }
+                }
+            }
+            
+            // Special check for the "All" button if it somehow lost content
+            if (btn.dataset.group === 'all' && (!btn.textContent.trim() || btn.textContent.trim() === '')) {
+                const icon = btn.querySelector('.filter-icon');
+                const text = btn.querySelector('.filter-text');
+                if (!icon || !text) {
+                    // Recreate the button structure if it was corrupted
+                    btn.innerHTML = `
+                        <span class="filter-icon">🌈</span>
+                        <span class="filter-text" data-i18n="filter.all">All</span>
+                    `;
+                    // Re-apply translation
+                    if (window.i18n) {
+                        const textSpan = btn.querySelector('.filter-text');
+                        if (textSpan) {
+                            textSpan.textContent = window.i18n.t('filter.all');
+                        }
+                    }
+                }
+            }
         });
     }
 }

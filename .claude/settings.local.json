@@ -13,7 +13,8 @@
       "mcp__puppeteer__puppeteer_select",
       "Bash(git commit:*)",
       "Bash(git add:*)",
-      "mcp__puppeteer__puppeteer_evaluate"
+      "mcp__puppeteer__puppeteer_evaluate",
+      "mcp__puppeteer__puppeteer_fill"
     ],
     "deny": [],
     "ask": []

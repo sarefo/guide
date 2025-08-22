@@ -1,4 +1,4 @@
-const VERSION = '1.0.13'; // UPDATE THIS VERSION IN app.js TOO!
+const VERSION = '1.0.14'; // UPDATE THIS VERSION IN app.js TOO!
 const CACHE_NAME = `biodiversity-explorer-v${VERSION}`;
 const API_CACHE_NAME = `biodiversity-api-v${VERSION}`;
 
@@ -139,21 +139,36 @@ function isStale(response) {
 
 self.addEventListener('message', event => {
     if (event.data && event.data.type === 'CLEAR_CACHE') {
+        console.log('🧹 SW: Received CLEAR_CACHE message');
         event.waitUntil(
             caches.keys().then(cacheNames => {
-                return Promise.all(
-                    cacheNames.map(cacheName => caches.delete(cacheName))
-                );
+                console.log('🗑️ SW: Clearing all caches:', cacheNames);
+                const deletePromises = cacheNames.map(cacheName => {
+                    console.log('🗑️ SW: Deleting cache:', cacheName);
+                    return caches.delete(cacheName);
+                });
+                return Promise.all(deletePromises);
             }).then(() => {
-                event.ports[0].postMessage({ success: true });
+                console.log('✅ SW: All caches cleared successfully');
+                if (event.ports && event.ports[0]) {
+                    event.ports[0].postMessage({ success: true });
+                }
+            }).catch(error => {
+                console.error('❌ SW: Cache clearing failed:', error);
+                if (event.ports && event.ports[0]) {
+                    event.ports[0].postMessage({ success: false, error: error.message });
+                }
             })
         );
     } else if (event.data && event.data.type === 'CHECK_UPDATE') {
-        event.ports[0].postMessage({
-            version: VERSION,
-            cacheNames: [CACHE_NAME, API_CACHE_NAME]
-        });
+        if (event.ports && event.ports[0]) {
+            event.ports[0].postMessage({
+                version: VERSION,
+                cacheNames: [CACHE_NAME, API_CACHE_NAME]
+            });
+        }
     } else if (event.data && event.data.type === 'SKIP_WAITING') {
+        console.log('⏭️ SW: Received SKIP_WAITING, activating new version');
         self.skipWaiting();
         if (event.ports && event.ports[0]) {
             event.ports[0].postMessage({ success: true });
@@ -188,14 +203,17 @@ self.addEventListener('install', event => {
 self.addEventListener('activate', event => {
     event.waitUntil(
         caches.keys().then(cacheNames => {
-            return Promise.all(
-                cacheNames.map(cacheName => {
-                    if (!cacheName.includes(VERSION)) {
-                        return caches.delete(cacheName);
-                    }
-                })
-            );
+            // Delete ALL old caches that don't match current version
+            const deletePromises = cacheNames.map(cacheName => {
+                if (!cacheName.includes(VERSION)) {
+                    console.log('🗑️ SW: Deleting old cache:', cacheName);
+                    return caches.delete(cacheName);
+                }
+            });
+            
+            return Promise.all(deletePromises);
         }).then(() => {
+            console.log('✅ SW: Cache cleanup complete, claiming clients');
             // Notify all clients that update is complete
             return self.clients.matchAll();
         }).then(clients => {

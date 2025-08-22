@@ -1,6 +1,6 @@
 class BiodiversityApp {
     constructor() {
-        this.version = '1.0.13'; // UPDATE THIS VERSION IN sw.js TOO!
+        this.version = '1.0.14'; // UPDATE THIS VERSION IN sw.js TOO!
         this.initialized = false;
         this.updateCheckInterval = null;
         this.lastUpdateCheck = null;
@@ -355,12 +355,16 @@ class BiodiversityApp {
         this.showUpdateCheckingIndicator();
 
         try {
+            // Clear all caches before reload to ensure fresh content
+            await this.clearAllCaches();
+            
             // Always reload the app when manual update is requested
             setTimeout(() => {
                 this.hideUpdateCheckingIndicator();
-                window.location.reload();
+                window.location.reload(true); // Force reload from server
             }, 1000);
         } catch (error) {
+            console.error('Manual update check failed:', error);
             this.hideUpdateCheckingIndicator();
             this.showUpdateError();
         }
@@ -411,6 +415,9 @@ class BiodiversityApp {
             // Show updating indicator
             this.showUpdatingIndicator();
             
+            // Clear all caches before update to ensure no stale data
+            await this.clearAllCaches();
+            
             const registration = await navigator.serviceWorker.getRegistration();
             if (registration && registration.waiting) {
                 // Tell the waiting service worker to take over
@@ -418,20 +425,21 @@ class BiodiversityApp {
 
                 // Listen for the activation and reload
                 navigator.serviceWorker.addEventListener('controllerchange', () => {
-                    window.location.reload();
+                    window.location.reload(true); // Force reload from server
                 });
                 
                 // Fallback: reload after timeout if controllerchange doesn't fire
                 setTimeout(() => {
-                        window.location.reload();
+                    window.location.reload(true); // Force reload from server
                 }, 3000);
             } else {
-                // No waiting worker, just reload
-                window.location.reload();
+                // No waiting worker, just reload with cache clearing
+                window.location.reload(true); // Force reload from server
             }
         } catch (error) {
             console.error('Update application failed:', error);
-            window.location.reload();
+            // Even if cache clearing fails, still reload
+            window.location.reload(true); // Force reload from server
         }
     }
 
@@ -515,6 +523,35 @@ class BiodiversityApp {
         setTimeout(() => {
             error.remove();
         }, 3000);
+    }
+
+    async clearAllCaches() {
+        if ('caches' in window) {
+            try {
+                const cacheNames = await caches.keys();
+                const deletePromises = cacheNames.map(cacheName => {
+                    console.log('🗑️ Clearing cache:', cacheName);
+                    return caches.delete(cacheName);
+                });
+                await Promise.all(deletePromises);
+                console.log('✅ All caches cleared successfully');
+            } catch (error) {
+                console.error('❌ Cache clearing failed:', error);
+                throw error;
+            }
+        }
+        
+        // Also clear service worker cache via message if available
+        if ('serviceWorker' in navigator) {
+            try {
+                const registration = await navigator.serviceWorker.getRegistration();
+                if (registration && registration.active) {
+                    registration.active.postMessage({ type: 'CLEAR_CACHE' });
+                }
+            } catch (error) {
+                console.warn('Could not message service worker for cache clearing:', error);
+            }
+        }
     }
 
     getAppInfo() {

@@ -19,12 +19,18 @@
   "filter.arthropods": "Gliederfüßer",
   "filter.molluscs": "Weichtiere",
   "filter.arachnids": "Spinnentiere",
+  "filter.other": "Andere",
   
   "location.search.placeholder": "Nach einem Standort suchen...",
   "location.search.title": "Standort Wählen",
   "location.change": "Standort ändern",
   "location.results.empty": "Keine Standorte gefunden",
   "location.results.error": "Standortsuche nicht möglich. Bitte versuchen Sie es erneut.",
+  
+  "taxon.search.placeholder": "Nach einem Taxon suchen...",
+  "taxon.search.title": "Taxon Suchen",
+  "taxon.results.empty": "Keine Taxa gefunden",
+  "taxon.results.error": "Taxonsuche nicht möglich. Bitte versuchen Sie es erneut.",
   
   "share.location": "Standort teilen",
   "share.title": "Diesen Standort Teilen", 

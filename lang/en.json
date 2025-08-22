@@ -19,12 +19,18 @@
   "filter.arthropods": "Arthropods",
   "filter.molluscs": "Molluscs",
   "filter.arachnids": "Arachnids",
+  "filter.other": "Other",
   
   "location.search.placeholder": "Search for a location...",
   "location.search.title": "Choose Location",
   "location.change": "Change location",
   "location.results.empty": "No locations found",
   "location.results.error": "Unable to search locations. Please try again.",
+  
+  "taxon.search.placeholder": "Search for any taxon...",
+  "taxon.search.title": "Search Taxon",
+  "taxon.results.empty": "No taxa found",
+  "taxon.results.error": "Unable to search taxa. Please try again.",
   
   "share.location": "Share location",
   "share.title": "Share This Location", 

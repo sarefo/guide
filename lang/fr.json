@@ -19,12 +19,18 @@
   "filter.arthropods": "Arthropodes",
   "filter.molluscs": "Mollusques",
   "filter.arachnids": "Arachnides",
+  "filter.other": "Autre",
   
   "location.search.placeholder": "Rechercher un emplacement...",
   "location.search.title": "Choisir l'Emplacement",
   "location.change": "Changer d'emplacement",
   "location.results.empty": "Aucun emplacement trouvé",
   "location.results.error": "Impossible de rechercher les emplacements. Réessayez.",
+  
+  "taxon.search.placeholder": "Rechercher un taxon...",
+  "taxon.search.title": "Rechercher un Taxon",
+  "taxon.results.empty": "Aucun taxon trouvé",
+  "taxon.results.error": "Impossible de rechercher des taxons. Réessayez.",
   
   "share.location": "Partager l'emplacement",
   "share.title": "Partager Cet Emplacement", 

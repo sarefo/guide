@@ -104,9 +104,23 @@ class iNaturalistAPI {
         }
     }
 
+    async searchTaxa(query, limit = 20) {
+        try {
+            const data = await this.makeRequest('/taxa/autocomplete', {
+                q: query,
+                per_page: limit
+            });
+            return data.results || [];
+        } catch (error) {
+            console.error('Failed to search taxa:', error);
+            throw new Error('Unable to search taxa');
+        }
+    }
+
     async getSpeciesObservations(placeId, options = {}) {
         const {
             iconicTaxonId = null,
+            taxonId = null,
             locale = 'en',
             perPage = 50,
             page = 1,
@@ -126,14 +140,17 @@ class iNaturalistAPI {
 
             if (iconicTaxonId && iconicTaxonId !== 'all') {
                 params.iconic_taxa = iconicTaxonId;
+            } else if (taxonId) {
+                params.taxon_id = taxonId;
             }
 
             if (photos) {
                 params.photos = 'true';
             }
 
-            // Use place_id + iconic_taxa as unique request key to cancel previous requests
-            const requestKey = `species_${placeId}_${iconicTaxonId || 'all'}`;
+            // Use place_id + filter type as unique request key to cancel previous requests
+            const filterKey = iconicTaxonId || taxonId || 'all';
+            const requestKey = `species_${placeId}_${filterKey}`;
             const data = await this.makeRequest('/observations/species_counts', params, requestKey);
             return data.results || [];
         } catch (error) {

@@ -305,7 +305,8 @@ body {
 /* Modal Styles */
 .species-modal,
 .location-modal,
-.share-modal {
+.share-modal,
+.taxon-modal {
     display: none;
     position: fixed;
     top: 0;
@@ -430,6 +431,122 @@ body {
     color: #d32f2f;
 }
 
+/* Taxon Search Modal */
+#taxon-search {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+}
+
+#taxon-search:focus {
+    outline: none;
+    border-color: #2E7D32;
+}
+
+.taxon-results {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.taxon-result {
+    padding: 1rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 0.5rem;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--card-bg, white);
+}
+
+.taxon-result:hover {
+    background: rgba(46, 125, 50, 0.05);
+    border-color: #2E7D32;
+}
+
+.taxon-names {
+    flex: 1;
+}
+
+.taxon-common-name {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    color: var(--text-primary, #333);
+}
+
+.taxon-scientific-name {
+    font-size: 0.9rem;
+    color: var(--text-secondary, #666);
+    font-style: italic;
+}
+
+.taxon-rank {
+    font-size: 0.8rem;
+    color: var(--text-tertiary, #888);
+    background: var(--rank-bg, #f5f5f5);
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    text-transform: capitalize;
+}
+
+/* Dark mode overrides for taxon results */
+@media (prefers-color-scheme: dark) {
+    .taxon-result {
+        --card-bg: #2a2a2a;
+        --text-primary: #ffffff;
+        --text-secondary: #cccccc;
+        --text-tertiary: #aaaaaa;
+        --rank-bg: #404040;
+        border-color: #444444;
+    }
+    
+    .taxon-result:hover {
+        background: rgba(46, 125, 50, 0.15);
+        border-color: #4CAF50;
+    }
+}
+
+.search-error {
+    text-align: center;
+    color: #d32f2f;
+    padding: 1rem;
+    font-style: italic;
+}
+
+/* Custom Filter Button Styles */
+.filter-btn .remove-custom {
+    position: absolute;
+    top: -0.25rem;
+    right: -0.25rem;
+    background: #d32f2f;
+    color: white;
+    border: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    font-size: 0.8rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.filter-btn:hover .remove-custom {
+    opacity: 1;
+}
+
+.filter-btn {
+    position: relative;
+}
+
 /* QR Code Modal */
 .qr-code-container {
     display: flex;
@@ -537,7 +654,8 @@ body {
     
     /* Position modals higher on mobile to avoid keyboard obstruction */
     .location-modal,
-    .share-modal {
+    .share-modal,
+    .taxon-modal {
         padding-top: 10vh;
         align-items: flex-start;
     }

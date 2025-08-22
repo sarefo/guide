@@ -97,6 +97,10 @@
                         <span class="filter-icon">🐚</span>
                         <span class="filter-text" data-i18n="filter.molluscs">Molluscs</span>
                     </button>
+                    <button class="filter-btn" data-group="other">
+                        <span class="filter-icon">🔍</span>
+                        <span class="filter-text" data-i18n="filter.other">Other</span>
+                    </button>
                 </div>
             </nav>
 
@@ -149,6 +153,20 @@
                 <div id="qr-code" class="qr-code-container"></div>
                 <p class="share-url" id="share-url"></p>
                 <button id="copy-url" class="copy-btn" data-i18n="share.url.copy">Copy URL</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Taxon Search Modal -->
+    <div id="taxon-modal" class="taxon-modal">
+        <div class="modal-content">
+            <button class="modal-close" aria-label="Close">&times;</button>
+            <div class="modal-body">
+                <h2 data-i18n="taxon.search.title">Search Taxon</h2>
+                <input type="text" id="taxon-search" data-i18n-placeholder="taxon.search.placeholder" placeholder="Search for any taxon..." />
+                <div id="taxon-results" class="taxon-results">
+                    <!-- Search results populated by JavaScript -->
+                </div>
             </div>
         </div>
     </div>

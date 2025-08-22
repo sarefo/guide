@@ -7,6 +7,9 @@ class SpeciesManager {
         this.loading = false;
         this.loadTimeout = null;
         this.loadPromise = null; // Track current loading promise
+        this.customTaxa = new Map(); // Store multiple custom taxa {id -> {name, rank}}
+        this.predefinedIconicTaxa = ['all', '3', '40151', '47126', '47158', '47119', '26036', '20978', '47178', '47170', '47115'];
+        this.loadCustomTaxaFromStorage();
         this.init();
     }
 
@@ -18,19 +21,29 @@ class SpeciesManager {
     setupEventListeners() {
         window.addEventListener('locationChanged', (event) => {
             this.currentPlaceId = event.detail.id;
+            this.createStoredCustomTaxaButtons();
             this.loadSpecies();
         });
         
         window.addEventListener('lifeGroupFromURL', (event) => {
             this.currentFilter = event.detail.lifeGroup;
             this.pendingLifeGroupFromURL = event.detail.lifeGroup;
+            
+            // If this is a custom taxon ID (not in predefined list), we need to fetch its details
+            if (!this.predefinedIconicTaxa.includes(event.detail.lifeGroup)) {
+                this.restoreCustomTaxonFromURL(event.detail.lifeGroup);
+            }
         });
 
         const filterButtons = document.querySelectorAll('.filter-btn');
         filterButtons.forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const group = e.currentTarget.dataset.group;
-                this.setFilter(group);
+                if (group === 'other') {
+                    this.openTaxonModal();
+                } else {
+                    this.setFilter(group);
+                }
             });
         });
 
@@ -101,12 +114,24 @@ class SpeciesManager {
     async _doLoadSpecies() {
         try {
             const options = {
-                iconicTaxonId: this.currentFilter === 'all' ? null : this.currentFilter,
+                iconicTaxonId: null,
+                taxonId: null,
                 locale: this.currentLocale,
                 perPage: 50,
                 quality: 'research',
                 photos: true
             };
+
+            // Determine if we're using iconic taxa or custom taxon
+            if (this.currentFilter === 'all') {
+                // No filter
+            } else if (this.predefinedIconicTaxa.includes(this.currentFilter)) {
+                // Use iconic taxon filter
+                options.iconicTaxonId = this.currentFilter;
+            } else {
+                // Use custom taxon filter
+                options.taxonId = this.currentFilter;
+            }
 
             const speciesData = await window.api.getSpeciesObservations(this.currentPlaceId, options);
             
@@ -200,6 +225,9 @@ class SpeciesManager {
 
     setFilter(group) {
         this.currentFilter = group;
+        
+        // No longer automatically remove custom taxa when switching filters
+        // Custom taxa persist until explicitly removed by user
         
         const filterButtons = document.querySelectorAll('.filter-btn');
         filterButtons.forEach(btn => {
@@ -435,6 +463,252 @@ class SpeciesManager {
         });
         
         this.pendingLifeGroupFromURL = null;
+    }
+
+    openTaxonModal() {
+        const modal = document.getElementById('taxon-modal');
+        const searchInput = document.getElementById('taxon-search');
+        const resultsContainer = document.getElementById('taxon-results');
+        
+        if (!modal || !searchInput || !resultsContainer) return;
+
+        // Clear previous search
+        searchInput.value = '';
+        resultsContainer.innerHTML = '';
+        
+        modal.style.display = 'flex';
+        searchInput.focus();
+
+        // Setup search functionality
+        let searchTimeout;
+        const handleSearch = async (query) => {
+            if (query.length < 2) {
+                resultsContainer.innerHTML = '';
+                return;
+            }
+
+            try {
+                const taxa = await window.api.searchTaxa(query);
+                this.displayTaxonResults(taxa, resultsContainer);
+            } catch (error) {
+                console.error('Taxon search failed:', error);
+                resultsContainer.innerHTML = '<div class="search-error">Search failed. Please try again.</div>';
+            }
+        };
+
+        searchInput.addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => handleSearch(e.target.value.trim()), 300);
+        });
+
+        // Setup modal close functionality
+        const closeModal = () => {
+            modal.style.display = 'none';
+            clearTimeout(searchTimeout);
+        };
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
+        });
+
+        const closeBtn = modal.querySelector('.modal-close');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', closeModal);
+        }
+    }
+
+    displayTaxonResults(taxa, container) {
+        if (!taxa || taxa.length === 0) {
+            container.innerHTML = '<div class="no-results">No taxa found</div>';
+            return;
+        }
+
+        const resultsHTML = taxa.map(taxon => {
+            const commonName = taxon.preferred_common_name || taxon.english_common_name || '';
+            const scientificName = taxon.name || '';
+            const rank = taxon.rank || '';
+            
+            return `
+                <div class="taxon-result" data-taxon-id="${taxon.id}" data-taxon-name="${commonName || scientificName}" data-taxon-rank="${rank}">
+                    <div class="taxon-names">
+                        ${commonName ? `<div class="taxon-common-name">${commonName}</div>` : ''}
+                        <div class="taxon-scientific-name"><em>${scientificName}</em></div>
+                    </div>
+                    <div class="taxon-rank">${rank}</div>
+                </div>
+            `;
+        }).join('');
+
+        container.innerHTML = resultsHTML;
+
+        // Add click handlers to results
+        container.querySelectorAll('.taxon-result').forEach(result => {
+            result.addEventListener('click', (e) => {
+                const taxonId = e.currentTarget.dataset.taxonId;
+                const taxonName = e.currentTarget.dataset.taxonName;
+                const taxonRank = e.currentTarget.dataset.taxonRank;
+                
+                this.selectCustomTaxon(taxonId, taxonName, taxonRank);
+                document.getElementById('taxon-modal').style.display = 'none';
+            });
+        });
+    }
+
+    selectCustomTaxon(taxonId, taxonName, taxonRank) {
+        // Store the custom taxon
+        this.customTaxa.set(taxonId, { name: taxonName, rank: taxonRank });
+        
+        // Save to localStorage
+        this.saveCustomTaxaToStorage();
+        
+        // Create custom filter button if it doesn't exist
+        this.addCustomFilterButton(taxonName, taxonRank, taxonId);
+        
+        // Set filter and load species
+        this.setFilter(taxonId);
+    }
+
+    addCustomFilterButton(taxonName, taxonRank, taxonId) {
+        // Check if this taxon already has a button
+        const existingCustomBtn = document.querySelector(`.filter-btn[data-group="${taxonId}"]`);
+        
+        // If button already exists for this taxon, don't recreate it
+        if (existingCustomBtn) {
+            return;
+        }
+
+        // Create new custom filter button
+        const filterContainer = document.querySelector('.filter-container');
+        const otherBtn = document.querySelector('.filter-btn[data-group="other"]');
+        
+        if (filterContainer && otherBtn) {
+            const customBtn = document.createElement('button');
+            customBtn.className = 'filter-btn';
+            customBtn.dataset.group = taxonId;
+            
+            // Truncate long names
+            const displayName = taxonName.length > 12 ? taxonName.substring(0, 12) + '...' : taxonName;
+            
+            customBtn.innerHTML = `
+                <span class="filter-icon">🔬</span>
+                <span class="filter-text">${displayName}</span>
+                <span class="remove-custom" title="Remove filter">&times;</span>
+            `;
+
+            // Insert before the "Other" button
+            filterContainer.insertBefore(customBtn, otherBtn);
+
+            // Add click handler for the main button
+            customBtn.addEventListener('click', (e) => {
+                if (!e.target.classList.contains('remove-custom')) {
+                    this.setFilter(taxonId);
+                }
+            });
+
+            // Add click handler for the remove button
+            const removeBtn = customBtn.querySelector('.remove-custom');
+            removeBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.removeCustomTaxon(taxonId);
+            });
+        }
+    }
+
+    removeCustomTaxon(taxonId) {
+        // Remove custom taxon from storage
+        this.customTaxa.delete(taxonId);
+        
+        // Save to localStorage
+        this.saveCustomTaxaToStorage();
+        
+        // Remove custom filter button
+        const customBtn = document.querySelector(`.filter-btn[data-group="${taxonId}"]`);
+        if (customBtn) {
+            customBtn.remove();
+        }
+        
+        // If this was the active filter, reset to "all" filter
+        if (this.currentFilter === taxonId) {
+            this.setFilter('all');
+        }
+    }
+
+    async restoreCustomTaxonFromURL(taxonId) {
+        // If taxon is already in localStorage, don't fetch it again
+        if (this.customTaxa.has(taxonId)) {
+            console.log(`Custom taxon ${taxonId} already in storage, skipping URL restoration`);
+            return;
+        }
+
+        try {
+            // Fetch taxon details to get its name
+            const taxonData = await window.api.getTaxonDetails(taxonId);
+            const taxon = taxonData.results?.[0] || taxonData;
+            
+            if (taxon) {
+                const commonName = taxon.preferred_common_name || taxon.english_common_name || taxon.name;
+                const rank = taxon.rank || 'Unknown';
+                
+                // Store the custom taxon
+                this.customTaxa.set(taxonId, { 
+                    name: commonName, 
+                    rank: rank 
+                });
+                
+                // Save to localStorage
+                this.saveCustomTaxaToStorage();
+                
+                // Create the custom filter button
+                this.addCustomFilterButton(commonName, rank, taxonId);
+                
+                console.log(`Restored custom taxon from URL: ${commonName} (${rank})`);
+            }
+        } catch (error) {
+            console.error('Failed to restore custom taxon from URL:', error);
+            // If we can't get the taxon details, still proceed but with generic name
+            this.customTaxa.set(taxonId, { 
+                name: `Taxon ${taxonId}`, 
+                rank: 'Unknown' 
+            });
+            this.saveCustomTaxaToStorage();
+            this.addCustomFilterButton(`Taxon ${taxonId}`, 'Unknown', taxonId);
+        }
+    }
+
+    loadCustomTaxaFromStorage() {
+        try {
+            const stored = localStorage.getItem('biodiversity_custom_taxa');
+            if (stored) {
+                const taxaArray = JSON.parse(stored);
+                taxaArray.forEach(taxon => {
+                    this.customTaxa.set(taxon.id, { name: taxon.name, rank: taxon.rank });
+                });
+                console.log(`Loaded ${taxaArray.length} custom taxa from storage`);
+            }
+        } catch (error) {
+            console.error('Failed to load custom taxa from storage:', error);
+        }
+    }
+
+    saveCustomTaxaToStorage() {
+        try {
+            const taxaArray = Array.from(this.customTaxa.entries()).map(([id, data]) => ({
+                id: id,
+                name: data.name,
+                rank: data.rank
+            }));
+            localStorage.setItem('biodiversity_custom_taxa', JSON.stringify(taxaArray));
+            console.log(`Saved ${taxaArray.length} custom taxa to storage`);
+        } catch (error) {
+            console.error('Failed to save custom taxa to storage:', error);
+        }
+    }
+
+    createStoredCustomTaxaButtons() {
+        // Create buttons for all stored custom taxa
+        this.customTaxa.forEach((data, taxonId) => {
+            this.addCustomFilterButton(data.name, data.rank, taxonId);
+        });
     }
 }
 

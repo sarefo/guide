@@ -58,6 +58,7 @@ class I18nManager {
             "species.observations": "observations",
             "modal.wikipedia": "Wikipedia",
             "modal.inaturalist": "iNaturalist",
+            "help.links.donate": "Donate",
             "notification.copied": "URL copied to clipboard!",
             "notification.offline": "You are offline",
             "notification.online": "Connection restored"

@@ -54,6 +54,7 @@
   "help.usage": "Tap species photos to learn more • Use filters to browse by group • Share locations with the share button",
   "help.data.source": "Species data from iNaturalist - a community of millions of naturalists worldwide.",
   "help.links.visit": "Visit iNaturalist",
+  "help.links.donate": "Donate",
   
   "notification.copied": "URL copied to clipboard!",
   "notification.copy.failed": "Copy failed. Please copy manually.",

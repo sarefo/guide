@@ -1,7 +1,7 @@
 {
-  "name": "Biodiversity Explorer",
-  "short_name": "BioExplorer",
-  "description": "Explore local biodiversity with species photos and information",
+  "name": "LocNat",
+  "short_name": "LocNat",
+  "description": "Discover wildlife at this location",
   "start_url": "/?place_id=97394",
   "display": "standalone",
   "background_color": "#ffffff",

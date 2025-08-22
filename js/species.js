@@ -418,10 +418,10 @@ class SpeciesManager {
             }
             <div class="modal-actions" style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;">
                 <a href="${wikipediaUrl}" target="_blank" class="modal-action-btn">
-                    📖 ${window.i18n.t('modal.wikipedia')}
+                    ${window.i18n.t('modal.wikipedia')}
                 </a>
                 <a href="${species.inatUrl}" target="_blank" class="modal-action-btn">
-                    🔍 ${window.i18n.t('modal.inaturalist')}
+                    ${window.i18n.t('modal.inaturalist')}
                 </a>
             </div>
             ${species.photo?.attribution ? `

@@ -228,6 +228,10 @@ body {
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 }
 
+.species-name.scientific-name {
+    font-style: italic;
+}
+
 .species-scientific {
     font-size: 0.9rem;
     font-style: italic;

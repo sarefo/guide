@@ -34,6 +34,7 @@
   "species.observations": "observations",
   "species.observation": "observation",
   "species.rank": "Taxonomic rank",
+  "species.scientificName": "Scientific name",
   "species.empty": "No species found for this location and filter.",
   "species.empty.try": "Try Different Filter",
   

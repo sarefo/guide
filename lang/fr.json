@@ -33,8 +33,8 @@
   
   "species.observations": "observations",
   "species.observation": "observation",
-  "species.observation": "observation",
   "species.rank": "Rang taxonomique",
+  "species.scientificName": "Nom scientifique",
   "species.empty": "Aucune espèce trouvée pour cet emplacement et filtre.",
   "species.empty.try": "Essayer un Filtre Différent",
   

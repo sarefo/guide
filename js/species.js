@@ -135,6 +135,9 @@ class SpeciesManager {
         const vernacularName = species.name ? 
             species.name.charAt(0).toUpperCase() + species.name.slice(1) : 
             'Unknown species';
+            
+        // Check if we're using scientific name as fallback (no common name available)
+        const isUsingScientificName = species.name === species.scientificName;
         
         return `
             <div class="species-card" data-species-id="${species.id}">
@@ -151,7 +154,7 @@ class SpeciesManager {
                     </div>
                 `}
                 <div class="species-overlay">
-                    <div class="species-name">${vernacularName}</div>
+                    <div class="species-name${isUsingScientificName ? ' scientific-name' : ''}">${vernacularName}</div>
                 </div>
             </div>
         `;
@@ -245,17 +248,9 @@ class SpeciesManager {
             ` : ''}
             <h2>${species.name}</h2>
             ${species.scientificName !== species.name ? 
-                `<p style="font-style: italic; color: #666; margin-bottom: 1rem;">${species.scientificName}</p>` : ''
+                `<p style="color: #666; margin-bottom: 1rem;"><strong>${window.i18n.t('species.scientificName')}:</strong> <em>${species.scientificName}</em></p>` : ''
             }
-            <div style="margin-bottom: 1rem;">
-                <strong>${species.count === 1 ? window.i18n.t('species.observation') : window.i18n.t('species.observations')}:</strong> ${species.count}
-            </div>
-            ${species.rank ? `
-                <div style="margin-bottom: 1rem;">
-                    <strong>${window.i18n.t('species.rank')}:</strong> ${species.rank}
-                </div>
-            ` : ''}
-            <div class="modal-actions" style="display: flex; gap: 1rem; flex-wrap: wrap;">
+            <div class="modal-actions" style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;">
                 <a href="${wikipediaUrl}" target="_blank" class="modal-action-btn">
                     📖 ${window.i18n.t('modal.wikipedia')}
                 </a>

@@ -10,7 +10,7 @@
 + taxon dialog:
   + lose "observations" + "taxonomic rank"
   + add "scientific name" before taxonName
-+ sometimes gets stuck on "cargando ubicación"
++ sometimes gets stuck on "Loading location..."
 + flickering on reload after new location
 + make sure dark mode looks nice
   + dark background in dark mode only for first scrolling page :p

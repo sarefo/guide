@@ -7,6 +7,12 @@ class LocationManager {
         this.defaultLocation = { lat: 51.505, lng: -0.09, radius: 50, name: 'London, UK' }; // Default location
         this.radius = 50; // Always 50km as requested
         this.isGettingLocation = false;
+        
+        // Search state management
+        this.currentSearchQuery = '';
+        this.searchState = 'idle'; // 'idle' | 'searching' | 'complete'
+        this.currentSearchController = null;
+        
         this.init();
     }
 
@@ -77,7 +83,7 @@ class LocationManager {
 
         // Search input with geocoding
         searchInput?.addEventListener('input', (e) => {
-            this.debounce(() => this.searchLocations(e.target.value), 300)();
+            this.debounce(() => this.handleSearchInput(e.target.value), 500)();
         });
 
         // Language change handler
@@ -103,6 +109,9 @@ class LocationManager {
         
         await this.waitForDependencies();
         this.setLanguage(lang);
+        
+        // Small delay to ensure language setting propagates to API and species manager
+        await new Promise(resolve => setTimeout(resolve, 100));
         
         // Handle life group selection BEFORE loading location
         // This ensures species manager has the correct filter when locationChanged fires
@@ -351,59 +360,111 @@ class LocationManager {
         }
     }
 
-    // Search functionality using map's geocoder
-    async searchLocations(query) {
-        if (!query || query.length < 2) {
+    // Handle search input with proper state management
+    handleSearchInput(query) {
+        this.currentSearchQuery = query.trim();
+        
+        // Cancel any ongoing search
+        if (this.currentSearchController) {
+            this.currentSearchController.abort();
+            this.currentSearchController = null;
+        }
+        
+        // Handle different input states
+        if (this.currentSearchQuery.length === 0) {
             this.clearLocationResults();
             return;
         }
+        
+        if (this.currentSearchQuery.length < 3) {
+            this.showSearchPrompt();
+            return;
+        }
+        
+        // Start new search
+        this.searchLocations(this.currentSearchQuery);
+    }
 
+    // Search functionality with proper cancellation and state management
+    async searchLocations(query) {
         try {
+            // Set up cancellation
+            this.currentSearchController = new AbortController();
+            const signal = this.currentSearchController.signal;
+            
+            // Update state and show loading
+            this.searchState = 'searching';
+            this.showSearchLoading();
+            
             console.log('🔍 Searching locations:', query);
             
             let places = [];
             
             // Use map manager's geocoder if available
             if (window.mapManager && window.mapManager.searchLocation) {
-                places = await window.mapManager.searchLocation(query);
+                places = await window.mapManager.searchLocation(query, signal);
                 console.log('🔍 Received places from map manager:', places);
             } else {
-                // Fallback to direct geocoding (would need to implement)
                 console.warn('Map manager not available for search');
+                this.displayLocationError('Map not available');
                 return;
             }
             
-            console.log('🔍 About to display results for', places?.length || 0, 'places');
-            this.displayLocationResults(places);
+            // Check if this search was cancelled or if query has changed
+            if (signal.aborted || query !== this.currentSearchQuery) {
+                console.log('🔍 Search cancelled or outdated:', { 
+                    cancelled: signal.aborted, 
+                    queryChanged: query !== this.currentSearchQuery 
+                });
+                return;
+            }
+            
+            // Update state and display results
+            this.searchState = 'complete';
+            this.displayLocationResults(places, query);
+            
         } catch (error) {
+            // Don't show error if request was just cancelled
+            if (error.name === 'AbortError') {
+                console.log('🔍 Search request cancelled');
+                return;
+            }
+            
             console.error('Location search failed:', error);
-            this.displayLocationError();
+            this.searchState = 'idle';
+            this.displayLocationError('Search failed. Please try again.');
         }
     }
 
-    displayLocationResults(places) {
+    displayLocationResults(places, query) {
         const resultsContainer = document.getElementById('location-results');
-        console.log('📋 Display results - container found:', !!resultsContainer);
-        console.log('📋 Display results - places:', places);
         
         if (!resultsContainer) {
             console.error('📋 No results container found!');
             return;
         }
 
-        if (!places || places.length === 0) {
-            console.log('📋 No places to display');
-            resultsContainer.innerHTML = `<p class="no-results">${window.i18n.t('location.results.empty')}</p>`;
-            this.showLocationResults(); // Show the "no results" message
+        // Verify this is still the current search
+        if (query !== this.currentSearchQuery) {
+            console.log('📋 Ignoring outdated results for:', query);
             return;
         }
 
-        console.log('📋 Displaying', places.length, 'places');
+        if (!places || places.length === 0) {
+            console.log('📋 No places to display for query:', query);
+            resultsContainer.innerHTML = `
+                <div class="search-state no-results">
+                    <p>No locations found for "${query}"</p>
+                </div>
+            `;
+            this.showLocationResults();
+            return;
+        }
+
+        console.log('📋 Displaying', places.length, 'places for query:', query);
 
         const resultsHTML = places.map(place => {
             const name = place.display_name || place.name;
-            console.log('📋 Creating result for:', name);
-
             return `
                 <div class="location-result" data-lat="${place.lat}" data-lng="${place.lng}" data-name="${name}">
                     <div class="location-info">
@@ -413,17 +474,13 @@ class LocationManager {
             `;
         }).join('');
 
-        console.log('📋 Setting results HTML:', resultsHTML.length, 'characters');
         resultsContainer.innerHTML = resultsHTML;
-        this.showLocationResults(); // Make sure results are visible
-        console.log('📋 Results container now has', resultsContainer.children.length, 'children');
+        this.showLocationResults();
 
         // Remove existing click handlers and add new one
-        resultsContainer.onclick = null; // Clear existing handlers
+        resultsContainer.onclick = null;
         resultsContainer.onclick = (e) => {
-            console.log('📋 Results container clicked:', e.target);
             const resultEl = e.target.closest('.location-result');
-            console.log('📋 Found result element:', resultEl);
             if (resultEl) {
                 const lat = parseFloat(resultEl.dataset.lat);
                 const lng = parseFloat(resultEl.dataset.lng);
@@ -434,6 +491,40 @@ class LocationManager {
         };
     }
 
+    showSearchPrompt() {
+        const resultsContainer = document.getElementById('location-results');
+        if (!resultsContainer) return;
+
+        resultsContainer.innerHTML = `
+            <div class="search-state search-prompt">
+                <p>Type at least 3 characters to search locations...</p>
+            </div>
+        `;
+        this.showLocationResults();
+    }
+
+    showSearchLoading() {
+        const resultsContainer = document.getElementById('location-results');
+        if (!resultsContainer) return;
+
+        resultsContainer.innerHTML = `
+            <div class="search-state search-loading">
+                <div class="loading-spinner"></div>
+                <p>Searching locations...</p>
+            </div>
+        `;
+        this.showLocationResults();
+    }
+
+    clearLocationResults() {
+        const resultsContainer = document.getElementById('location-results');
+        if (resultsContainer) {
+            resultsContainer.innerHTML = '';
+            this.hideLocationResults();
+        }
+        this.searchState = 'idle';
+    }
+
     async selectLocationFromSearch(lat, lng, name) {
         // Show location selection instead of immediately loading
         this.showLocationSelection(lat, lng, name);
@@ -441,13 +532,6 @@ class LocationManager {
         // Also update the map to show this location
         if (window.mapManager) {
             window.mapManager.setLocation(lat, lng, name);
-        }
-    }
-
-    clearLocationResults() {
-        const resultsContainer = document.getElementById('location-results');
-        if (resultsContainer) {
-            resultsContainer.innerHTML = '';
         }
     }
 
@@ -465,10 +549,15 @@ class LocationManager {
         }
     }
 
-    displayLocationError() {
+    displayLocationError(message = 'Search error occurred') {
         const resultsContainer = document.getElementById('location-results');
         if (resultsContainer) {
-            resultsContainer.innerHTML = `<p class="error">${window.i18n.t('location.results.error')}</p>`;
+            resultsContainer.innerHTML = `
+                <div class="search-state search-error">
+                    <p>${message}</p>
+                </div>
+            `;
+            this.showLocationResults();
         }
     }
 
@@ -501,9 +590,12 @@ class LocationManager {
             coords: !!coordsEl
         });
 
-        if (confirmPanel && nameEl && coordsEl) {
+        if (confirmPanel && nameEl) {
             nameEl.textContent = name || 'Selected Location';
-            coordsEl.textContent = `${lat.toFixed(3)}, ${lng.toFixed(3)}`;
+            // Hide coordinates element
+            if (coordsEl) {
+                coordsEl.style.display = 'none';
+            }
             confirmPanel.style.display = 'block';
             console.log('🎯 Confirmation panel shown');
         } else {
@@ -707,21 +799,32 @@ class LocationManager {
 
     // Language management
     setLanguage(lang) {
+        console.log('🌐 Setting language to:', lang);
+        
         const langSelect = document.getElementById('language-select');
         if (langSelect) {
             langSelect.value = lang;
         }
         
         if (window.api) {
+            console.log('🌐 Setting API locale to:', lang);
             window.api.setLocale(lang);
+        } else {
+            console.warn('🌐 API not available when setting language');
         }
         
         if (window.speciesManager) {
+            console.log('🌐 Setting species manager locale to:', lang);
             window.speciesManager.setLocale(lang);
+        } else {
+            console.warn('🌐 Species manager not available when setting language');
         }
         
         if (window.i18n) {
+            console.log('🌐 Setting i18n language to:', lang);
             window.i18n.setLanguage(lang);
+        } else {
+            console.warn('🌐 i18n not available when setting language');
         }
     }
     

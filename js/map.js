@@ -178,7 +178,7 @@ class MapManager {
         this.map.setView([lat, lng], 10);
     }
 
-    async searchLocation(query) {
+    async searchLocation(query, signal = null) {
         if (!this.geocoder || !query || query.length < 2) {
             return [];
         }
@@ -186,11 +186,21 @@ class MapManager {
         console.log('🔍 Searching for location:', query);
 
         try {
-            // Try direct Nominatim API call since Leaflet geocoder might not be working
-            const url = `https://nominatim.openstreetmap.org/search?format=json&limit=5&addressdetails=1&q=${encodeURIComponent(query)}`;
-            console.log('🔍 Making direct Nominatim request:', url);
+            // Get current language for i18n support with fallback priority
+            const currentLang = window.i18n ? window.i18n.getCurrentLang() : 'en';
+            // Create language priority list: chosen language first, then common languages, then any language
+            const acceptLanguage = `${currentLang},en,de,fr,es,*;q=0.1`;
             
-            const response = await fetch(url);
+            // Try direct Nominatim API call with language support
+            const url = `https://nominatim.openstreetmap.org/search?format=json&limit=5&addressdetails=1&accept-language=${acceptLanguage}&q=${encodeURIComponent(query)}`;
+            console.log('🔍 Making direct Nominatim request with language priority:', url);
+            
+            const fetchOptions = {};
+            if (signal) {
+                fetchOptions.signal = signal;
+            }
+            
+            const response = await fetch(url, fetchOptions);
             const data = await response.json();
             
             console.log('🔍 Raw Nominatim results:', data);
@@ -224,9 +234,14 @@ class MapManager {
         console.log('🔄 Reverse geocoding:', { lat, lng });
 
         try {
-            // Direct Nominatim reverse geocoding
-            const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`;
-            console.log('🔄 Making reverse geocoding request:', url);
+            // Get current language for i18n support with fallback priority
+            const currentLang = window.i18n ? window.i18n.getCurrentLang() : 'en';
+            // Create language priority list: chosen language first, then common languages, then any language
+            const acceptLanguage = `${currentLang},en,de,fr,es,*;q=0.1`;
+            
+            // Direct Nominatim reverse geocoding with language support
+            const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&accept-language=${acceptLanguage}`;
+            console.log('🔄 Making reverse geocoding request with language priority:', url);
             
             const response = await fetch(url);
             const data = await response.json();

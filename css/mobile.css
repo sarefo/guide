@@ -280,6 +280,29 @@
         border-color: #444;
         border-top-color: #4CAF50;
     }
+    
+    /* Location confirmation dark mode */
+    .location-confirm {
+        background: rgba(76, 175, 80, 0.1);
+        border-color: rgba(76, 175, 80, 0.3);
+    }
+    
+    #selected-location-name {
+        color: #e8e8e8;
+    }
+    
+    #selected-location-coords {
+        color: #aaa;
+    }
+    
+    .use-location-btn {
+        background: linear-gradient(135deg, #2E7D32 0%, #388E3C 100%);
+        color: white;
+    }
+    
+    .use-location-btn:hover {
+        background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%);
+    }
 }
 
 /* Reduced motion */

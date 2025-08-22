@@ -817,30 +817,50 @@ body {
     animation: slideInUp 0.3s ease-out;
 }
 
-.update-notification span {
+.update-notification .update-message {
     flex: 1;
+    line-height: 1.4;
 }
 
-.update-notification button {
-    background: rgba(255,255,255,0.2);
-    color: white;
+.update-notification .update-message small {
+    opacity: 0.9;
+    font-size: 0.85rem;
+}
+
+.update-notification .update-btn-primary {
+    background: rgba(255,255,255,0.9);
+    color: #2E7D32;
+    font-weight: 600;
     border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 0.25rem;
+    padding: 0.75rem 1.25rem;
+    border-radius: 0.375rem;
     cursor: pointer;
-    margin-left: 0.5rem;
-    transition: background-color 0.2s;
+    margin-left: 1rem;
+    transition: all 0.2s;
+    font-size: 0.95rem;
 }
 
-.update-notification button:hover {
-    background: rgba(255,255,255,0.3);
+.update-notification .update-btn-primary:hover {
+    background: white;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 
-.update-notification #dismiss-update {
+.update-notification .update-btn-dismiss {
     background: transparent;
+    color: rgba(255,255,255,0.8);
+    border: none;
     padding: 0.25rem 0.5rem;
     font-size: 1.2rem;
     font-weight: bold;
+    cursor: pointer;
+    margin-left: 0.5rem;
+    border-radius: 0.25rem;
+    transition: background-color 0.2s;
+}
+
+.update-notification .update-btn-dismiss:hover {
+    background: rgba(255,255,255,0.1);
 }
 
 /* Update status messages */

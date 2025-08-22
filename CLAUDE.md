@@ -45,4 +45,11 @@ This is a **mobile-first Progressive Web App** for displaying location-based bio
 - Access app at: http://localhost:8000
 - No need to start new server unless explicitly stopped
 
+## Version Management
+When incrementing version (user request):
+1. Update `js/app.js` line 3: `this.version = '1.0.X'`
+2. Update `sw.js` line 1: `const VERSION = '1.0.X'`  
+3. Increment only the last digit (patch version)
+4. HTML version updates automatically from app.js
+
 Always maintain session continuity by updating status files and using TodoWrite tool.

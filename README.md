@@ -1,7 +1,5 @@
 + still sometimes flicker when loading life group
 
-+ not sure the "new version: update" functionality works as intended
-
 + improve location search
   + add location picker
   + add region fallback if no taxa found for location (eg. because too small)

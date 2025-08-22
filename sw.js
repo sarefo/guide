@@ -1,4 +1,4 @@
-const VERSION = '1.0.1';
+const VERSION = '1.0.3'; // UPDATE THIS VERSION IN app.js TOO!
 const CACHE_NAME = `biodiversity-explorer-v${VERSION}`;
 const API_CACHE_NAME = `biodiversity-api-v${VERSION}`;
 
@@ -44,10 +44,10 @@ function isAPIRequest(url) {
 }
 
 function isStaticAsset(request) {
-    return request.method === 'GET' && 
-           (request.url.includes('.js') || 
-            request.url.includes('.css') || 
-            request.url.includes('.svg') || 
+    return request.method === 'GET' &&
+        (request.url.includes('.js') ||
+            request.url.includes('.css') ||
+            request.url.includes('.svg') ||
             request.url.includes('.json') ||
             request.url.includes('.png'));
 }
@@ -55,7 +55,7 @@ function isStaticAsset(request) {
 async function handleAPIRequest(request) {
     const cache = await caches.open(API_CACHE_NAME);
     const cachedResponse = await cache.match(request);
-    
+
     if (cachedResponse && !isStale(cachedResponse)) {
         console.log('Serving API from cache:', request.url);
         return cachedResponse;
@@ -85,7 +85,7 @@ async function handleAPIRequest(request) {
 async function handleStaticAsset(request) {
     const cache = await caches.open(CACHE_NAME);
     const cachedResponse = await cache.match(request);
-    
+
     if (cachedResponse) {
         console.log('Serving static asset from cache:', request.url);
         return cachedResponse;
@@ -109,7 +109,7 @@ async function handleStaticAsset(request) {
 
 async function handleNavigation(request) {
     const cache = await caches.open(CACHE_NAME);
-    
+
     try {
         const networkResponse = await fetch(request);
         return networkResponse;
@@ -126,7 +126,7 @@ async function handleNavigation(request) {
 function addTimestamp(response) {
     const headers = new Headers(response.headers);
     headers.set('sw-cached-at', Date.now().toString());
-    
+
     return new Response(response.body, {
         status: response.status,
         statusText: response.statusText,
@@ -137,10 +137,10 @@ function addTimestamp(response) {
 function isStale(response) {
     const cachedAt = response.headers.get('sw-cached-at');
     if (!cachedAt) return false;
-    
+
     const cacheAge = Date.now() - parseInt(cachedAt);
     const maxAge = 10 * 60 * 1000; // 10 minutes for API responses
-    
+
     return cacheAge > maxAge;
 }
 
@@ -152,7 +152,7 @@ self.addEventListener('message', event => {
                     cacheNames.map(cacheName => caches.delete(cacheName))
                 );
             }).then(() => {
-                event.ports[0].postMessage({success: true});
+                event.ports[0].postMessage({ success: true });
             })
         );
     } else if (event.data && event.data.type === 'CHECK_UPDATE') {
@@ -162,7 +162,9 @@ self.addEventListener('message', event => {
         });
     } else if (event.data && event.data.type === 'SKIP_WAITING') {
         self.skipWaiting();
-        event.ports[0].postMessage({success: true});
+        if (event.ports && event.ports[0]) {
+            event.ports[0].postMessage({ success: true });
+        }
     }
 });
 
@@ -186,7 +188,7 @@ self.addEventListener('install', event => {
                         version: VERSION
                     });
                 });
-                return self.skipWaiting();
+                // Don't auto-skipWaiting - let user decide when to update
             })
     );
 });

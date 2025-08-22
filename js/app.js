@@ -1,6 +1,6 @@
 class BiodiversityApp {
     constructor() {
-        this.version = '1.0.1';
+        this.version = '1.0.3'; // UPDATE THIS VERSION IN sw.js TOO!
         this.initialized = false;
         this.updateCheckInterval = null;
         this.lastUpdateCheck = null;
@@ -10,16 +10,16 @@ class BiodiversityApp {
 
     async init() {
         if (this.initialized) return;
-        
+
         console.log(`🌿 Biodiversity Explorer v${this.version} initializing...`);
-        
+
         try {
             await this.waitForDependencies();
             this.setupErrorHandling();
             this.setupNetworkMonitoring();
             this.initializeApp();
             this.initialized = true;
-            
+
             console.log('✅ App initialized successfully');
         } catch (error) {
             console.error('❌ App initialization failed:', error);
@@ -74,11 +74,11 @@ class BiodiversityApp {
         this.setupServiceWorkerListeners();
         this.checkForUpdates();
         this.startPeriodicUpdateChecks();
-        
+
         if (window.locationManager) {
             console.log('🌍 Location manager ready');
         }
-        
+
         if (window.speciesManager) {
             console.log('🐦 Species manager ready');
         }
@@ -117,7 +117,7 @@ class BiodiversityApp {
 
     handleServiceWorkerMessage(data) {
         console.log('SW message received:', data);
-        
+
         switch (data.type) {
             case 'SW_UPDATE_AVAILABLE':
                 console.log('🔄 Service Worker update available');
@@ -193,19 +193,19 @@ class BiodiversityApp {
 
         if (modal && shareUrl) {
             shareUrl.textContent = url;
-            modal.style.display = 'flex';
+
+            // Use unified modal manager
+            if (window.modalManager) {
+                window.modalManager.openModal(modal);
+            } else {
+                modal.style.display = 'flex';
+            }
 
             if (copyBtn) {
                 copyBtn.onclick = () => {
                     this.copyToClipboard(url);
                 };
             }
-
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    modal.style.display = 'none';
-                }
-            });
         }
     }
 
@@ -260,10 +260,10 @@ class BiodiversityApp {
     }
 
     showNetworkStatus(status) {
-        const statusMessage = status === 'online' ? 
-            'Connection restored' : 
+        const statusMessage = status === 'online' ?
+            'Connection restored' :
             'You are offline';
-        
+
         const statusType = status === 'online' ? 'success' : 'warning';
         this.showNotification(statusMessage, statusType);
     }
@@ -277,12 +277,12 @@ class BiodiversityApp {
 
     async refreshData() {
         console.log('🔄 Refreshing data...');
-        
+
         try {
             if (window.speciesManager) {
                 await window.speciesManager.loadSpecies();
             }
-            
+
             // Data refreshed silently
         } catch (error) {
             console.error('Refresh failed:', error);
@@ -292,7 +292,7 @@ class BiodiversityApp {
 
     handleError(error) {
         console.error('App error:', error);
-        
+
         if (navigator.onLine) {
             this.showNotification('An error occurred. Please refresh the page.', 'error');
         } else {
@@ -319,7 +319,7 @@ class BiodiversityApp {
         if (this.initialized && navigator.onLine) {
             const timeSinceLastUpdate = Date.now() - (this.lastUpdateTime || 0);
             const updateInterval = 5 * 60 * 1000; // 5 minutes
-            
+
             if (timeSinceLastUpdate > updateInterval) {
                 this.refreshData();
             }
@@ -332,7 +332,7 @@ class BiodiversityApp {
 
     onAppUnload() {
         console.log('👋 App unloading');
-        
+
         if (window.api) {
             const stats = window.api.getRequestStats();
             console.log('📊 API request stats:', stats);
@@ -344,11 +344,11 @@ class BiodiversityApp {
             try {
                 this.lastUpdateCheck = new Date();
                 const registration = await navigator.serviceWorker.getRegistration();
-                
+
                 if (registration) {
                     // Force update check
                     await registration.update();
-                    
+
                     // Listen for new worker
                     registration.addEventListener('updatefound', () => {
                         const newWorker = registration.installing;
@@ -362,7 +362,7 @@ class BiodiversityApp {
                         }
                     });
                 }
-                
+
             } catch (error) {
                 console.error('Update check failed:', error);
             }
@@ -371,10 +371,10 @@ class BiodiversityApp {
 
     async manualUpdateCheck() {
         this.showUpdateCheckingIndicator();
-        
+
         try {
             await this.checkForUpdates();
-            
+
             setTimeout(() => {
                 this.hideUpdateCheckingIndicator();
                 if (!this.updateAvailable) {
@@ -389,28 +389,31 @@ class BiodiversityApp {
 
     showUpdateNotification() {
         this.hideUpdateNotification(); // Remove any existing notification
-        
+
         const updateNotification = document.createElement('div');
         updateNotification.id = 'update-notification';
         updateNotification.innerHTML = `
             <div class="update-notification">
-                <span data-i18n="update.available">A new version is available!</span>
-                <button id="update-btn" data-i18n="update.button">Update</button>
-                <button id="dismiss-update" aria-label="Dismiss">&times;</button>
+                <div class="update-message">
+                    <strong>🔄 New version available!</strong>
+                    <br><small>Click Update to reload with the latest features</small>
+                </div>
+                <button id="update-btn" class="update-btn-primary">Update Now</button>
+                <button id="dismiss-update" class="update-btn-dismiss" aria-label="Dismiss">&times;</button>
             </div>
         `;
-        
+
         document.body.appendChild(updateNotification);
-        
+
         // Add event listeners
         document.getElementById('update-btn').addEventListener('click', () => {
             this.applyUpdate();
         });
-        
+
         document.getElementById('dismiss-update').addEventListener('click', () => {
             this.hideUpdateNotification();
         });
-        
+
     }
 
     hideUpdateNotification() {
@@ -422,23 +425,48 @@ class BiodiversityApp {
 
     async applyUpdate() {
         try {
+            // Show updating indicator
+            this.showUpdatingIndicator();
+            
             const registration = await navigator.serviceWorker.getRegistration();
             if (registration && registration.waiting) {
                 // Tell the waiting service worker to take over
-                registration.waiting.postMessage({type: 'SKIP_WAITING'});
-                
-                // Listen for the activation
+                registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+
+                // Listen for the activation and reload
                 navigator.serviceWorker.addEventListener('controllerchange', () => {
+                    console.log('🔄 Service worker updated, reloading...');
                     window.location.reload();
                 });
+                
+                // Fallback: reload after timeout if controllerchange doesn't fire
+                setTimeout(() => {
+                    console.log('🔄 Fallback reload after update');
+                    window.location.reload();
+                }, 3000);
             } else {
-                // Fallback: just reload
+                // No waiting worker, just reload
+                console.log('🔄 No waiting worker, reloading...');
                 window.location.reload();
             }
         } catch (error) {
             console.error('Update application failed:', error);
             window.location.reload();
         }
+    }
+
+    showUpdatingIndicator() {
+        // Hide the update notification and show updating indicator
+        this.hideUpdateNotification();
+        
+        const indicator = document.createElement('div');
+        indicator.id = 'updating-indicator';
+        indicator.innerHTML = `
+            <div class="update-checking">
+                <span>Updating app... Please wait.</span>
+            </div>
+        `;
+        document.body.appendChild(indicator);
     }
 
     showUpdateCheckingIndicator() {
@@ -468,7 +496,7 @@ class BiodiversityApp {
             </div>
         `;
         document.body.appendChild(message);
-        
+
         setTimeout(() => {
             message.remove();
         }, 3000);
@@ -483,7 +511,7 @@ class BiodiversityApp {
             </div>
         `;
         document.body.appendChild(error);
-        
+
         setTimeout(() => {
             error.remove();
         }, 3000);
@@ -498,6 +526,79 @@ class BiodiversityApp {
             lastUpdateCheck: this.lastUpdateCheck,
             updateAvailable: this.updateAvailable
         };
+    }
+}
+
+class ModalManager {
+    constructor() {
+        this.openModals = new Set();
+        this.init();
+    }
+
+    init() {
+        this.setupGlobalEventListeners();
+    }
+
+    setupGlobalEventListeners() {
+        // Global click handler for closing modals when clicking outside
+        document.addEventListener('click', (e) => {
+            // Find if the click was on a modal backdrop
+            const modal = e.target.closest('.species-modal, .location-modal, .share-modal, .help-modal, .taxon-modal');
+            if (modal && e.target === modal) {
+                this.closeModal(modal);
+            }
+        });
+
+        // Global escape key handler
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                this.closeTopModal();
+            }
+        });
+    }
+
+    openModal(modal) {
+        if (modal) {
+            modal.style.display = 'flex';
+            this.openModals.add(modal);
+        }
+    }
+
+    closeModal(modal) {
+        if (modal) {
+            modal.style.display = 'none';
+            this.openModals.delete(modal);
+
+            // Clear search input and results if present
+            const searchInput = modal.querySelector('input[type="text"]');
+            if (searchInput) {
+                searchInput.value = '';
+            }
+
+            const resultsContainer = modal.querySelector('.location-results, .taxon-results');
+            if (resultsContainer) {
+                resultsContainer.innerHTML = '';
+            }
+        }
+    }
+
+    closeTopModal() {
+        // Close the most recently opened modal
+        if (this.openModals.size > 0) {
+            const modalsArray = Array.from(this.openModals);
+            const topModal = modalsArray[modalsArray.length - 1];
+            this.closeModal(topModal);
+        }
+    }
+
+    closeAllModals() {
+        this.openModals.forEach(modal => {
+            this.closeModal(modal);
+        });
+    }
+
+    isModalOpen() {
+        return this.openModals.size > 0;
     }
 }
 
@@ -544,7 +645,9 @@ document.head.appendChild(style);
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         window.app = new BiodiversityApp();
+        window.modalManager = new ModalManager();
     });
 } else {
     window.app = new BiodiversityApp();
+    window.modalManager = new ModalManager();
 }

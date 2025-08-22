@@ -434,7 +434,12 @@ class SpeciesManager {
             </div>
         `;
 
-        modal.style.display = 'flex';
+        // Use unified modal manager
+        if (window.modalManager) {
+            window.modalManager.openModal(modal);
+        } else {
+            modal.style.display = 'flex';
+        }
 
         const actionBtns = modal.querySelectorAll('.modal-action-btn');
         actionBtns.forEach(btn => {
@@ -458,17 +463,16 @@ class SpeciesManager {
             });
         });
 
-        const closeModal = () => {
-            modal.style.display = 'none';
-        };
-
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) closeModal();
-        });
-
+        // Close button handler (redundant with global handler but kept for explicitness)
         const closeBtn = modal.querySelector('.modal-close');
         if (closeBtn) {
-            closeBtn.addEventListener('click', closeModal);
+            closeBtn.addEventListener('click', () => {
+                if (window.modalManager) {
+                    window.modalManager.closeModal(modal);
+                } else {
+                    modal.style.display = 'none';
+                }
+            });
         }
     }
 
@@ -510,7 +514,12 @@ class SpeciesManager {
         searchInput.value = '';
         resultsContainer.innerHTML = '';
         
-        modal.style.display = 'flex';
+        // Use unified modal manager
+        if (window.modalManager) {
+            window.modalManager.openModal(modal);
+        } else {
+            modal.style.display = 'flex';
+        }
         searchInput.focus();
 
         // Setup search functionality
@@ -535,19 +544,17 @@ class SpeciesManager {
             searchTimeout = setTimeout(() => handleSearch(e.target.value.trim()), 300);
         });
 
-        // Setup modal close functionality
-        const closeModal = () => {
-            modal.style.display = 'none';
-            clearTimeout(searchTimeout);
-        };
-
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) closeModal();
-        });
-
+        // Close button handler (redundant with global handler but kept for explicitness)
         const closeBtn = modal.querySelector('.modal-close');
         if (closeBtn) {
-            closeBtn.addEventListener('click', closeModal);
+            closeBtn.addEventListener('click', () => {
+                clearTimeout(searchTimeout);
+                if (window.modalManager) {
+                    window.modalManager.closeModal(modal);
+                } else {
+                    modal.style.display = 'none';
+                }
+            });
         }
     }
 
@@ -610,7 +617,12 @@ class SpeciesManager {
                 const taxonRank = e.currentTarget.dataset.taxonRank;
                 
                 this.selectCustomTaxon(taxonId, taxonName, taxonRank);
-                document.getElementById('taxon-modal').style.display = 'none';
+                const taxonModal = document.getElementById('taxon-modal');
+                if (window.modalManager) {
+                    window.modalManager.closeModal(taxonModal);
+                } else {
+                    taxonModal.style.display = 'none';
+                }
             });
         });
     }

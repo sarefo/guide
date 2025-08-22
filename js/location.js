@@ -59,8 +59,14 @@ class LocationManager {
         
         modalCloses.forEach(close => {
             close.addEventListener('click', (e) => {
-                const modal = e.target.closest('.location-modal, .species-modal, .share-modal, .help-modal');
-                if (modal) this.closeModal(modal);
+                const modal = e.target.closest('.location-modal, .species-modal, .share-modal, .help-modal, .taxon-modal');
+                if (modal) {
+                    if (window.modalManager) {
+                        window.modalManager.closeModal(modal);
+                    } else {
+                        this.closeModal(modal);
+                    }
+                }
             });
         });
 
@@ -196,7 +202,12 @@ class LocationManager {
     openLocationModal() {
         const modal = document.getElementById('location-modal');
         if (modal) {
-            modal.style.display = 'flex';
+            // Use unified modal manager
+            if (window.modalManager) {
+                window.modalManager.openModal(modal);
+            } else {
+                modal.style.display = 'flex';
+            }
             const searchInput = document.getElementById('location-search');
             if (searchInput) {
                 searchInput.focus();
@@ -207,7 +218,12 @@ class LocationManager {
     openHelpModal() {
         const modal = document.getElementById('help-modal');
         if (modal) {
-            modal.style.display = 'flex';
+            // Use unified modal manager
+            if (window.modalManager) {
+                window.modalManager.openModal(modal);
+            } else {
+                modal.style.display = 'flex';
+            }
             setTimeout(() => {
                 this.updateHelpModalInfo();
             }, 100);
@@ -323,7 +339,12 @@ class LocationManager {
 
     selectLocation(placeId) {
         this.loadLocation(placeId);
-        this.closeModal(document.getElementById('location-modal'));
+        const modal = document.getElementById('location-modal');
+        if (window.modalManager) {
+            window.modalManager.closeModal(modal);
+        } else {
+            this.closeModal(modal);
+        }
     }
 
     clearLocationResults() {

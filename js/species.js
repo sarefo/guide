@@ -79,14 +79,38 @@ class SpeciesManager {
             clearTimeout(this.loadTimeout);
         }
         
+        // Cancel any existing loading promise
+        if (this.loadPromise) {
+            this.loadPromise = null;
+        }
+        
         // Set loading immediately to prevent multiple calls
         this.loading = true;
         this.showLoadingOverlay();
         
         // Debounce the actual loading by 150ms
         this.loadTimeout = setTimeout(() => {
-            this.loadSpecies();
+            this._performLoad();
         }, 150);
+    }
+
+    async _performLoad() {
+        if (!this.currentPlaceId) return;
+        
+        // Reset loading state
+        this.loading = true;
+        this.showLoading();
+
+        // Create and store the loading promise
+        this.loadPromise = this._doLoadSpecies();
+        
+        try {
+            await this.loadPromise;
+        } finally {
+            this.loadPromise = null;
+            this.loading = false;
+            this.hideLoading();
+        }
     }
 
     async loadSpecies() {
@@ -96,6 +120,13 @@ class SpeciesManager {
         if (this.loadPromise) {
             return this.loadPromise;
         }
+        
+        // If there's a pending debounced load, cancel it and load immediately
+        if (this.loadTimeout) {
+            clearTimeout(this.loadTimeout);
+            this.loadTimeout = null;
+        }
+        
         this.loading = true;
         this.showLoading();
 
@@ -239,7 +270,7 @@ class SpeciesManager {
             window.locationManager.updateURLWithLifeGroup(group);
         }
 
-        this.loadSpecies();
+        this.debouncedLoadSpecies();
     }
 
     showLoadingOverlay() {

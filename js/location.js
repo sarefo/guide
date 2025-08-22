@@ -203,7 +203,6 @@ class LocationManager {
 
         const resultsHTML = places.map(place => {
             const name = place.display_name || place.name;
-            const adminLevel = place.admin_level ? ` (${place.admin_level})` : '';
             const bbox = place.bounding_box_geojson;
             const coords = bbox ? 
                 `${bbox.coordinates[0][0][1].toFixed(2)}, ${bbox.coordinates[0][0][0].toFixed(2)}` : 
@@ -212,7 +211,7 @@ class LocationManager {
             return `
                 <div class="location-result" data-place-id="${place.id}">
                     <div class="location-info">
-                        <h3 class="location-result-name">${name}${adminLevel}</h3>
+                        <h3 class="location-result-name">${name}</h3>
                         ${coords ? `<p class="location-coords">${coords}</p>` : ''}
                     </div>
                 </div>

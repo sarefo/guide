@@ -24,6 +24,12 @@
   "location.search.placeholder": "Rechercher un emplacement...",
   "location.search.title": "Choisir l'Emplacement",
   "location.change": "Changer d'emplacement",
+  "location.myLocation": "Ma Position",
+  "location.detecting": "Détection de la position...",
+  "location.permission.denied": "Permission de géolocalisation refusée",
+  "location.permission.error": "Impossible d'obtenir la position",
+  "location.map.click": "Cliquez sur la carte pour sélectionner",
+  "location.useLocation": "Utiliser Cet Emplacement",
   "location.results.empty": "Aucun emplacement trouvé",
   "location.results.error": "Impossible de rechercher les emplacements. Réessayez.",
   

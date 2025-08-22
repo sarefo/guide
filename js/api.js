@@ -123,7 +123,7 @@ class iNaturalistAPI {
         }
     }
 
-    async getSpeciesObservations(placeId, options = {}) {
+    async getSpeciesObservations(lat, lng, radius = 50, options = {}) {
         const {
             iconicTaxonId = null,
             taxonId = null,
@@ -137,7 +137,9 @@ class iNaturalistAPI {
 
         try {
             const baseParams = {
-                place_id: placeId,
+                lat: lat,
+                lng: lng,
+                radius: radius,
                 per_page: perPage,
                 page: page,
                 locale: locale,
@@ -155,9 +157,9 @@ class iNaturalistAPI {
                 baseParams.photos = 'true';
             }
 
-            // Use place_id + filter type as unique request key to cancel previous requests
+            // Use lat/lng + filter type as unique request key to cancel previous requests
             const filterKey = iconicTaxonId || taxonId || 'all';
-            const requestKey = `species_${placeId}_${filterKey}`;
+            const requestKey = `species_${lat}_${lng}_${filterKey}`;
             
             if (includeGenusLevel && !taxonId) {
                 // Only use rank filtering for iconic taxa, not custom taxa
@@ -374,15 +376,19 @@ class iNaturalistAPI {
         return iconicTaxa[iconicTaxonId] || 'unknown';
     }
 
-    async getLocationStats(placeId) {
+    async getLocationStats(lat, lng, radius = 50) {
         try {
             const [speciesData, observersData] = await Promise.all([
                 this.makeRequest('/observations/species_counts', {
-                    place_id: placeId,
+                    lat: lat,
+                    lng: lng,
+                    radius: radius,
                     per_page: 1
                 }),
                 this.makeRequest('/observations/observers', {
-                    place_id: placeId,
+                    lat: lat,
+                    lng: lng,
+                    radius: radius,
                     per_page: 1
                 })
             ]);
@@ -397,6 +403,49 @@ class iNaturalistAPI {
                 speciesCount: 0,
                 observerCount: 0
             };
+        }
+    }
+
+    // Helper method to convert place center from bounding box
+    async getPlaceCenter(placeId) {
+        try {
+            const place = await this.getPlace(placeId);
+            
+            if (place.bounding_box_geojson) {
+                return this.calculateCenterFromBbox(place.bounding_box_geojson);
+            }
+            
+            return null;
+        } catch (error) {
+            console.error('Failed to get place center:', error);
+            return null;
+        }
+    }
+
+    calculateCenterFromBbox(boundingBoxGeoJson) {
+        if (!boundingBoxGeoJson || !boundingBoxGeoJson.coordinates) {
+            return null;
+        }
+
+        try {
+            const coords = boundingBoxGeoJson.coordinates[0];
+            let minLng = Infinity, maxLng = -Infinity;
+            let minLat = Infinity, maxLat = -Infinity;
+
+            coords.forEach(([lng, lat]) => {
+                minLng = Math.min(minLng, lng);
+                maxLng = Math.max(maxLng, lng);
+                minLat = Math.min(minLat, lat);
+                maxLat = Math.max(maxLat, lat);
+            });
+
+            const centerLat = (minLat + maxLat) / 2;
+            const centerLng = (minLng + maxLng) / 2;
+
+            return { lat: centerLat, lng: centerLng };
+        } catch (error) {
+            console.error('Failed to calculate center from bbox:', error);
+            return null;
         }
     }
 

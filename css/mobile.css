@@ -8,7 +8,9 @@
     .icon-btn,
     .language-select,
     .retry-btn,
-    .copy-btn {
+    .copy-btn,
+    .my-location-btn,
+    .use-location-btn {
         min-height: 44px;
         -webkit-touch-callout: none;
         -webkit-user-select: none;
@@ -55,6 +57,39 @@
     .species-image {
         image-rendering: -webkit-optimize-contrast;
         image-rendering: crisp-edges;
+    }
+}
+
+/* Mobile map optimizations */
+@media screen and (max-width: 767px) {
+    .location-map {
+        height: 150px;
+        margin-bottom: 0.75rem;
+    }
+    
+    .my-location-btn {
+        padding: 1rem;
+        font-size: 1.1rem;
+        min-height: 52px;
+    }
+    
+    /* Improve map controls on mobile */
+    .location-map .leaflet-control-zoom {
+        margin-left: 8px;
+        margin-top: 8px;
+    }
+    
+    .location-map .leaflet-control-zoom a {
+        width: 36px;
+        height: 36px;
+        line-height: 34px;
+        font-size: 20px;
+    }
+    
+    /* Make attribution smaller on mobile */
+    .location-map .leaflet-control-attribution {
+        font-size: 0.6rem;
+        padding: 2px 4px;
     }
 }
 

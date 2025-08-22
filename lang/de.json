@@ -24,6 +24,12 @@
   "location.search.placeholder": "Nach einem Standort suchen...",
   "location.search.title": "Standort Wählen",
   "location.change": "Standort ändern",
+  "location.myLocation": "Mein Standort",
+  "location.detecting": "Standort wird ermittelt...",
+  "location.permission.denied": "Standortberechtigung verweigert",
+  "location.permission.error": "Standort konnte nicht ermittelt werden",
+  "location.map.click": "Klicken Sie auf die Karte zur Auswahl",
+  "location.useLocation": "Diesen Standort Verwenden",
   "location.results.empty": "Keine Standorte gefunden",
   "location.results.error": "Standortsuche nicht möglich. Bitte versuchen Sie es erneut.",
   

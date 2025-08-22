@@ -408,7 +408,7 @@ body {
 }
 
 .location-results {
-    max-height: 300px;
+    max-height: 180px;
     overflow-y: auto;
 }
 
@@ -448,6 +448,154 @@ body {
 
 .error {
     color: #d32f2f;
+}
+
+/* My Location Button */
+.my-location-btn {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    background: linear-gradient(135deg, #2E7D32 0%, #388E3C 100%);
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 1rem;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(46, 125, 50, 0.2);
+}
+
+.my-location-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%);
+    box-shadow: 0 4px 8px rgba(46, 125, 50, 0.3);
+    transform: translateY(-1px);
+}
+
+.my-location-btn:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(46, 125, 50, 0.2);
+}
+
+.my-location-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Location Map */
+.location-map {
+    width: 100%;
+    height: 200px;
+    border: 2px solid #e0e0e0;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    overflow: hidden;
+    position: relative;
+}
+
+.location-map .leaflet-container {
+    height: 100%;
+    width: 100%;
+    border-radius: 0.5rem;
+}
+
+/* Leaflet Attribution Positioning */
+.location-map .leaflet-control-attribution {
+    font-size: 0.7rem;
+    background: rgba(255, 255, 255, 0.8);
+    margin: 0;
+}
+
+/* Leaflet Control Positioning */
+.location-map .leaflet-control-zoom {
+    margin-left: 10px;
+    margin-top: 10px;
+}
+
+/* Custom map loading overlay */
+.location-map::before {
+    content: "🗺️ Loading map...";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 255, 255, 0.9);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+    color: #666;
+    z-index: 1000;
+    pointer-events: none;
+}
+
+.location-map.map-loaded::before {
+    display: none;
+}
+
+/* Map marker popup styling */
+.leaflet-popup-content-wrapper {
+    border-radius: 0.5rem;
+    font-family: inherit;
+}
+
+.leaflet-popup-content {
+    margin: 0.5rem;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+/* Location Confirmation */
+.location-confirm {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: rgba(46, 125, 50, 0.05);
+    border: 1px solid rgba(46, 125, 50, 0.2);
+    border-radius: 0.5rem;
+}
+
+.selected-location {
+    margin-bottom: 0.75rem;
+}
+
+#selected-location-name {
+    display: block;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.25rem;
+}
+
+#selected-location-coords {
+    display: block;
+    font-size: 0.85rem;
+    color: #666;
+    font-family: 'Courier New', monospace;
+}
+
+.use-location-btn {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    background: linear-gradient(135deg, #2E7D32 0%, #388E3C 100%);
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(46, 125, 50, 0.2);
+}
+
+.use-location-btn:hover {
+    background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%);
+    box-shadow: 0 4px 8px rgba(46, 125, 50, 0.3);
+    transform: translateY(-1px);
+}
+
+.use-location-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(46, 125, 50, 0.2);
 }
 
 /* Taxon Search Modal */

@@ -2,7 +2,7 @@ class SpeciesManager {
     constructor() {
         this.currentSpecies = [];
         this.currentFilter = 'all';
-        this.currentPlaceId = null;
+        this.currentLocation = null; // Changed from currentPlaceId to currentLocation
         this.currentLocale = 'en';
         this.loading = false;
         this.loadTimeout = null;
@@ -20,14 +20,19 @@ class SpeciesManager {
 
     setupEventListeners() {
         window.addEventListener('locationChanged', (event) => {
-            this.currentPlaceId = event.detail.id;
+            this.currentLocation = event.detail; // Store full location object with lat/lng/radius
             this.createStoredCustomTaxaButtons();
             this.loadSpecies();
         });
         
         window.addEventListener('lifeGroupFromURL', (event) => {
+            console.log('🎯 lifeGroupFromURL event received:', event.detail.lifeGroup);
+            console.log('🎯 Setting currentFilter from:', this.currentFilter, 'to:', event.detail.lifeGroup);
+            
             this.currentFilter = event.detail.lifeGroup;
             this.pendingLifeGroupFromURL = event.detail.lifeGroup;
+            
+            console.log('🎯 currentFilter after URL event:', this.currentFilter);
             
             // If this is a custom taxon ID (not in predefined list), we need to fetch its details
             if (!this.predefinedIconicTaxa.includes(event.detail.lifeGroup)) {
@@ -37,9 +42,12 @@ class SpeciesManager {
 
         // Use event delegation for filter buttons (handles dynamic buttons too)
         const filterContainer = document.querySelector('.filter-container');
+        console.log('🔧 Filter container found:', !!filterContainer);
         if (filterContainer) {
             filterContainer.addEventListener('click', (e) => {
+                console.log('🔧 Filter container clicked:', e.target);
                 const filterBtn = e.target.closest('.filter-btn');
+                console.log('🔧 Filter button found:', filterBtn);
                 if (!filterBtn) return;
                 
                 // Handle remove custom button clicks
@@ -52,12 +60,15 @@ class SpeciesManager {
                 
                 // Handle filter button clicks
                 const group = filterBtn.dataset.group;
+                console.log('🔧 Filter group selected:', group);
                 if (group === 'other') {
                     this.openTaxonModal();
                 } else {
                     this.setFilter(group);
                 }
             });
+        } else {
+            console.error('🔧 Filter container not found!');
         }
 
         const retryBtn = document.getElementById('retry-btn');
@@ -87,6 +98,8 @@ class SpeciesManager {
     }
 
     debouncedLoadSpecies() {
+        console.log('🔄 debouncedLoadSpecies called');
+        
         // Clear any existing timeout
         if (this.loadTimeout) {
             clearTimeout(this.loadTimeout);
@@ -103,12 +116,18 @@ class SpeciesManager {
         
         // Debounce the actual loading by 150ms
         this.loadTimeout = setTimeout(() => {
+            console.log('🔄 Debounced timeout executing _performLoad');
             this._performLoad();
         }, 150);
     }
 
     async _performLoad() {
-        if (!this.currentPlaceId) return;
+        console.log('🔄 _performLoad called with location:', this.currentLocation);
+        
+        if (!this.currentLocation || !this.currentLocation.lat || !this.currentLocation.lng) {
+            console.error('🔄 No valid location for _performLoad');
+            return;
+        }
         
         // Reset loading state
         this.loading = true;
@@ -127,7 +146,13 @@ class SpeciesManager {
     }
 
     async loadSpecies() {
-        if (!this.currentPlaceId) return;
+        console.log('🔄 loadSpecies called with location:', this.currentLocation);
+        console.log('🔄 loadSpecies called with filter:', this.currentFilter);
+        
+        if (!this.currentLocation || !this.currentLocation.lat || !this.currentLocation.lng) {
+            console.error('🔄 No valid location for loadSpecies');
+            return;
+        }
         
         // If already loading, return the existing promise
         if (this.loadPromise) {
@@ -157,6 +182,8 @@ class SpeciesManager {
 
     async _doLoadSpecies() {
         try {
+            console.log('🔄 _doLoadSpecies using filter:', this.currentFilter);
+            
             const options = {
                 iconicTaxonId: null,
                 taxonId: null,
@@ -168,16 +195,26 @@ class SpeciesManager {
 
             // Determine if we're using iconic taxa or custom taxon
             if (this.currentFilter === 'all') {
+                console.log('🔄 Using no filter (all species)');
                 // No filter
             } else if (this.predefinedIconicTaxa.includes(this.currentFilter)) {
+                console.log('🔄 Using iconic taxon filter:', this.currentFilter);
                 // Use iconic taxon filter
                 options.iconicTaxonId = this.currentFilter;
             } else {
+                console.log('🔄 Using custom taxon filter:', this.currentFilter);
                 // Use custom taxon filter
                 options.taxonId = this.currentFilter;
             }
+            
+            console.log('🔄 API options:', options);
 
-            const speciesData = await window.api.getSpeciesObservations(this.currentPlaceId, options);
+            const speciesData = await window.api.getSpeciesObservations(
+                this.currentLocation.lat, 
+                this.currentLocation.lng, 
+                this.currentLocation.radius || 50, 
+                options
+            );
             
             // Only update if we got actual data (not cancelled request)
             if (speciesData && speciesData.length >= 0) {
@@ -272,6 +309,9 @@ class SpeciesManager {
     }
 
     setFilter(group) {
+        console.log('🔧 Setting filter to:', group);
+        console.log('🔧 Current location:', this.currentLocation);
+        
         this.currentFilter = group;
         
         // No longer automatically remove custom taxa when switching filters
@@ -498,7 +538,7 @@ class SpeciesManager {
 
     setLocale(locale) {
         this.currentLocale = locale;
-        if (this.currentPlaceId) {
+        if (this.currentLocation) {
             this.loadSpecies();
         }
     }

@@ -24,6 +24,12 @@
   "location.search.placeholder": "Search for a location...",
   "location.search.title": "Choose Location",
   "location.change": "Change location",
+  "location.myLocation": "My Location",
+  "location.detecting": "Detecting location...",
+  "location.permission.denied": "Location permission denied",
+  "location.permission.error": "Could not get location",
+  "location.map.click": "Click on map to select location",
+  "location.useLocation": "Use This Location",
   "location.results.empty": "No locations found",
   "location.results.error": "Unable to search locations. Please try again.",
   

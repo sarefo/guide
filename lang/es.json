@@ -24,6 +24,12 @@
   "location.search.placeholder": "Buscar una ubicación...",
   "location.search.title": "Elegir Ubicación",
   "location.change": "Cambiar ubicación",
+  "location.myLocation": "Mi Ubicación",
+  "location.detecting": "Detectando ubicación...",
+  "location.permission.denied": "Permiso de ubicación denegado",
+  "location.permission.error": "No se pudo obtener la ubicación",
+  "location.map.click": "Haz clic en el mapa para seleccionar ubicación",
+  "location.useLocation": "Usar Esta Ubicación",
   "location.results.empty": "No se encontraron ubicaciones",
   "location.results.error": "No se pueden buscar ubicaciones. Inténtalo de nuevo.",
   

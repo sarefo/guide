@@ -78,6 +78,7 @@ class LocationManager {
     async loadLocation(placeId) {
         try {
             const locationData = await window.api.getPlace(placeId);
+            
             this.currentLocation = {
                 id: placeId,
                 name: locationData.display_name || locationData.name,
@@ -105,6 +106,8 @@ class LocationManager {
         const locationNameEl = document.getElementById('location-name');
         if (locationNameEl && this.currentLocation) {
             locationNameEl.textContent = this.currentLocation.name;
+            // Remove data-i18n attribute to prevent i18n system from overwriting this content
+            locationNameEl.removeAttribute('data-i18n');
         }
     }
 

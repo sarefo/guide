@@ -5,6 +5,8 @@ class SpeciesManager {
         this.currentPlaceId = null;
         this.currentLocale = 'en';
         this.loading = false;
+        this.loadTimeout = null;
+        this.loadPromise = null; // Track current loading promise
         this.init();
     }
 
@@ -58,12 +60,45 @@ class SpeciesManager {
         });
     }
 
-    async loadSpecies() {
-        if (this.loading || !this.currentPlaceId) return;
-
-        this.showLoading();
+    debouncedLoadSpecies() {
+        // Clear any existing timeout
+        if (this.loadTimeout) {
+            clearTimeout(this.loadTimeout);
+        }
+        
+        // Set loading immediately to prevent multiple calls
         this.loading = true;
+        this.showLoadingOverlay();
+        
+        // Debounce the actual loading by 150ms
+        this.loadTimeout = setTimeout(() => {
+            this.loadSpecies();
+        }, 150);
+    }
 
+    async loadSpecies() {
+        if (!this.currentPlaceId) return;
+        
+        // If already loading, return the existing promise
+        if (this.loadPromise) {
+            return this.loadPromise;
+        }
+        this.loading = true;
+        this.showLoading();
+
+        // Create and store the loading promise
+        this.loadPromise = this._doLoadSpecies();
+        
+        try {
+            await this.loadPromise;
+        } finally {
+            this.loadPromise = null;
+            this.loading = false;
+            this.hideLoading();
+        }
+    }
+
+    async _doLoadSpecies() {
         try {
             const options = {
                 iconicTaxonId: this.currentFilter === 'all' ? null : this.currentFilter,
@@ -75,23 +110,26 @@ class SpeciesManager {
 
             const speciesData = await window.api.getSpeciesObservations(this.currentPlaceId, options);
             
-            this.currentSpecies = speciesData.map(species => 
-                window.api.formatSpeciesData(species)
-            );
+            // Only update if we got actual data (not cancelled request)
+            if (speciesData && speciesData.length >= 0) {
+                this.currentSpecies = speciesData.map(species => 
+                    window.api.formatSpeciesData(species)
+                );
 
-            this.displaySpecies();
-            
-            // Handle pending life group from URL
-            if (this.pendingLifeGroupFromURL) {
-                this.handlePendingLifeGroupFromURL();
+                this.displaySpecies();
+                
+                // Handle pending life group from URL
+                if (this.pendingLifeGroupFromURL) {
+                    this.handlePendingLifeGroupFromURL();
+                }
             }
             
         } catch (error) {
-            console.error('Failed to load species:', error);
-            this.showError();
-        } finally {
-            this.loading = false;
-            this.hideLoading();
+            // Don't show error for cancelled requests
+            if (error.message !== 'Request cancelled' && error.message !== 'Unable to load species data') {
+                console.error('Failed to load species:', error);
+                this.showError();
+            }
         }
     }
 
@@ -161,8 +199,6 @@ class SpeciesManager {
     }
 
     setFilter(group) {
-        if (this.loading) return;
-
         this.currentFilter = group;
         
         const filterButtons = document.querySelectorAll('.filter-btn');
@@ -176,6 +212,77 @@ class SpeciesManager {
         }
 
         this.loadSpecies();
+    }
+
+    showLoadingOverlay() {
+        const grid = document.getElementById('species-grid');
+        if (!grid) return;
+
+        // Create or show loading overlay
+        let overlay = document.getElementById('loading-overlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'loading-overlay';
+            overlay.innerHTML = `
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                    <p>Loading species...</p>
+                </div>
+            `;
+            overlay.style.cssText = `
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(255, 255, 255, 0.8);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10;
+                backdrop-filter: blur(2px);
+            `;
+            
+            // Add spinner styles
+            const style = document.createElement('style');
+            style.textContent = `
+                .loading-spinner {
+                    text-align: center;
+                    color: #2E7D32;
+                }
+                .spinner {
+                    width: 40px;
+                    height: 40px;
+                    border: 4px solid #f3f3f3;
+                    border-top: 4px solid #2E7D32;
+                    border-radius: 50%;
+                    animation: spin 1s linear infinite;
+                    margin: 0 auto 1rem;
+                }
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // Make grid container relative for positioning
+            grid.style.position = 'relative';
+            grid.appendChild(overlay);
+        } else {
+            overlay.style.display = 'flex';
+        }
+        
+        // Hide error state
+        const error = document.getElementById('error-state');
+        if (error) error.style.display = 'none';
+    }
+
+    hideLoadingOverlay() {
+        const overlay = document.getElementById('loading-overlay');
+        if (overlay) {
+            overlay.style.display = 'none';
+        }
     }
 
     showLoading() {

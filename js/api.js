@@ -5,9 +5,10 @@ class iNaturalistAPI {
         this.lastRequestTime = 0;
         this.minRequestInterval = 100; // Minimum 100ms between requests
         this.currentLocale = 'en';
+        this.currentRequests = new Map(); // Track active requests
     }
 
-    async makeRequest(endpoint, params = {}) {
+    async makeRequest(endpoint, params = {}, requestKey = null) {
         await this.respectRateLimit();
         
         const url = new URL(`${this.baseURL}${endpoint}`);
@@ -22,10 +23,22 @@ class iNaturalistAPI {
             }
         });
 
+        // Cancel any existing request with the same key
+        if (requestKey && this.currentRequests.has(requestKey)) {
+            this.currentRequests.get(requestKey).abort();
+        }
+
+        const controller = new AbortController();
+        if (requestKey) {
+            this.currentRequests.set(requestKey, controller);
+        }
+
         console.log('API Request:', url.toString());
         
         try {
-            const response = await fetch(url);
+            const response = await fetch(url, {
+                signal: controller.signal
+            });
             
             if (!response.ok) {
                 throw new Error(`API request failed: ${response.status} ${response.statusText}`);
@@ -34,8 +47,23 @@ class iNaturalistAPI {
             const data = await response.json();
             this.requestCount++;
             
+            // Clean up the request tracker
+            if (requestKey) {
+                this.currentRequests.delete(requestKey);
+            }
+            
             return data;
         } catch (error) {
+            // Clean up the request tracker
+            if (requestKey) {
+                this.currentRequests.delete(requestKey);
+            }
+            
+            if (error.name === 'AbortError') {
+                console.log('Request cancelled:', url.toString());
+                throw new Error('Request cancelled');
+            }
+            
             console.error('API request error:', error);
             throw error;
         }
@@ -104,9 +132,14 @@ class iNaturalistAPI {
                 params.photos = 'true';
             }
 
-            const data = await this.makeRequest('/observations/species_counts', params);
+            // Use place_id + iconic_taxa as unique request key to cancel previous requests
+            const requestKey = `species_${placeId}_${iconicTaxonId || 'all'}`;
+            const data = await this.makeRequest('/observations/species_counts', params, requestKey);
             return data.results || [];
         } catch (error) {
+            if (error.message === 'Request cancelled') {
+                return []; // Return empty array for cancelled requests
+            }
             console.error('Failed to get species observations:', error);
             throw new Error('Unable to load species data');
         }

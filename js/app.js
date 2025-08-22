@@ -1,6 +1,6 @@
 class BiodiversityApp {
     constructor() {
-        this.version = '1.0.5'; // UPDATE THIS VERSION IN sw.js TOO!
+        this.version = '1.0.6'; // UPDATE THIS VERSION IN sw.js TOO!
         this.initialized = false;
         this.updateCheckInterval = null;
         this.lastUpdateCheck = null;
@@ -373,13 +373,11 @@ class BiodiversityApp {
         this.showUpdateCheckingIndicator();
 
         try {
-            await this.checkForUpdates();
-
+            // Always reload the app when manual update is requested
             setTimeout(() => {
                 this.hideUpdateCheckingIndicator();
-                if (!this.updateAvailable) {
-                    this.showNoUpdateMessage();
-                }
+                console.log('🔄 Manual update requested, reloading app...');
+                window.location.reload();
             }, 1000);
         } catch (error) {
             this.hideUpdateCheckingIndicator();

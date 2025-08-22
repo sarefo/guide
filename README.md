@@ -1,5 +1,4 @@
 + sometimes gets stuck on "Loading location..."
-+ flickering on reload after new location
 + improve location search
   + add location picker
   + add region fallback if no taxa found for location (eg. because too small)
@@ -13,6 +12,5 @@
   
 
 ## Future Functions
-+ show most common animals/plants/…
-  + search by name?
-  + add hierarchical tree?
++ search by name?
++ add hierarchical tree?

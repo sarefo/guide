@@ -46,6 +46,12 @@
                                 d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.50-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z" />
                         </svg>
                     </button>
+                    <button id="help-btn" class="icon-btn" aria-label="Help">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z" />
+                        </svg>
+                    </button>
                 </div>
             </div>
         </header>
@@ -153,6 +159,27 @@
                 <div id="qr-code" class="qr-code-container"></div>
                 <p class="share-url" id="share-url"></p>
                 <button id="copy-url" class="copy-btn" data-i18n="share.url.copy">Copy URL</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Modal -->
+    <div id="help-modal" class="help-modal">
+        <div class="modal-content">
+            <button class="modal-close" aria-label="Close">&times;</button>
+            <div class="modal-body">
+                <h2 data-i18n="help.title">About LocNat</h2>
+                <div class="help-content">
+                    <p data-i18n="help.description">Discover local wildlife through photos. Scan QR codes at nature spots or search any location.</p>
+                    
+                    <p data-i18n="help.usage">Tap species photos to learn more • Use filters to browse by group • Share locations with the share button</p>
+
+                    <p data-i18n="help.data.source">Species data from <a href="https://www.inaturalist.org" target="_blank" rel="noopener">iNaturalist</a> - a community of millions of naturalists worldwide.</p>
+
+                    <div class="help-links">
+                        <a href="https://www.inaturalist.org" target="_blank" rel="noopener" data-i18n="help.links.visit">Visit iNaturalist</a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

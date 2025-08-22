@@ -109,6 +109,7 @@ class BiodiversityApp {
         }
     }
 
+
     async shareLocation() {
         const currentUrl = window.location.href;
         const locationName = window.locationManager?.getCurrentLocation()?.name || 'Unknown Location';
@@ -167,6 +168,7 @@ class BiodiversityApp {
             });
         }
     }
+
 
     async copyToClipboard(text) {
         try {

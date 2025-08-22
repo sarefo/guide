@@ -49,6 +49,12 @@
   "modal.inaturalist": "iNaturalist",
   "modal.photo.credit": "Photo",
   
+  "help.title": "About LocNat",
+  "help.description": "Discover local wildlife through photos. Scan QR codes at nature spots or search any location.",
+  "help.usage": "Tap species photos to learn more • Use filters to browse by group • Share locations with the share button",
+  "help.data.source": "Species data from iNaturalist - a community of millions of naturalists worldwide.",
+  "help.links.visit": "Visit iNaturalist",
+  
   "notification.copied": "URL copied to clipboard!",
   "notification.copy.failed": "Copy failed. Please copy manually.",
   "notification.offline": "You are offline", 

@@ -1,29 +1,65 @@
+console.log('📂 location.js script loading...');
+
 class LocationManager {
     constructor() {
+        console.log('🏗️ LocationManager constructor called');
         this.currentLocation = null;
         this.defaultPlaceId = 97394; // Global default
         this.init();
     }
 
     init() {
+        console.log('🌍 LocationManager initializing...');
         this.loadLocationFromURL();
         this.setupEventListeners();
+        
+        // Manual test - try to find help button after a delay
+        setTimeout(() => {
+            const helpBtn = document.getElementById('help-btn');
+            console.log('🔍 Delayed help button check:', helpBtn);
+            if (helpBtn) {
+                console.log('✅ Help button available after delay');
+                // Add a manual test function to window
+                window.testHelpButton = () => {
+                    console.log('🧪 Manual help button test');
+                    this.openHelpModal();
+                };
+                console.log('🧪 You can now run: window.testHelpButton() in console');
+            }
+        }, 1000);
     }
 
     setupEventListeners() {
+        console.log('🔧 LocationManager setupEventListeners called');
         const locationBtn = document.getElementById('location-btn');
         const locationName = document.getElementById('location-name');
         const locationModal = document.getElementById('location-modal');
         const searchInput = document.getElementById('location-search');
         const modalCloses = document.querySelectorAll('.modal-close');
         const languageSelect = document.getElementById('language-select');
+        const helpBtn = document.getElementById('help-btn');
+
+        console.log('🔍 Element check:');
+        console.log('  locationBtn:', locationBtn);
+        console.log('  helpBtn:', helpBtn);
+        console.log('  locationModal:', locationModal);
 
         locationBtn?.addEventListener('click', () => this.openLocationModal());
         locationName?.addEventListener('click', () => this.openLocationModal());
         
+        if (helpBtn) {
+            console.log('✅ Help button found, adding event listener...');
+            helpBtn.addEventListener('click', (e) => {
+                console.log('💡 Help button clicked via location.js!', e);
+                this.openHelpModal();
+            });
+        } else {
+            console.error('❌ Help button NOT found in setupEventListeners');
+        }
+        
         modalCloses.forEach(close => {
             close.addEventListener('click', (e) => {
-                const modal = e.target.closest('.location-modal, .species-modal, .share-modal');
+                const modal = e.target.closest('.location-modal, .species-modal, .share-modal, .help-modal');
                 if (modal) this.closeModal(modal);
             });
         });
@@ -168,6 +204,17 @@ class LocationManager {
         }
     }
 
+    openHelpModal() {
+        console.log('📖 Opening help modal from location.js...');
+        const modal = document.getElementById('help-modal');
+        if (modal) {
+            modal.style.display = 'flex';
+            console.log('✅ Help modal displayed successfully');
+        } else {
+            console.error('❌ Help modal not found!');
+        }
+    }
+
     closeModal(modal) {
         modal.style.display = 'none';
         const searchInput = modal.querySelector('input');
@@ -292,4 +339,16 @@ class LocationManager {
     }
 }
 
-window.locationManager = new LocationManager();
+console.log('📂 About to create LocationManager...');
+console.log('📂 Window object available:', typeof window);
+console.log('📂 Document ready state:', document.readyState);
+
+try {
+    console.log('📍 Creating LocationManager...');
+    window.locationManager = new LocationManager();
+    console.log('✅ LocationManager created successfully');
+    console.log('✅ window.locationManager:', window.locationManager);
+} catch (error) {
+    console.error('❌ Failed to create LocationManager:', error);
+    console.error('❌ Error stack:', error.stack);
+}

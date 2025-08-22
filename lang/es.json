@@ -49,6 +49,12 @@
   "modal.inaturalist": "iNaturalist",
   "modal.photo.credit": "Foto",
   
+  "help.title": "Acerca de LocNat",
+  "help.description": "Descubre vida silvestre local con fotos. Escanea códigos QR en sitios naturales o busca cualquier ubicación.",
+  "help.usage": "Toca fotos de especies para aprender más • Usa filtros para explorar por grupo • Comparte ubicaciones con el botón compartir",
+  "help.data.source": "Datos de especies de iNaturalist - una comunidad de millones de naturalistas en todo el mundo.",
+  "help.links.visit": "Visitar iNaturalist",
+  
   "notification.copied": "¡URL copiada al portapapeles!",
   "notification.copy.failed": "Copia falló. Por favor copia manualmente.",
   "notification.offline": "Estás desconectado", 

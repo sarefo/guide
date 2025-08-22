@@ -306,7 +306,8 @@ body {
 .species-modal,
 .location-modal,
 .share-modal,
-.taxon-modal {
+.taxon-modal,
+.help-modal {
     display: none;
     position: fixed;
     top: 0;
@@ -679,5 +680,95 @@ body {
     /* Responsive modal image on mobile */
     .species-modal-image {
         max-height: 200px !important;
+    }
+}
+
+/* Help Modal Specific Styles */
+.help-modal {
+    padding-top: 10vh !important;
+    align-items: flex-start !important;
+}
+
+.help-modal .modal-body h2 {
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+    color: #2E7D32;
+    font-weight: 600;
+}
+
+.help-content p {
+    margin-bottom: 0.75rem;
+    line-height: 1.6;
+    font-size: 1.1rem;
+}
+
+.help-content p:last-of-type {
+    margin-bottom: 1rem;
+}
+
+.help-links {
+    margin-top: 0.5rem;
+    text-align: center;
+}
+
+.help-links a {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background: #2E7D32;
+    color: white !important;
+    text-decoration: none;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: background 0.2s;
+    border: none;
+    cursor: pointer;
+}
+
+.help-links a:hover {
+    background: #1B5E20;
+}
+
+.help-content a {
+    color: #2E7D32;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.help-content a:hover {
+    text-decoration: underline;
+}
+
+/* Ensure button text is visible */
+.help-links a:visited,
+.help-links a:link,
+.help-links a:active {
+    color: white !important;
+}
+
+@media (max-width: 640px) {
+    .help-modal {
+        padding: 1rem 0.5rem;
+        padding-top: 5vh !important;
+    }
+    
+    .help-modal .modal-content {
+        margin: 0;
+        border-radius: 0.75rem;
+    }
+    
+    .help-modal .modal-body {
+        padding: 1.5rem;
+    }
+    
+    .help-content p {
+        font-size: 1rem;
+        margin-bottom: 0.7rem;
+        line-height: 1.5;
+    }
+    
+    .help-links a {
+        font-size: 1rem;
+        padding: 0.8rem 1.6rem;
     }
 }

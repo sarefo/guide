@@ -727,7 +727,7 @@ class SpeciesManager {
             const displayName = capitalizedName.length > 12 ? capitalizedName.substring(0, 12) + '...' : capitalizedName;
             
             customBtn.innerHTML = `
-                <span class="filter-icon">🔬</span>
+                <span class="filter-icon">◯</span>
                 <span class="filter-text">${displayName}</span>
                 <span class="remove-custom" title="Remove filter">&times;</span>
             `;

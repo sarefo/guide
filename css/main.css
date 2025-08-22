@@ -132,25 +132,13 @@ body {
     position: relative;
 }
 
-/* Scroll indicator gradient */
-.life-group-filter::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    width: 20px;
-    background: linear-gradient(to left, rgba(255, 255, 255, 0.9), transparent);
-    pointer-events: none;
-    z-index: 1;
-}
-
 .filter-container {
     display: flex;
     gap: 0.5rem;
     padding: 0 1rem;
-    padding-right: 2rem; /* Extra space to show partial last item */
+    padding-right: 3rem; /* Extra space to ensure last items are fully visible */
     min-width: fit-content;
+    width: max-content; /* Ensure container accommodates all buttons */
 }
 
 .filter-btn {
@@ -520,8 +508,35 @@ body {
     text-transform: capitalize;
 }
 
-/* Dark mode overrides for taxon results */
+/* Dark mode overrides */
 @media (prefers-color-scheme: dark) {
+    html, body {
+        background-color: #121212;
+        color: #ffffff;
+    }
+    
+    .life-group-filter {
+        background: #1e1e1e;
+        border-bottom-color: #333333;
+    }
+    
+    .filter-btn {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.12);
+        color: #cccccc;
+    }
+    
+    .filter-btn:hover {
+        background: rgba(46, 125, 50, 0.15);
+        border-color: rgba(76, 175, 80, 0.3);
+    }
+    
+    .filter-btn.active {
+        background: rgba(46, 125, 50, 0.25);
+        border-color: #4CAF50;
+        color: #4CAF50;
+    }
+    
     .taxon-result {
         --card-bg: #2a2a2a;
         --text-primary: #ffffff;

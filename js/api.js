@@ -104,12 +104,18 @@ class iNaturalistAPI {
         }
     }
 
-    async searchTaxa(query, limit = 20) {
+    async searchTaxa(query, limit = 20, locale = null) {
         try {
-            const data = await this.makeRequest('/taxa/autocomplete', {
+            const params = {
                 q: query,
                 per_page: limit
-            });
+            };
+            
+            if (locale) {
+                params.locale = locale;
+            }
+            
+            const data = await this.makeRequest('/taxa/autocomplete', params);
             return data.results || [];
         } catch (error) {
             console.error('Failed to search taxa:', error);

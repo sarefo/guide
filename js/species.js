@@ -488,7 +488,7 @@ class SpeciesManager {
             }
 
             try {
-                const taxa = await window.api.searchTaxa(query);
+                const taxa = await window.api.searchTaxa(query, 20, this.currentLocale);
                 this.displayTaxonResults(taxa, resultsContainer);
             } catch (error) {
                 console.error('Taxon search failed:', error);
@@ -524,14 +524,41 @@ class SpeciesManager {
         }
 
         const resultsHTML = taxa.map(taxon => {
-            const commonName = taxon.preferred_common_name || taxon.english_common_name || '';
+            // Get vernacular name with locale preference
+            let vernacularName = '';
+            if (taxon.preferred_common_name) {
+                vernacularName = taxon.preferred_common_name;
+            } else if (taxon.names && taxon.names.length > 0) {
+                // Look for a name in current locale
+                const localName = taxon.names.find(name => 
+                    name.locale === this.currentLocale || 
+                    name.locale?.startsWith(this.currentLocale)
+                );
+                if (localName) {
+                    vernacularName = localName.name;
+                } else {
+                    // Fallback to first common name or english
+                    const fallbackName = taxon.names.find(name => name.locale === 'en') || taxon.names[0];
+                    vernacularName = fallbackName ? fallbackName.name : '';
+                }
+            } else if (taxon.english_common_name) {
+                vernacularName = taxon.english_common_name;
+            }
+            
+            // Capitalize first letter of vernacular name
+            const displayName = vernacularName ? 
+                vernacularName.charAt(0).toUpperCase() + vernacularName.slice(1) : '';
+            
             const scientificName = taxon.name || '';
             const rank = taxon.rank || '';
             
+            // Use display name for button, fallback to scientific name
+            const buttonName = displayName || scientificName;
+            
             return `
-                <div class="taxon-result" data-taxon-id="${taxon.id}" data-taxon-name="${commonName || scientificName}" data-taxon-rank="${rank}">
+                <div class="taxon-result" data-taxon-id="${taxon.id}" data-taxon-name="${buttonName}" data-taxon-rank="${rank}">
                     <div class="taxon-names">
-                        ${commonName ? `<div class="taxon-common-name">${commonName}</div>` : ''}
+                        ${displayName ? `<div class="taxon-common-name">${displayName}</div>` : ''}
                         <div class="taxon-scientific-name"><em>${scientificName}</em></div>
                     </div>
                     <div class="taxon-rank">${rank}</div>
@@ -554,18 +581,79 @@ class SpeciesManager {
         });
     }
 
-    selectCustomTaxon(taxonId, taxonName, taxonRank) {
-        // Store the custom taxon
-        this.customTaxa.set(taxonId, { name: taxonName, rank: taxonRank });
-        
-        // Save to localStorage
-        this.saveCustomTaxaToStorage();
-        
-        // Create custom filter button if it doesn't exist
-        this.addCustomFilterButton(taxonName, taxonRank, taxonId);
-        
-        // Set filter and load species
-        this.setFilter(taxonId);
+    async selectCustomTaxon(taxonId, taxonName, taxonRank) {
+        try {
+            // Fetch full taxon details with current locale to get proper vernacular name
+            const taxonData = await window.api.getTaxonDetails(taxonId, this.currentLocale);
+            const taxon = taxonData.results?.[0] || taxonData;
+            
+            let finalName = taxonName; // fallback to passed name
+            let finalRank = taxonRank;
+            
+            if (taxon) {
+                // Get vernacular name with locale preference
+                let vernacularName = '';
+                if (taxon.preferred_common_name) {
+                    vernacularName = taxon.preferred_common_name;
+                } else if (taxon.names && taxon.names.length > 0) {
+                    // Look for a name in current locale
+                    const localName = taxon.names.find(name => 
+                        name.locale === this.currentLocale || 
+                        name.locale?.startsWith(this.currentLocale)
+                    );
+                    if (localName) {
+                        vernacularName = localName.name;
+                    } else {
+                        // Fallback to english or first available
+                        const fallbackName = taxon.names.find(name => name.locale === 'en') || taxon.names[0];
+                        vernacularName = fallbackName ? fallbackName.name : '';
+                    }
+                } else if (taxon.english_common_name) {
+                    vernacularName = taxon.english_common_name;
+                }
+                
+                // Use vernacular name if available, otherwise scientific name
+                finalName = vernacularName || taxon.name || taxonName;
+                finalRank = taxon.rank || taxonRank;
+                
+                // Capitalize first letter
+                if (finalName) {
+                    finalName = finalName.charAt(0).toUpperCase() + finalName.slice(1);
+                }
+            }
+            
+            // Store the custom taxon
+            this.customTaxa.set(taxonId, { name: finalName, rank: finalRank });
+            
+            // Save to localStorage
+            this.saveCustomTaxaToStorage();
+            
+            // Create custom filter button if it doesn't exist
+            this.addCustomFilterButton(finalName, finalRank, taxonId);
+            
+            // Set filter and load species
+            this.setFilter(taxonId);
+            
+        } catch (error) {
+            console.error('Failed to fetch taxon details for custom selection:', error);
+            
+            // Fallback: use the passed name and rank with capitalization
+            const capitalizedName = taxonName ? 
+                taxonName.charAt(0).toUpperCase() + taxonName.slice(1) : 
+                `Taxon ${taxonId}`;
+            
+            // Store the custom taxon with fallback data
+            this.customTaxa.set(taxonId, { name: capitalizedName, rank: taxonRank });
+            
+            // Save to localStorage
+            this.saveCustomTaxaToStorage();
+            
+            // Create custom filter button
+            this.addCustomFilterButton(capitalizedName, taxonRank, taxonId);
+            
+            // Set filter and load species
+            this.setFilter(taxonId);
+        }
     }
 
     addCustomFilterButton(taxonName, taxonRank, taxonId) {
@@ -586,8 +674,11 @@ class SpeciesManager {
             customBtn.className = 'filter-btn';
             customBtn.dataset.group = taxonId;
             
-            // Truncate long names
-            const displayName = taxonName.length > 12 ? taxonName.substring(0, 12) + '...' : taxonName;
+            // Ensure capitalization and truncate long names
+            const capitalizedName = taxonName ? 
+                taxonName.charAt(0).toUpperCase() + taxonName.slice(1) : 
+                'Unknown';
+            const displayName = capitalizedName.length > 12 ? capitalizedName.substring(0, 12) + '...' : capitalizedName;
             
             customBtn.innerHTML = `
                 <span class="filter-icon">🔬</span>
@@ -641,17 +732,44 @@ class SpeciesManager {
         }
 
         try {
-            // Fetch taxon details to get its name
-            const taxonData = await window.api.getTaxonDetails(taxonId);
+            // Fetch taxon details with current locale to get its name
+            const taxonData = await window.api.getTaxonDetails(taxonId, this.currentLocale);
             const taxon = taxonData.results?.[0] || taxonData;
             
             if (taxon) {
-                const commonName = taxon.preferred_common_name || taxon.english_common_name || taxon.name;
+                // Get vernacular name with locale preference
+                let vernacularName = '';
+                if (taxon.preferred_common_name) {
+                    vernacularName = taxon.preferred_common_name;
+                } else if (taxon.names && taxon.names.length > 0) {
+                    // Look for a name in current locale
+                    const localName = taxon.names.find(name => 
+                        name.locale === this.currentLocale || 
+                        name.locale?.startsWith(this.currentLocale)
+                    );
+                    if (localName) {
+                        vernacularName = localName.name;
+                    } else {
+                        // Fallback to english or first available
+                        const fallbackName = taxon.names.find(name => name.locale === 'en') || taxon.names[0];
+                        vernacularName = fallbackName ? fallbackName.name : '';
+                    }
+                } else if (taxon.english_common_name) {
+                    vernacularName = taxon.english_common_name;
+                }
+                
+                // Use vernacular name if available, otherwise scientific name
+                const finalName = vernacularName || taxon.name;
                 const rank = taxon.rank || 'Unknown';
+                
+                // Capitalize first letter
+                const capitalizedName = finalName ? 
+                    finalName.charAt(0).toUpperCase() + finalName.slice(1) : 
+                    `Taxon ${taxonId}`;
                 
                 // Store the custom taxon
                 this.customTaxa.set(taxonId, { 
-                    name: commonName, 
+                    name: capitalizedName, 
                     rank: rank 
                 });
                 
@@ -659,9 +777,9 @@ class SpeciesManager {
                 this.saveCustomTaxaToStorage();
                 
                 // Create the custom filter button
-                this.addCustomFilterButton(commonName, rank, taxonId);
+                this.addCustomFilterButton(capitalizedName, rank, taxonId);
                 
-                console.log(`Restored custom taxon from URL: ${commonName} (${rank})`);
+                console.log(`Restored custom taxon from URL: ${capitalizedName} (${rank})`);
             }
         } catch (error) {
             console.error('Failed to restore custom taxon from URL:', error);

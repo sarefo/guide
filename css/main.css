@@ -679,7 +679,9 @@ body {
     
     /* Responsive modal image on mobile */
     .species-modal-image {
-        max-height: 200px !important;
+        width: min(35vh, 250px) !important;
+        height: min(35vh, 250px) !important;
+        max-width: 90% !important;
     }
 }
 

@@ -114,7 +114,9 @@
     }
     
     .species-modal-image {
-        max-height: 150px !important;
+        width: min(25vh, 200px) !important;
+        height: min(25vh, 200px) !important;
+        max-width: 90% !important;
     }
 }
 
@@ -167,6 +169,24 @@
     .modal-content {
         background: #1e1e1e;
         color: #ffffff;
+    }
+    
+    .modal-content h2 {
+        color: #e8e8e8;
+        font-weight: 600;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    }
+    
+    .modal-content p {
+        color: #b8b8b8;
+    }
+    
+    .modal-content p strong {
+        color: #e0e0e0;
+    }
+    
+    .modal-content .photo-attribution {
+        color: #aaaaaa;
     }
     
     .modal-close {
@@ -316,7 +336,9 @@
     
     /* Responsive image sizing in modal */
     .species-modal-image {
-        max-height: 180px !important;
+        width: min(30vh, 200px) !important;
+        height: min(30vh, 200px) !important;
+        max-width: 90% !important;
     }
 }
 

@@ -404,31 +404,33 @@ class SpeciesManager {
             window.api.buildWikipediaSearchURL(species.scientificName, species.name);
 
         modalBody.innerHTML = `
-            ${hasPhoto ? `
-                <img 
-                    src="${photoUrl}" 
-                    alt="${species.name}"
-                    class="species-modal-image"
-                    style="width: 100%; max-height: 250px; object-fit: cover; border-radius: 0.5rem; margin-bottom: 1rem;"
-                />
-            ` : ''}
-            <h2>${species.name}</h2>
-            ${species.scientificName !== species.name ? 
-                `<p style="color: #666; margin-bottom: 1rem;"><strong>${window.i18n.t('species.scientificName')}:</strong> <em>${species.scientificName}</em></p>` : ''
-            }
-            <div class="modal-actions" style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;">
-                <a href="${wikipediaUrl}" target="_blank" class="modal-action-btn">
-                    ${window.i18n.t('modal.wikipedia')}
-                </a>
-                <a href="${species.inatUrl}" target="_blank" class="modal-action-btn">
-                    ${window.i18n.t('modal.inaturalist')}
-                </a>
-            </div>
-            ${species.photo?.attribution ? `
-                <div style="margin-top: 1rem; font-size: 0.8rem; color: #666;">
-                    ${window.i18n.t('modal.photo.credit')}: ${species.photo.attribution}
+            <div style="text-align: center;">
+                ${hasPhoto ? `
+                    <img 
+                        src="${photoUrl}" 
+                        alt="${species.name}"
+                        class="species-modal-image"
+                        style="width: min(40vh, 350px); height: min(40vh, 350px); max-width: 100%; object-fit: cover; border-radius: 0.5rem; margin: 0 auto 1rem; display: block;"
+                    />
+                ` : ''}
+                <h2 style="margin-bottom: 1rem;">${species.name}</h2>
+                ${species.scientificName !== species.name ? 
+                    `<p style="margin-bottom: 1rem;"><strong>${window.i18n.t('species.scientificName')}:</strong> <em>${species.scientificName}</em></p>` : ''
+                }
+                <div class="modal-actions" style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; margin-bottom: 1rem;">
+                    <a href="${wikipediaUrl}" target="_blank" class="modal-action-btn">
+                        ${window.i18n.t('modal.wikipedia')}
+                    </a>
+                    <a href="${species.inatUrl}" target="_blank" class="modal-action-btn">
+                        ${window.i18n.t('modal.inaturalist')}
+                    </a>
                 </div>
-            ` : ''}
+                ${species.photo?.attribution ? `
+                    <div class="photo-attribution" style="font-size: 0.8rem;">
+                        ${window.i18n.t('modal.photo.credit')}: ${species.photo.attribution}
+                    </div>
+                ` : ''}
+            </div>
         `;
 
         modal.style.display = 'flex';

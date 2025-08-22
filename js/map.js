@@ -237,7 +237,10 @@ class MapManager {
             return formattedResults;
             
         } catch (error) {
-            console.error('🔍 Geocoding error:', error);
+            // Only log non-abort errors (avoid spam from search cancellations)
+            if (error.name !== 'AbortError') {
+                console.error('🔍 Geocoding error:', error);
+            }
             return [];
         }
     }

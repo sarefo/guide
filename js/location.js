@@ -10,6 +10,8 @@ class LocationManager {
         this.currentSearchQuery = '';
         this.searchState = 'idle'; // 'idle' | 'searching' | 'complete'
         this.currentSearchController = null;
+        this.isRapidTyping = false;
+        this.lastInputTime = 0;
         
         this.init();
     }
@@ -72,7 +74,13 @@ class LocationManager {
 
         // Search input with geocoding
         searchInput?.addEventListener('input', (e) => {
-            this.debounce(() => this.handleSearchInput(e.target.value), 800)();
+            const now = Date.now();
+            this.isRapidTyping = (now - this.lastInputTime) < 200; // Less than 200ms between keystrokes
+            this.lastInputTime = now;
+            this.debounce(() => {
+                this.isRapidTyping = false;
+                this.handleSearchInput(e.target.value);
+            }, 800)();
         });
 
         // Language change handler
@@ -423,10 +431,10 @@ class LocationManager {
             
             // Check if this search was cancelled or if query has changed
             if (signal.aborted || query !== this.currentSearchQuery) {
-                console.log('Search cancelled:', {
-                    cancelled: signal.aborted, 
-                    queryChanged: query !== this.currentSearchQuery 
-                });
+                // Only log if it's a meaningful cancellation (not just rapid typing)
+                if (query.length > 2 && !this.isRapidTyping) {
+                    console.log('🔍 Search cancelled for:', query);
+                }
                 return;
             }
             
@@ -437,6 +445,7 @@ class LocationManager {
         } catch (error) {
             // Don't show error if request was just cancelled
             if (error.name === 'AbortError') {
+                // Silent cancellation - this is expected behavior
                 return;
             }
             

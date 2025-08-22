@@ -76,7 +76,6 @@
   "notification.error": "Une erreur s'est produite. Veuillez actualiser la page.",
   
   "update.available": "Nouvelle version disponible !",
-  "update.description": "Cliquez sur Mettre à jour pour recharger avec les dernières fonctionnalités",
   "update.button": "Mettre à Jour Maintenant",
   "update.updating": "Mise à jour de l'application... Veuillez patienter.",
   "update.checking": "Vérification des mises à jour...",

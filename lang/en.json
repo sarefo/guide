@@ -75,7 +75,6 @@
   "notification.error": "An error occurred. Please refresh the page.",
   
   "update.available": "New version available!",
-  "update.description": "Click Update to reload with the latest features",
   "update.button": "Update Now",
   "update.updating": "Updating app... Please wait.",
   "update.checking": "Checking for updates...",

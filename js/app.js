@@ -394,7 +394,6 @@ class BiodiversityApp {
             <div class="update-notification">
                 <div class="update-message">
                     <strong data-i18n="update.available">New version available!</strong>
-                    <br><small data-i18n="update.description">Click Update to reload with the latest features</small>
                 </div>
                 <button id="update-btn" class="update-btn-primary" data-i18n="update.button">Update Now</button>
                 <button id="dismiss-update" class="update-btn-dismiss" aria-label="Dismiss">&times;</button>

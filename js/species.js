@@ -400,7 +400,8 @@ class SpeciesManager {
         const photoUrl = species.photo?.url || species.photo?.thumbUrl;
         const hasPhoto = photoUrl && photoUrl !== 'null';
 
-        const wikipediaUrl = species.wikipediaUrl || 
+        const wikipediaUrl = species.wikipediaUrl ? 
+            window.api.convertWikipediaURL(species.wikipediaUrl) :
             window.api.buildWikipediaSearchURL(species.scientificName, species.name);
 
         modalBody.innerHTML = `

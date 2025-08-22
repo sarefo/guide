@@ -305,7 +305,30 @@ class iNaturalistAPI {
 
     buildWikipediaSearchURL(scientificName, commonName) {
         const searchTerm = commonName || scientificName;
-        return `https://en.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(searchTerm)}`;
+        const lang = window.i18n ? window.i18n.getCurrentLang() : 'en';
+        return `https://${lang}.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(searchTerm)}`;
+    }
+
+    convertWikipediaURL(wikipediaUrl) {
+        if (!wikipediaUrl) return null;
+        
+        const lang = window.i18n ? window.i18n.getCurrentLang() : 'en';
+        
+        // If it's already in the target language, return as-is
+        if (wikipediaUrl.includes(`://${lang}.wikipedia.org/`)) {
+            return wikipediaUrl;
+        }
+        
+        // Extract the article title from the URL
+        const match = wikipediaUrl.match(/https?:\/\/[a-z-]+\.wikipedia\.org\/wiki\/(.+)/);
+        if (!match) {
+            return wikipediaUrl;
+        }
+        
+        const articleTitle = match[1];
+        
+        // Convert to target language, with fallback handling
+        return `https://${lang}.wikipedia.org/wiki/${articleTitle}`;
     }
 
     setLocale(locale) {

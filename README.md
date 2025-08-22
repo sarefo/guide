@@ -1,9 +1,5 @@
 + still sometimes flicker when loading life group
 
-+ find better name for the app
-
-+ show image in taxon dialog as square
-
 + not sure the "new version: update" functionality works as intended
 
 + improve location search

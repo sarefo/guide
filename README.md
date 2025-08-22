@@ -1,3 +1,5 @@
++ location dialog:
+  + larger, so it fills the available screen space with map
 
 ## Future Functions
 + search/sort by name?

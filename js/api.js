@@ -33,7 +33,6 @@ class iNaturalistAPI {
             this.currentRequests.set(requestKey, controller);
         }
 
-        console.log('API Request:', url.toString());
         
         try {
             const response = await fetch(url, {
@@ -60,7 +59,6 @@ class iNaturalistAPI {
             }
             
             if (error.name === 'AbortError') {
-                console.log('Request cancelled:', url.toString());
                 throw new Error('Request cancelled');
             }
             
@@ -106,7 +104,6 @@ class iNaturalistAPI {
 
     async reverseGeocode(lat, lng) {
         try {
-            console.log('🔍 Reverse geocoding coordinates using Nominatim:', { lat, lng });
             
             // Use Nominatim for reverse geocoding (more reliable than iNaturalist)
             const lang = this.currentLocale || 'en';
@@ -123,7 +120,6 @@ class iNaturalistAPI {
             }
             
             const data = await response.json();
-            console.log('🔍 Nominatim response:', data);
             
             if (data && data.display_name) {
                 let locationName = data.display_name;
@@ -133,17 +129,19 @@ class iNaturalistAPI {
                     const addr = data.address;
                     const parts = [];
                     
-                    // Add city/town/village
-                    if (addr.city) parts.push(addr.city);
+                    // Primary place name (in order of preference for different place types)
+                    if (addr.tourism) parts.push(addr.tourism);        // Tourist attractions
+                    else if (addr.amenity) parts.push(addr.amenity);   // Parks, reserves
+                    else if (addr.leisure) parts.push(addr.leisure);   // Recreation areas  
+                    else if (addr.natural) parts.push(addr.natural);   // Natural features
+                    else if (addr.city) parts.push(addr.city);
                     else if (addr.town) parts.push(addr.town);
                     else if (addr.village) parts.push(addr.village);
                     else if (addr.municipality) parts.push(addr.municipality);
+                    else if (addr.county) parts.push(addr.county);     // Fallback to county
+                    else if (addr.state) parts.push(addr.state);       // Or state
                     
-                    // Add state/region
-                    if (addr.state) parts.push(addr.state);
-                    else if (addr.region) parts.push(addr.region);
-                    
-                    // Add country
+                    // Always add country as second part
                     if (addr.country) parts.push(addr.country);
                     
                     if (parts.length > 0) {
@@ -151,7 +149,6 @@ class iNaturalistAPI {
                     }
                 }
                 
-                console.log('✅ Location name from Nominatim:', locationName);
                 return {
                     name: locationName,
                     data: data
@@ -264,7 +261,9 @@ class iNaturalistAPI {
                 
                 // Get genus-level observations separately (without quality_grade restriction)
                 const genusParams = {
-                    place_id: placeId,
+                    lat: lat,
+                    lng: lng,
+                    radius: radius,
                     taxon_id: taxonId,
                     hrank: 'genus',
                     lrank: 'genus',
@@ -552,7 +551,6 @@ class iNaturalistAPI {
 
     setLocale(locale) {
         this.currentLocale = locale;
-        console.log(`API locale updated to: ${locale}`);
     }
 
     getRequestStats() {

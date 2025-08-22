@@ -11,7 +11,6 @@ class BiodiversityApp {
     async init() {
         if (this.initialized) return;
 
-        console.log(`🌿 Biodiversity Explorer v${this.version} initializing...`);
 
         try {
             await this.waitForDependencies();
@@ -20,7 +19,6 @@ class BiodiversityApp {
             this.initializeApp();
             this.initialized = true;
 
-            console.log('✅ App initialized successfully');
         } catch (error) {
             console.error('❌ App initialization failed:', error);
             this.showInitializationError();
@@ -57,13 +55,11 @@ class BiodiversityApp {
 
     setupNetworkMonitoring() {
         window.addEventListener('online', () => {
-            console.log('📶 Network connection restored');
             this.showNetworkStatus('online');
             this.retryFailedOperations();
         });
 
         window.addEventListener('offline', () => {
-            console.log('📵 Network connection lost');
             this.showNetworkStatus('offline');
         });
     }
@@ -76,11 +72,9 @@ class BiodiversityApp {
         this.startPeriodicUpdateChecks();
 
         if (window.locationManager) {
-            console.log('🌍 Location manager ready');
         }
 
         if (window.speciesManager) {
-            console.log('🐦 Species manager ready');
         }
     }
 
@@ -116,16 +110,13 @@ class BiodiversityApp {
     }
 
     handleServiceWorkerMessage(data) {
-        console.log('SW message received:', data);
 
         switch (data.type) {
             case 'SW_UPDATE_AVAILABLE':
-                console.log('🔄 Service Worker update available');
                 this.updateAvailable = true;
                 this.showUpdateNotification();
                 break;
             case 'SW_UPDATE_COMPLETE':
-                console.log('✅ Service Worker update complete');
                 this.hideUpdateNotification();
                 break;
         }
@@ -162,7 +153,6 @@ class BiodiversityApp {
                     text: shareText,
                     url: currentUrl
                 });
-                console.log('📤 Shared successfully via Web Share API');
             } catch (error) {
                 if (error.name !== 'AbortError') {
                     console.error('Share failed:', error);
@@ -270,13 +260,11 @@ class BiodiversityApp {
 
     async retryFailedOperations() {
         if (window.speciesManager && !window.speciesManager.currentSpecies.length) {
-            console.log('🔄 Retrying species data load...');
             await window.speciesManager.loadSpecies();
         }
     }
 
     async refreshData() {
-        console.log('🔄 Refreshing data...');
 
         try {
             if (window.speciesManager) {
@@ -331,12 +319,6 @@ class BiodiversityApp {
     }
 
     onAppUnload() {
-        console.log('👋 App unloading');
-
-        if (window.api) {
-            const stats = window.api.getRequestStats();
-            console.log('📊 API request stats:', stats);
-        }
     }
 
     async checkForUpdates() {
@@ -376,7 +358,6 @@ class BiodiversityApp {
             // Always reload the app when manual update is requested
             setTimeout(() => {
                 this.hideUpdateCheckingIndicator();
-                console.log('🔄 Manual update requested, reloading app...');
                 window.location.reload();
             }, 1000);
         } catch (error) {
@@ -437,18 +418,15 @@ class BiodiversityApp {
 
                 // Listen for the activation and reload
                 navigator.serviceWorker.addEventListener('controllerchange', () => {
-                    console.log('🔄 Service worker updated, reloading...');
                     window.location.reload();
                 });
                 
                 // Fallback: reload after timeout if controllerchange doesn't fire
                 setTimeout(() => {
-                    console.log('🔄 Fallback reload after update');
-                    window.location.reload();
+                        window.location.reload();
                 }, 3000);
             } else {
                 // No waiting worker, just reload
-                console.log('🔄 No waiting worker, reloading...');
                 window.location.reload();
             }
         } catch (error) {

@@ -57,7 +57,6 @@ async function handleAPIRequest(request) {
     const cachedResponse = await cache.match(request);
 
     if (cachedResponse && !isStale(cachedResponse)) {
-        console.log('Serving API from cache:', request.url);
         return cachedResponse;
     }
 
@@ -67,11 +66,9 @@ async function handleAPIRequest(request) {
             const responseClone = networkResponse.clone();
             const responseWithTimestamp = addTimestamp(responseClone);
             cache.put(request, responseWithTimestamp);
-            console.log('Cached API response:', request.url);
         }
         return networkResponse;
     } catch (error) {
-        console.log('Network failed, serving stale cache:', request.url);
         if (cachedResponse) {
             return cachedResponse;
         }
@@ -87,7 +84,6 @@ async function handleStaticAsset(request) {
     const cachedResponse = await cache.match(request);
 
     if (cachedResponse) {
-        console.log('Serving static asset from cache:', request.url);
         return cachedResponse;
     }
 
@@ -95,11 +91,9 @@ async function handleStaticAsset(request) {
         const networkResponse = await fetch(request);
         if (networkResponse.ok) {
             cache.put(request, networkResponse.clone());
-            console.log('Cached static asset:', request.url);
         }
         return networkResponse;
     } catch (error) {
-        console.log('Failed to fetch static asset:', request.url);
         return new Response('Asset not available', {
             status: 404,
             statusText: 'Not Found'
@@ -114,7 +108,6 @@ async function handleNavigation(request) {
         const networkResponse = await fetch(request);
         return networkResponse;
     } catch (error) {
-        console.log('Network failed for navigation, serving index.html');
         const cachedResponse = await cache.match('./index.html');
         return cachedResponse || new Response('Offline', {
             status: 503,
@@ -170,11 +163,9 @@ self.addEventListener('message', event => {
 
 // Notify clients when service worker is updated
 self.addEventListener('install', event => {
-    console.log(`Service Worker v${VERSION} installing...`);
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => {
-                console.log('Caching static assets');
                 return cache.addAll(STATIC_ASSETS);
             })
             .then(() => {
@@ -195,13 +186,11 @@ self.addEventListener('install', event => {
 
 // Clean up old caches more thoroughly
 self.addEventListener('activate', event => {
-    console.log(`Service Worker v${VERSION} activating...`);
     event.waitUntil(
         caches.keys().then(cacheNames => {
             return Promise.all(
                 cacheNames.map(cacheName => {
                     if (!cacheName.includes(VERSION)) {
-                        console.log('Deleting old cache:', cacheName);
                         return caches.delete(cacheName);
                     }
                 })

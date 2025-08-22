@@ -1,10 +1,8 @@
-console.log('📂 location.js script loading...');
 
 class LocationManager {
     constructor() {
-        console.log('🏗️ LocationManager constructor called');
         this.currentLocation = null;
-        this.defaultLocation = { lat: 51.505, lng: -0.09, radius: 50, name: 'London, UK' }; // Default location
+        this.defaultLocation = { lat: 22.3193, lng: 114.1694, radius: 50, name: 'Hong Kong' }; // Default location
         this.radius = 50; // Always 50km as requested
         this.isGettingLocation = false;
         
@@ -17,7 +15,6 @@ class LocationManager {
     }
 
     init() {
-        console.log('🌍 LocationManager initializing...');
         this.loadLocationFromURL();
         this.setupEventListeners();
         
@@ -26,7 +23,6 @@ class LocationManager {
             const helpBtn = document.getElementById('help-btn');
             if (helpBtn) {
                 window.testHelpButton = () => {
-                    console.log('🧪 Manual help button test');
                     this.openHelpModal();
                 };
             }
@@ -34,7 +30,6 @@ class LocationManager {
     }
 
     setupEventListeners() {
-        console.log('🔧 LocationManager setupEventListeners called');
         
         // Main UI elements
         const locationBtn = document.getElementById('location-btn');
@@ -49,11 +44,6 @@ class LocationManager {
         const myLocationBtn = document.getElementById('my-location-btn');
         const useLocationBtn = document.getElementById('use-location-btn');
 
-        console.log('🔍 Element check:');
-        console.log('  locationBtn:', locationBtn);
-        console.log('  myLocationBtn:', myLocationBtn);
-        console.log('  useLocationBtn:', useLocationBtn);
-        console.log('  helpBtn:', helpBtn);
 
         // Event listeners
         locationBtn?.addEventListener('click', () => this.openLocationModal());
@@ -63,7 +53,6 @@ class LocationManager {
         
         if (helpBtn) {
             helpBtn.addEventListener('click', (e) => {
-                console.log('💡 Help button clicked!', e);
                 this.openHelpModal();
             });
         }
@@ -116,7 +105,6 @@ class LocationManager {
         // Handle life group selection BEFORE loading location
         // This ensures species manager has the correct filter when locationChanged fires
         if (lifeGroup) {
-            console.log('🎯 Dispatching lifeGroupFromURL before location load:', lifeGroup);
             window.dispatchEvent(new CustomEvent('lifeGroupFromURL', {
                 detail: { lifeGroup }
             }));
@@ -124,17 +112,14 @@ class LocationManager {
         
         if (lat && lng) {
             // New coordinate-based URL
-            console.log('📍 Loading location from coordinates:', { lat, lng, name });
             await this.loadLocationFromCoordinates(parseFloat(lat), parseFloat(lng), name);
         } else {
             // Check for legacy place_id format
             const placeId = urlParams.get('place_id');
             if (placeId) {
-                console.log('🔄 Converting legacy place_id to coordinates:', placeId);
                 await this.convertPlaceIdToCoordinates(placeId);
             } else {
                 // No location specified, use default
-                console.log('🌍 Using default location');
                 await this.loadLocationFromCoordinates(
                     this.defaultLocation.lat, 
                     this.defaultLocation.lng, 
@@ -162,7 +147,6 @@ class LocationManager {
 
     async loadLocationFromCoordinates(lat, lng, name = null) {
         try {
-            console.log('📍 Loading location from coordinates:', { lat, lng, name });
             
             // Create location object
             this.currentLocation = {
@@ -194,7 +178,6 @@ class LocationManager {
 
     async convertPlaceIdToCoordinates(placeId) {
         try {
-            console.log('🔄 Converting place_id to coordinates:', placeId);
             
             const locationData = await window.api.getPlace(placeId);
             
@@ -211,7 +194,6 @@ class LocationManager {
                     lng = center.lng;
                     name = locationData.display_name || locationData.name;
                     
-                    console.log('✅ Converted place to coordinates:', { lat, lng, name });
                     await this.loadLocationFromCoordinates(lat, lng, name);
                     return;
                 }
@@ -265,7 +247,6 @@ class LocationManager {
     // GPS Location functionality
     async getCurrentGPSLocation() {
         if (this.isGettingLocation) {
-            console.log('🔄 Already getting location...');
             return;
         }
 
@@ -284,14 +265,12 @@ class LocationManager {
         };
 
         try {
-            console.log('📍 Requesting GPS location...');
             
             const position = await new Promise((resolve, reject) => {
                 navigator.geolocation.getCurrentPosition(resolve, reject, options);
             });
 
             const { latitude, longitude, accuracy } = position.coords;
-            console.log('✅ GPS location obtained:', { latitude, longitude, accuracy });
 
             // Store in localStorage for faster subsequent loads
             localStorage.setItem('lastGPSLocation', JSON.stringify({
@@ -309,13 +288,10 @@ class LocationManager {
                     const geocodeResult = await window.api.reverseGeocode(latitude, longitude);
                     if (geocodeResult && geocodeResult.name) {
                         locationName = geocodeResult.name;
-                        console.log('✅ Got location name from reverse geocoding:', locationName);
                     } else {
-                        console.log('⚠️ No location name from reverse geocoding, using i18n fallback');
                     }
                 }
             } catch (error) {
-                console.log('⚠️ Reverse geocoding failed, using i18n fallback:', error);
                 // Continue with i18n fallback name
             }
 
@@ -433,14 +409,12 @@ class LocationManager {
             this.searchState = 'searching';
             this.showSearchLoading();
             
-            console.log('🔍 Searching locations:', query);
             
             let places = [];
             
             // Use map manager's geocoder if available
             if (window.mapManager && window.mapManager.searchLocation) {
                 places = await window.mapManager.searchLocation(query, signal);
-                console.log('🔍 Received places from map manager:', places);
             } else {
                 console.warn('Map manager not available for search');
                 this.displayLocationError('Map not available');
@@ -449,7 +423,7 @@ class LocationManager {
             
             // Check if this search was cancelled or if query has changed
             if (signal.aborted || query !== this.currentSearchQuery) {
-                console.log('🔍 Search cancelled or outdated:', { 
+                console.log('Search cancelled:', {
                     cancelled: signal.aborted, 
                     queryChanged: query !== this.currentSearchQuery 
                 });
@@ -463,7 +437,6 @@ class LocationManager {
         } catch (error) {
             // Don't show error if request was just cancelled
             if (error.name === 'AbortError') {
-                console.log('🔍 Search request cancelled');
                 return;
             }
             
@@ -483,12 +456,10 @@ class LocationManager {
 
         // Verify this is still the current search
         if (query !== this.currentSearchQuery) {
-            console.log('📋 Ignoring outdated results for:', query);
             return;
         }
 
         if (!places || places.length === 0) {
-            console.log('📋 No places to display for query:', query);
             resultsContainer.innerHTML = `
                 <div class="search-state no-results">
                     <p>No locations found for "${query}"</p>
@@ -498,7 +469,6 @@ class LocationManager {
             return;
         }
 
-        console.log('📋 Displaying', places.length, 'places for query:', query);
 
         const resultsHTML = places.map(place => {
             const name = place.display_name || place.name;
@@ -522,7 +492,6 @@ class LocationManager {
                 const lat = parseFloat(resultEl.dataset.lat);
                 const lng = parseFloat(resultEl.dataset.lng);
                 const name = resultEl.dataset.name;
-                console.log('📋 Selecting location:', { lat, lng, name });
                 this.selectLocationFromSearch(lat, lng, name);
             }
         };
@@ -600,20 +569,16 @@ class LocationManager {
 
     // Map integration
     setLocationFromCoordinates(lat, lng, name) {
-        console.log('🗺️ Setting location from map:', { lat, lng, name });
         this.showLocationSelection(lat, lng, name);
     }
 
     // Show location selection confirmation
     showLocationSelection(lat, lng, name) {
-        console.log('🎯 Showing location selection:', { lat, lng, name });
         
         // Update search field
         const searchInput = document.getElementById('location-search');
-        console.log('🎯 Search input found:', !!searchInput);
         if (searchInput) {
             searchInput.value = name || `${lat.toFixed(3)}, ${lng.toFixed(3)}`;
-            console.log('🎯 Updated search input to:', searchInput.value);
         }
 
         // Show confirmation panel
@@ -621,7 +586,7 @@ class LocationManager {
         const nameEl = document.getElementById('selected-location-name');
         const coordsEl = document.getElementById('selected-location-coords');
 
-        console.log('🎯 Confirmation elements found:', {
+        console.log('Confirmation elements:', {
             panel: !!confirmPanel,
             name: !!nameEl, 
             coords: !!coordsEl
@@ -634,14 +599,12 @@ class LocationManager {
                 coordsEl.style.display = 'none';
             }
             confirmPanel.style.display = 'block';
-            console.log('🎯 Confirmation panel shown');
         } else {
             console.error('🎯 Missing confirmation elements!');
         }
 
         // Store pending location
         this.pendingLocation = { lat, lng, name };
-        console.log('🎯 Stored pending location:', this.pendingLocation);
         
         // Clear and hide search results
         this.clearLocationResults();
@@ -836,7 +799,6 @@ class LocationManager {
 
     // Language management
     setLanguage(lang) {
-        console.log('🌐 Setting language to:', lang);
         
         const langSelect = document.getElementById('language-select');
         if (langSelect) {
@@ -844,21 +806,18 @@ class LocationManager {
         }
         
         if (window.api) {
-            console.log('🌐 Setting API locale to:', lang);
             window.api.setLocale(lang);
         } else {
             console.warn('🌐 API not available when setting language');
         }
         
         if (window.speciesManager) {
-            console.log('🌐 Setting species manager locale to:', lang);
             window.speciesManager.setLocale(lang);
         } else {
             console.warn('🌐 Species manager not available when setting language');
         }
         
         if (window.i18n) {
-            console.log('🌐 Setting i18n language to:', lang);
             window.i18n.setLanguage(lang);
         } else {
             console.warn('🌐 i18n not available when setting language');
@@ -920,13 +879,9 @@ class LocationManager {
     }
 }
 
-console.log('📂 About to create LocationManager...');
 
 try {
-    console.log('📍 Creating LocationManager...');
     window.locationManager = new LocationManager();
-    console.log('✅ LocationManager created successfully');
-    console.log('✅ window.locationManager:', window.locationManager);
 } catch (error) {
     console.error('❌ Failed to create LocationManager:', error);
     console.error('❌ Error stack:', error.stack);

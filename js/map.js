@@ -1,8 +1,6 @@
-console.log('📂 map.js script loading...');
 
 class MapManager {
     constructor() {
-        console.log('🗺️ MapManager constructor called');
         this.map = null;
         this.currentMarker = null;
         this.radiusCircle = null;
@@ -13,7 +11,6 @@ class MapManager {
     }
 
     init() {
-        console.log('🗺️ MapManager initializing...');
         // Don't initialize map immediately, wait for modal to be opened
         this.setupEventListeners();
     }
@@ -41,7 +38,6 @@ class MapManager {
         }
 
         try {
-            console.log('🗺️ Initializing Leaflet map...');
             
             // Initialize map with default view
             this.map = L.map('location-map', {
@@ -75,7 +71,6 @@ class MapManager {
             // Mark map as loaded to hide loading overlay
             mapContainer.classList.add('map-loaded');
 
-            console.log('✅ Map initialized successfully');
         } catch (error) {
             console.error('❌ Failed to initialize map:', error);
         }
@@ -95,7 +90,6 @@ class MapManager {
             });
 
             // Don't add the geocoder control to map, we'll use it programmatically
-            console.log('✅ Geocoder initialized');
         } catch (error) {
             console.error('❌ Failed to initialize geocoder:', error);
             // Create a fallback direct Nominatim implementation
@@ -103,12 +97,38 @@ class MapManager {
         }
     }
 
+    // Helper function to format location names consistently
+    formatLocationName(item) {
+        if (!item.address) {
+            return item.display_name;
+        }
+        
+        const addr = item.address;
+        const parts = [];
+        
+        // Primary place name (in order of preference for different place types)
+        if (addr.tourism) parts.push(addr.tourism);        // Tourist attractions
+        else if (addr.amenity) parts.push(addr.amenity);   // Parks, reserves
+        else if (addr.leisure) parts.push(addr.leisure);   // Recreation areas  
+        else if (addr.natural) parts.push(addr.natural);   // Natural features
+        else if (addr.city) parts.push(addr.city);
+        else if (addr.town) parts.push(addr.town);
+        else if (addr.village) parts.push(addr.village);
+        else if (addr.municipality) parts.push(addr.municipality);
+        else if (addr.county) parts.push(addr.county);     // Fallback to county
+        else if (addr.state) parts.push(addr.state);       // Or state
+        
+        // Always add country as second part
+        if (addr.country) parts.push(addr.country);
+        
+        return parts.length > 0 ? parts.join(', ') : item.display_name;
+    }
+
     createFallbackGeocoder() {
-        console.log('🔄 Creating fallback geocoder');
         this.geocoder = {
             geocode: async (query, callback) => {
                 try {
-                    const url = `https://nominatim.openstreetmap.org/search?format=json&limit=5&q=${encodeURIComponent(query)}`;
+                    const url = `https://nominatim.openstreetmap.org/search?format=json&limit=5&addressdetails=1&q=${encodeURIComponent(query)}`;
                     const response = await fetch(url);
                     const data = await response.json();
                     
@@ -117,7 +137,7 @@ class MapManager {
                             lat: parseFloat(item.lat),
                             lng: parseFloat(item.lon)
                         },
-                        name: item.display_name,
+                        name: this.formatLocationName(item),
                         bbox: item.boundingbox
                     }));
                     
@@ -128,11 +148,9 @@ class MapManager {
                 }
             }
         };
-        console.log('✅ Fallback geocoder created');
     }
 
     handleMapClick(latlng) {
-        console.log('🗺️ Map clicked at:', latlng);
         
         // Update map display
         this.updateLocation(latlng.lat, latlng.lng, 'Map Location');
@@ -144,7 +162,6 @@ class MapManager {
     updateLocation(lat, lng, name = null) {
         if (!this.map) return;
 
-        console.log('🗺️ Updating map location:', { lat, lng, name });
 
         this.currentLocation = { lat, lng, name };
 
@@ -183,7 +200,6 @@ class MapManager {
             return [];
         }
 
-        console.log('🔍 Searching for location:', query);
 
         try {
             // Get current language for i18n support with fallback priority
@@ -193,7 +209,6 @@ class MapManager {
             
             // Try direct Nominatim API call with language support
             const url = `https://nominatim.openstreetmap.org/search?format=json&limit=5&addressdetails=1&accept-language=${acceptLanguage}&q=${encodeURIComponent(query)}`;
-            console.log('🔍 Making direct Nominatim request with language priority:', url);
             
             const fetchOptions = {};
             if (signal) {
@@ -203,25 +218,22 @@ class MapManager {
             const response = await fetch(url, fetchOptions);
             const data = await response.json();
             
-            console.log('🔍 Raw Nominatim results:', data);
             
             if (!data || data.length === 0) {
-                console.log('🔍 No results from Nominatim');
                 return [];
             }
             
             const formattedResults = data.map(item => {
-                console.log('🔍 Processing Nominatim result:', item);
+                const formattedName = this.formatLocationName(item);
                 return {
                     lat: parseFloat(item.lat),
                     lng: parseFloat(item.lon),
-                    name: item.display_name,
-                    display_name: item.display_name,
+                    name: formattedName,
+                    display_name: formattedName,
                     bbox: item.boundingbox
                 };
             });
             
-            console.log('🔍 Formatted results:', formattedResults);
             return formattedResults;
             
         } catch (error) {
@@ -231,7 +243,6 @@ class MapManager {
     }
 
     async reverseGeocode(lat, lng) {
-        console.log('🔄 Reverse geocoding:', { lat, lng });
 
         try {
             // Get current language for i18n support with fallback priority
@@ -241,16 +252,13 @@ class MapManager {
             
             // Direct Nominatim reverse geocoding with language support
             const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&accept-language=${acceptLanguage}`;
-            console.log('🔄 Making reverse geocoding request with language priority:', url);
             
             const response = await fetch(url);
             const data = await response.json();
             
-            console.log('🔄 Reverse geocoding result:', data);
             
             if (data && data.display_name) {
-                const locationName = data.display_name;
-                console.log('🔄 Reverse geocoded name:', locationName);
+                const locationName = this.formatLocationName(data);
                 
                 // Update marker popup
                 if (this.currentMarker) {
@@ -265,7 +273,6 @@ class MapManager {
                     window.locationManager.setLocationFromCoordinates(lat, lng, locationName);
                 }
             } else {
-                console.log('🔄 No reverse geocoding result, using coordinates');
                 if (window.locationManager) {
                     window.locationManager.setLocationFromCoordinates(lat, lng, `${lat.toFixed(3)}, ${lng.toFixed(3)}`);
                 }
@@ -309,7 +316,6 @@ class MapManager {
             const centerLat = (minLat + maxLat) / 2;
             const centerLng = (minLng + maxLng) / 2;
 
-            console.log('📐 Calculated center from bbox:', { lat: centerLat, lng: centerLng });
             return { lat: centerLat, lng: centerLng };
         } catch (error) {
             console.error('❌ Failed to calculate center from bbox:', error);
@@ -327,13 +333,9 @@ class MapManager {
     }
 }
 
-console.log('📂 About to create MapManager...');
 
 try {
-    console.log('🗺️ Creating MapManager...');
     window.mapManager = new MapManager();
-    console.log('✅ MapManager created successfully');
-    console.log('✅ window.mapManager:', window.mapManager);
 } catch (error) {
     console.error('❌ Failed to create MapManager:', error);
     console.error('❌ Error stack:', error.stack);

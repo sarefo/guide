@@ -235,31 +235,51 @@ class LocationManager {
         const lastCheckEl = document.getElementById('last-update-check');
         const updateBtn = document.getElementById('manual-update-btn');
         
-        if (window.app && window.app.getAppInfo) {
+        // Always try to get version from app, fallback to hardcoded if needed
+        if (versionEl) {
+            let version = 'Loading...';
+            
+            if (window.app && window.app.getAppInfo) {
+                try {
+                    const appInfo = window.app.getAppInfo();
+                    if (appInfo && appInfo.version) {
+                        version = appInfo.version;
+                    }
+                } catch (error) {
+                    console.log('Could not get app info:', error);
+                }
+            }
+            
+            // If we still don't have version and app exists, get it directly
+            if (version === 'Loading...' && window.app && window.app.version) {
+                version = window.app.version;
+            }
+            
+            versionEl.textContent = version;
+        }
+        
+        if (lastCheckEl && window.app && window.app.getAppInfo) {
             try {
                 const appInfo = window.app.getAppInfo();
-                
-                if (versionEl && appInfo.version) {
-                    versionEl.textContent = appInfo.version;
-                }
-                
-                if (lastCheckEl && appInfo.lastUpdateCheck) {
+                if (appInfo && appInfo.lastUpdateCheck) {
                     const lastCheck = new Date(appInfo.lastUpdateCheck);
                     const diffMinutes = Math.floor((Date.now() - lastCheck) / (1000 * 60));
                     
                     let timeText = '';
-                    if (diffMinutes < 1) {
-                        timeText = 'Just checked';
-                    } else if (diffMinutes < 60) {
-                        timeText = `${diffMinutes}m ago`;
-                    } else {
-                        timeText = `${Math.floor(diffMinutes / 60)}h ago`;
+                    if (diffMinutes >= 1 && diffMinutes < 60) {
+                        timeText = window.i18n ? window.i18n.t('help.lastCheck.minutes').replace('{{minutes}}', diffMinutes) : `${diffMinutes}m ago`;
+                    } else if (diffMinutes >= 60) {
+                        timeText = window.i18n ? window.i18n.t('help.lastCheck.hours').replace('{{hours}}', Math.floor(diffMinutes / 60)) : `${Math.floor(diffMinutes / 60)}h ago`;
                     }
                     
-                    lastCheckEl.textContent = `(${timeText})`;
+                    if (timeText) {
+                        lastCheckEl.textContent = `(${timeText})`;
+                    } else {
+                        lastCheckEl.textContent = '';
+                    }
                 }
             } catch (error) {
-                // Silently fail
+                console.log('Could not get update check info:', error);
             }
         }
         
@@ -270,6 +290,11 @@ class LocationManager {
                 }
             });
             updateBtn.setAttribute('data-listener-added', 'true');
+        }
+        
+        // Ensure i18n is applied to the help modal content
+        if (window.i18n) {
+            window.i18n.translatePage();
         }
     }
 

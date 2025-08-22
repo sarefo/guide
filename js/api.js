@@ -131,11 +131,12 @@ class iNaturalistAPI {
             perPage = 50,
             page = 1,
             quality = 'research',
-            photos = true
+            photos = true,
+            includeGenusLevel = true
         } = options;
 
         try {
-            const params = {
+            const baseParams = {
                 place_id: placeId,
                 per_page: perPage,
                 page: page,
@@ -145,20 +146,111 @@ class iNaturalistAPI {
             };
 
             if (iconicTaxonId && iconicTaxonId !== 'all') {
-                params.iconic_taxa = iconicTaxonId;
+                baseParams.iconic_taxa = iconicTaxonId;
             } else if (taxonId) {
-                params.taxon_id = taxonId;
+                baseParams.taxon_id = taxonId;
             }
 
             if (photos) {
-                params.photos = 'true';
+                baseParams.photos = 'true';
             }
 
             // Use place_id + filter type as unique request key to cancel previous requests
             const filterKey = iconicTaxonId || taxonId || 'all';
             const requestKey = `species_${placeId}_${filterKey}`;
-            const data = await this.makeRequest('/observations/species_counts', params, requestKey);
-            return data.results || [];
+            
+            if (includeGenusLevel && !taxonId) {
+                // Only use rank filtering for iconic taxa, not custom taxa
+                // Make parallel requests for species and genus levels
+                const [speciesData, genusData] = await Promise.all([
+                    this.makeRequest('/observations/species_counts', {
+                        ...baseParams,
+                        hrank: 'species',
+                        lrank: 'species'
+                    }, `${requestKey}_species`),
+                    this.makeRequest('/observations/species_counts', {
+                        ...baseParams,
+                        hrank: 'genus',
+                        lrank: 'genus'
+                    }, `${requestKey}_genus`)
+                ]);
+                
+                const species = speciesData.results || [];
+                const genera = genusData.results || [];
+                
+                // Filter out genera that have species-level observations
+                const speciesGenera = new Set();
+                species.forEach(s => {
+                    if (s.taxon.ancestor_ids) {
+                        s.taxon.ancestor_ids.forEach(ancestorId => {
+                            speciesGenera.add(ancestorId);
+                        });
+                    }
+                });
+                
+                const uniqueGenera = genera.filter(g => !speciesGenera.has(g.taxon.id));
+                
+                // Combine species and unique genera
+                return [...species, ...uniqueGenera];
+            } else if (includeGenusLevel && taxonId) {
+                // For custom taxa, we need to use different approach
+                // Get species from species_counts (research grade)
+                const speciesData = await this.makeRequest('/observations/species_counts', baseParams, requestKey);
+                const species = speciesData.results || [];
+                
+                // Get genus-level observations separately (without quality_grade restriction)
+                const genusParams = {
+                    place_id: placeId,
+                    taxon_id: taxonId,
+                    hrank: 'genus',
+                    lrank: 'genus',
+                    per_page: perPage,
+                    locale: locale,
+                    verifiable: true
+                };
+                
+                if (photos) {
+                    genusParams.photos = 'true';
+                }
+                
+                const genusObsData = await this.makeRequest('/observations', genusParams, `${requestKey}_genus_obs`);
+                const genusObservations = genusObsData.results || [];
+                
+                // Convert genus observations to species_counts format and count by taxon
+                const genusCounts = new Map();
+                genusObservations.forEach(obs => {
+                    const taxonId = obs.taxon.id;
+                    if (genusCounts.has(taxonId)) {
+                        genusCounts.get(taxonId).count++;
+                    } else {
+                        genusCounts.set(taxonId, {
+                            count: 1,
+                            taxon: obs.taxon
+                        });
+                    }
+                });
+                
+                const genera = Array.from(genusCounts.values());
+                
+                // Filter out genera that have species-level observations
+                const speciesGenera = new Set();
+                species.forEach(s => {
+                    if (s.taxon.ancestor_ids) {
+                        s.taxon.ancestor_ids.forEach(ancestorId => {
+                            speciesGenera.add(ancestorId);
+                        });
+                    }
+                });
+                
+                const uniqueGenera = genera.filter(g => !speciesGenera.has(g.taxon.id));
+                
+                // Combine species and unique genera
+                return [...species, ...uniqueGenera];
+            } else {
+                // Original behavior: species only
+                const data = await this.makeRequest('/observations/species_counts', baseParams, requestKey);
+                return data.results || [];
+            }
         } catch (error) {
             if (error.message === 'Request cancelled') {
                 return []; // Return empty array for cancelled requests
@@ -222,6 +314,11 @@ class iNaturalistAPI {
             if (localName) {
                 vernacularName = localName.name;
             }
+        }
+        
+        // For genus-level taxa, show "Genus sp." format if no vernacular name
+        if (taxon.rank === 'genus' && (vernacularName === taxon.name || !taxon.preferred_common_name)) {
+            vernacularName = `<em>${taxon.name}</em> sp.`;
         }
         
         return {

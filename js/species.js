@@ -225,10 +225,14 @@ class SpeciesManager {
         const photoUrl = species.photo?.thumbUrl || species.photo?.url;
         const hasPhoto = photoUrl && photoUrl !== 'null';
         
-        // Capitalize first letter of vernacular name
-        const vernacularName = species.name ? 
-            species.name.charAt(0).toUpperCase() + species.name.slice(1) : 
-            'Unknown species';
+        // Handle vernacular name capitalization, accounting for potential HTML
+        let vernacularName = species.name || 'Unknown species';
+        
+        // If it doesn't contain HTML tags, capitalize normally
+        if (!vernacularName.includes('<')) {
+            vernacularName = vernacularName.charAt(0).toUpperCase() + vernacularName.slice(1);
+        }
+        // If it contains HTML (like <em>Genus</em> sp.), it's already properly formatted
             
         // Check if we're using scientific name as fallback (no common name available)
         const isUsingScientificName = species.name === species.scientificName;

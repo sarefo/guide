@@ -104,6 +104,68 @@ class iNaturalistAPI {
         }
     }
 
+    async reverseGeocode(lat, lng) {
+        try {
+            console.log('🔍 Reverse geocoding coordinates using Nominatim:', { lat, lng });
+            
+            // Use Nominatim for reverse geocoding (more reliable than iNaturalist)
+            const lang = this.currentLocale || 'en';
+            const nominatimUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=${lang}&zoom=14`;
+            
+            const response = await fetch(nominatimUrl, {
+                headers: {
+                    'User-Agent': 'BiodiversityExplorer/1.0'  // Nominatim requires a User-Agent
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error(`Nominatim request failed: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            console.log('🔍 Nominatim response:', data);
+            
+            if (data && data.display_name) {
+                let locationName = data.display_name;
+                
+                // Try to get a more concise name from the address components
+                if (data.address) {
+                    const addr = data.address;
+                    const parts = [];
+                    
+                    // Add city/town/village
+                    if (addr.city) parts.push(addr.city);
+                    else if (addr.town) parts.push(addr.town);
+                    else if (addr.village) parts.push(addr.village);
+                    else if (addr.municipality) parts.push(addr.municipality);
+                    
+                    // Add state/region
+                    if (addr.state) parts.push(addr.state);
+                    else if (addr.region) parts.push(addr.region);
+                    
+                    // Add country
+                    if (addr.country) parts.push(addr.country);
+                    
+                    if (parts.length > 0) {
+                        locationName = parts.join(', ');
+                    }
+                }
+                
+                console.log('✅ Location name from Nominatim:', locationName);
+                return {
+                    name: locationName,
+                    data: data
+                };
+            }
+            
+            return null;
+            
+        } catch (error) {
+            console.error('Nominatim reverse geocoding failed:', error);
+            return null;
+        }
+    }
+
     async searchTaxa(query, limit = 20, locale = null) {
         try {
             const params = {

@@ -83,7 +83,7 @@ class LocationManager {
 
         // Search input with geocoding
         searchInput?.addEventListener('input', (e) => {
-            this.debounce(() => this.handleSearchInput(e.target.value), 500)();
+            this.debounce(() => this.handleSearchInput(e.target.value), 800)();
         });
 
         // Language change handler
@@ -301,12 +301,30 @@ class LocationManager {
                 accuracy: accuracy
             }));
 
-            // Show location selection for GPS location
-            this.showLocationSelection(latitude, longitude, 'My Location');
+            // Get actual location name using reverse geocoding
+            let locationName = window.i18n?.t('location.myLocation') || 'My Location'; // Fallback with i18n
+            
+            try {
+                if (window.api && window.api.reverseGeocode) {
+                    const geocodeResult = await window.api.reverseGeocode(latitude, longitude);
+                    if (geocodeResult && geocodeResult.name) {
+                        locationName = geocodeResult.name;
+                        console.log('✅ Got location name from reverse geocoding:', locationName);
+                    } else {
+                        console.log('⚠️ No location name from reverse geocoding, using i18n fallback');
+                    }
+                }
+            } catch (error) {
+                console.log('⚠️ Reverse geocoding failed, using i18n fallback:', error);
+                // Continue with i18n fallback name
+            }
+
+            // Show location selection with actual location name
+            this.showLocationSelection(latitude, longitude, locationName);
             
             // Also update the map to show this location
             if (window.mapManager) {
-                window.mapManager.setLocation(latitude, longitude, 'My Location');
+                window.mapManager.setLocation(latitude, longitude, locationName);
             }
 
         } catch (error) {
@@ -364,25 +382,44 @@ class LocationManager {
     handleSearchInput(query) {
         this.currentSearchQuery = query.trim();
         
+        // Handle different input states
+        if (this.currentSearchQuery.length === 0) {
+            // Cancel any ongoing search and clear results
+            if (this.currentSearchController) {
+                this.currentSearchController.abort();
+                this.currentSearchController = null;
+            }
+            this.clearLocationResults();
+            return;
+        }
+        
+        if (this.currentSearchQuery.length < 3) {
+            // Cancel any ongoing search and show prompt
+            if (this.currentSearchController) {
+                this.currentSearchController.abort();
+                this.currentSearchController = null;
+            }
+            this.showSearchPrompt();
+            return;
+        }
+        
+        // Only cancel and start new search if we have enough characters
+        this.performSearch(this.currentSearchQuery);
+    }
+    
+    // Separate method to handle the actual search with proper cancellation
+    async performSearch(query) {
         // Cancel any ongoing search
         if (this.currentSearchController) {
             this.currentSearchController.abort();
             this.currentSearchController = null;
         }
         
-        // Handle different input states
-        if (this.currentSearchQuery.length === 0) {
-            this.clearLocationResults();
-            return;
-        }
-        
-        if (this.currentSearchQuery.length < 3) {
-            this.showSearchPrompt();
-            return;
-        }
+        // Small delay to avoid rapid cancellations
+        await new Promise(resolve => setTimeout(resolve, 50));
         
         // Start new search
-        this.searchLocations(this.currentSearchQuery);
+        this.searchLocations(query);
     }
 
     // Search functionality with proper cancellation and state management

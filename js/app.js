@@ -1,7 +1,10 @@
 class BiodiversityApp {
     constructor() {
-        this.version = '1.0.0';
+        this.version = '1.0.1';
         this.initialized = false;
+        this.updateCheckInterval = null;
+        this.lastUpdateCheck = null;
+        this.updateAvailable = false;
         this.init();
     }
 
@@ -68,7 +71,9 @@ class BiodiversityApp {
     initializeApp() {
         this.setupAppEventListeners();
         this.initializeSharing();
+        this.setupServiceWorkerListeners();
         this.checkForUpdates();
+        this.startPeriodicUpdateChecks();
         
         if (window.locationManager) {
             console.log('🌍 Location manager ready');
@@ -85,6 +90,8 @@ class BiodiversityApp {
                 this.onAppHidden();
             } else {
                 this.onAppVisible();
+                // Check for updates when app becomes visible
+                this.checkForUpdates();
             }
         });
 
@@ -98,6 +105,39 @@ class BiodiversityApp {
                 this.refreshData();
             });
         }
+    }
+
+    setupServiceWorkerListeners() {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.addEventListener('message', (event) => {
+                this.handleServiceWorkerMessage(event.data);
+            });
+        }
+    }
+
+    handleServiceWorkerMessage(data) {
+        console.log('SW message received:', data);
+        
+        switch (data.type) {
+            case 'SW_UPDATE_AVAILABLE':
+                console.log('🔄 Service Worker update available');
+                this.updateAvailable = true;
+                this.showUpdateNotification();
+                break;
+            case 'SW_UPDATE_COMPLETE':
+                console.log('✅ Service Worker update complete');
+                this.hideUpdateNotification();
+                break;
+        }
+    }
+
+    startPeriodicUpdateChecks() {
+        // Check for updates every hour
+        this.updateCheckInterval = setInterval(() => {
+            if (!document.hidden) {
+                this.checkForUpdates();
+            }
+        }, 60 * 60 * 1000); // 1 hour
     }
 
     initializeSharing() {
@@ -300,39 +340,153 @@ class BiodiversityApp {
     }
 
     async checkForUpdates() {
-        if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+        if ('serviceWorker' in navigator) {
             try {
+                this.lastUpdateCheck = new Date();
                 const registration = await navigator.serviceWorker.getRegistration();
+                
                 if (registration) {
+                    // Force update check
+                    await registration.update();
+                    
+                    // Listen for new worker
                     registration.addEventListener('updatefound', () => {
                         const newWorker = registration.installing;
                         if (newWorker) {
                             newWorker.addEventListener('statechange', () => {
                                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                    this.showUpdateAvailable();
+                                    this.updateAvailable = true;
+                                    this.showUpdateNotification();
                                 }
                             });
                         }
                     });
                 }
+                
             } catch (error) {
                 console.error('Update check failed:', error);
             }
         }
     }
 
-    showUpdateAvailable() {
+    async manualUpdateCheck() {
+        this.showUpdateCheckingIndicator();
+        
+        try {
+            await this.checkForUpdates();
+            
+            setTimeout(() => {
+                this.hideUpdateCheckingIndicator();
+                if (!this.updateAvailable) {
+                    this.showNoUpdateMessage();
+                }
+            }, 1000);
+        } catch (error) {
+            this.hideUpdateCheckingIndicator();
+            this.showUpdateError();
+        }
+    }
+
+    showUpdateNotification() {
+        this.hideUpdateNotification(); // Remove any existing notification
+        
         const updateNotification = document.createElement('div');
+        updateNotification.id = 'update-notification';
         updateNotification.innerHTML = `
-            <div style="position: fixed; bottom: 20px; left: 20px; right: 20px; background: #2E7D32; color: white; padding: 1rem; border-radius: 0.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 10000; display: flex; justify-content: space-between; align-items: center;">
-                <span>A new version is available!</span>
-                <button onclick="window.location.reload()" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.25rem; cursor: pointer;">
-                    Update
-                </button>
+            <div class="update-notification">
+                <span data-i18n="update.available">A new version is available!</span>
+                <button id="update-btn" data-i18n="update.button">Update</button>
+                <button id="dismiss-update" aria-label="Dismiss">&times;</button>
             </div>
         `;
         
         document.body.appendChild(updateNotification);
+        
+        // Add event listeners
+        document.getElementById('update-btn').addEventListener('click', () => {
+            this.applyUpdate();
+        });
+        
+        document.getElementById('dismiss-update').addEventListener('click', () => {
+            this.hideUpdateNotification();
+        });
+        
+    }
+
+    hideUpdateNotification() {
+        const notification = document.getElementById('update-notification');
+        if (notification) {
+            notification.remove();
+        }
+    }
+
+    async applyUpdate() {
+        try {
+            const registration = await navigator.serviceWorker.getRegistration();
+            if (registration && registration.waiting) {
+                // Tell the waiting service worker to take over
+                registration.waiting.postMessage({type: 'SKIP_WAITING'});
+                
+                // Listen for the activation
+                navigator.serviceWorker.addEventListener('controllerchange', () => {
+                    window.location.reload();
+                });
+            } else {
+                // Fallback: just reload
+                window.location.reload();
+            }
+        } catch (error) {
+            console.error('Update application failed:', error);
+            window.location.reload();
+        }
+    }
+
+    showUpdateCheckingIndicator() {
+        const indicator = document.createElement('div');
+        indicator.id = 'update-checking';
+        indicator.innerHTML = `
+            <div class="update-checking">
+                <span>Checking for updates...</span>
+            </div>
+        `;
+        document.body.appendChild(indicator);
+    }
+
+    hideUpdateCheckingIndicator() {
+        const indicator = document.getElementById('update-checking');
+        if (indicator) {
+            indicator.remove();
+        }
+    }
+
+    showNoUpdateMessage() {
+        const message = document.createElement('div');
+        message.id = 'no-update-message';
+        message.innerHTML = `
+            <div class="no-update-message">
+                <span>You have the latest version!</span>
+            </div>
+        `;
+        document.body.appendChild(message);
+        
+        setTimeout(() => {
+            message.remove();
+        }, 3000);
+    }
+
+    showUpdateError() {
+        const error = document.createElement('div');
+        error.id = 'update-error';
+        error.innerHTML = `
+            <div class="update-error">
+                <span>Update check failed. Please try again.</span>
+            </div>
+        `;
+        document.body.appendChild(error);
+        
+        setTimeout(() => {
+            error.remove();
+        }, 3000);
     }
 
     getAppInfo() {
@@ -340,7 +494,9 @@ class BiodiversityApp {
             version: this.version,
             initialized: this.initialized,
             online: navigator.onLine,
-            lastUpdateTime: this.lastUpdateTime
+            lastUpdateTime: this.lastUpdateTime,
+            lastUpdateCheck: this.lastUpdateCheck,
+            updateAvailable: this.updateAvailable
         };
     }
 }

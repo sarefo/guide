@@ -53,6 +53,11 @@
   "help.description": "Discover local wildlife through photos. Scan QR codes at nature spots or search any location.",
   "help.usage": "Tap species photos to learn more • Use filters to browse by group • Share locations with the share button",
   "help.data.source": "Species data from iNaturalist - a community of millions of naturalists worldwide.",
+  "help.version": "Version:",
+  "help.checkUpdates": "Check for Updates",
+  "help.lastCheck.now": "Just checked",
+  "help.lastCheck.minutes": "{{minutes}}m ago",
+  "help.lastCheck.hours": "{{hours}}h ago",
   "help.links.visit": "Visit iNaturalist",
   "help.links.donate": "Donate",
   
@@ -66,6 +71,9 @@
   
   "update.available": "A new version is available!",
   "update.button": "Update",
+  "update.checking": "Checking for updates...",
+  "update.none": "You have the latest version!",
+  "update.error": "Update check failed. Please try again.",
   
   "app.failed.title": "App Failed to Load",
   "app.failed.message": "There was a problem starting the application. Please refresh the page.",

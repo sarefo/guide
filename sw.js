@@ -1,5 +1,6 @@
-const CACHE_NAME = 'biodiversity-explorer-v1';
-const API_CACHE_NAME = 'biodiversity-api-v1';
+const VERSION = '1.0.1';
+const CACHE_NAME = `biodiversity-explorer-v${VERSION}`;
+const API_CACHE_NAME = `biodiversity-api-v${VERSION}`;
 
 const STATIC_ASSETS = [
     './',
@@ -24,33 +25,6 @@ const API_ENDPOINTS = [
     'https://static.inaturalist.org/'
 ];
 
-self.addEventListener('install', event => {
-    console.log('Service Worker installing...');
-    event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then(cache => {
-                console.log('Caching static assets');
-                return cache.addAll(STATIC_ASSETS);
-            })
-            .then(() => self.skipWaiting())
-    );
-});
-
-self.addEventListener('activate', event => {
-    console.log('Service Worker activating...');
-    event.waitUntil(
-        caches.keys().then(cacheNames => {
-            return Promise.all(
-                cacheNames.map(cacheName => {
-                    if (cacheName !== CACHE_NAME && cacheName !== API_CACHE_NAME) {
-                        console.log('Deleting old cache:', cacheName);
-                        return caches.delete(cacheName);
-                    }
-                })
-            );
-        }).then(() => self.clients.claim())
-    );
-});
 
 self.addEventListener('fetch', event => {
     const { request } = event;
@@ -181,5 +155,66 @@ self.addEventListener('message', event => {
                 event.ports[0].postMessage({success: true});
             })
         );
+    } else if (event.data && event.data.type === 'CHECK_UPDATE') {
+        event.ports[0].postMessage({
+            version: VERSION,
+            cacheNames: [CACHE_NAME, API_CACHE_NAME]
+        });
+    } else if (event.data && event.data.type === 'SKIP_WAITING') {
+        self.skipWaiting();
+        event.ports[0].postMessage({success: true});
     }
+});
+
+// Notify clients when service worker is updated
+self.addEventListener('install', event => {
+    console.log(`Service Worker v${VERSION} installing...`);
+    event.waitUntil(
+        caches.open(CACHE_NAME)
+            .then(cache => {
+                console.log('Caching static assets');
+                return cache.addAll(STATIC_ASSETS);
+            })
+            .then(() => {
+                // Notify all clients about the update
+                return self.clients.matchAll();
+            })
+            .then(clients => {
+                clients.forEach(client => {
+                    client.postMessage({
+                        type: 'SW_UPDATE_AVAILABLE',
+                        version: VERSION
+                    });
+                });
+                return self.skipWaiting();
+            })
+    );
+});
+
+// Clean up old caches more thoroughly
+self.addEventListener('activate', event => {
+    console.log(`Service Worker v${VERSION} activating...`);
+    event.waitUntil(
+        caches.keys().then(cacheNames => {
+            return Promise.all(
+                cacheNames.map(cacheName => {
+                    if (!cacheName.includes(VERSION)) {
+                        console.log('Deleting old cache:', cacheName);
+                        return caches.delete(cacheName);
+                    }
+                })
+            );
+        }).then(() => {
+            // Notify all clients that update is complete
+            return self.clients.matchAll();
+        }).then(clients => {
+            clients.forEach(client => {
+                client.postMessage({
+                    type: 'SW_UPDATE_COMPLETE',
+                    version: VERSION
+                });
+            });
+            return self.clients.claim();
+        })
+    );
 });

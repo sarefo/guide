@@ -53,6 +53,11 @@
   "help.description": "Découvrez la faune locale avec des photos. Scannez des codes QR dans la nature ou recherchez n'importe quel endroit.",
   "help.usage": "Touchez les photos d'espèces pour en savoir plus • Utilisez les filtres pour parcourir par groupe • Partagez des lieux avec le bouton partager",
   "help.data.source": "Données d'espèces d'iNaturalist - une communauté de millions de naturalistes dans le monde.",
+  "help.version": "Version :",
+  "help.checkUpdates": "Vérifier les mises à jour",
+  "help.lastCheck.now": "Vient de vérifier",
+  "help.lastCheck.minutes": "il y a {{minutes}}m",
+  "help.lastCheck.hours": "il y a {{hours}}h",
   "help.links.visit": "Visiter iNaturalist",
   "help.links.donate": "Faire un don",
   
@@ -67,6 +72,9 @@
   
   "update.available": "Une nouvelle version est disponible !",
   "update.button": "Mettre à jour",
+  "update.checking": "Vérification des mises à jour...",
+  "update.none": "Vous avez la dernière version !",
+  "update.error": "Échec de la vérification des mises à jour. Veuillez réessayer.",
   
   "app.failed.title": "L'App n'a pas Réussi à Charger",
   "app.failed.message": "Il y a eu un problème lors du démarrage de l'application. Veuillez actualiser la page.",

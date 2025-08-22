@@ -53,6 +53,11 @@
   "help.description": "Descubre vida silvestre local con fotos. Escanea códigos QR en sitios naturales o busca cualquier ubicación.",
   "help.usage": "Toca fotos de especies para aprender más • Usa filtros para explorar por grupo • Comparte ubicaciones con el botón compartir",
   "help.data.source": "Datos de especies de iNaturalist - una comunidad de millones de naturalistas en todo el mundo.",
+  "help.version": "Versión:",
+  "help.checkUpdates": "Buscar actualizaciones",
+  "help.lastCheck.now": "Recién verificado",
+  "help.lastCheck.minutes": "hace {{minutes}}m",
+  "help.lastCheck.hours": "hace {{hours}}h",
   "help.links.visit": "Visitar iNaturalist",
   "help.links.donate": "Donar",
   
@@ -67,6 +72,9 @@
   
   "update.available": "¡Una nueva versión está disponible!",
   "update.button": "Actualizar",
+  "update.checking": "Buscando actualizaciones...",
+  "update.none": "¡Tienes la versión más reciente!",
+  "update.error": "Falló la búsqueda de actualizaciones. Por favor intenta de nuevo.",
   
   "app.failed.title": "La App Falló al Cargar",
   "app.failed.message": "Hubo un problema iniciando la aplicación. Por favor actualiza la página.",

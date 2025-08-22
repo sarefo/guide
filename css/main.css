@@ -748,6 +748,155 @@ body {
     color: white !important;
 }
 
+/* Update section in help modal */
+.help-update-section {
+    margin-top: 1rem;
+    padding: 0.5rem 0 0 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+}
+
+.version-text {
+    color: #666;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.version-text #app-version {
+    font-weight: 500;
+    color: #2E7D32;
+}
+
+.update-check-time {
+    font-size: 0.75rem;
+    color: #999;
+}
+
+.update-check-btn {
+    background: transparent;
+    color: #2E7D32;
+    border: 1px solid #2E7D32;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    font-size: 0.75rem;
+    transition: all 0.2s;
+}
+
+.update-check-btn:hover {
+    background: #2E7D32;
+    color: white;
+}
+
+.update-check-btn:disabled {
+    background: transparent;
+    color: #ccc;
+    border-color: #ccc;
+    cursor: not-allowed;
+}
+
+/* Update notification styles */
+.update-notification {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    background: #2E7D32;
+    color: white;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    z-index: 10000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    animation: slideInUp 0.3s ease-out;
+}
+
+.update-notification span {
+    flex: 1;
+}
+
+.update-notification button {
+    background: rgba(255,255,255,0.2);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    margin-left: 0.5rem;
+    transition: background-color 0.2s;
+}
+
+.update-notification button:hover {
+    background: rgba(255,255,255,0.3);
+}
+
+.update-notification #dismiss-update {
+    background: transparent;
+    padding: 0.25rem 0.5rem;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+/* Update status messages */
+.update-checking,
+.no-update-message,
+.update-error {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    color: #333;
+    padding: 1rem 2rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    z-index: 10001;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.update-checking {
+    background: #E3F2FD;
+    border-left: 4px solid #2196F3;
+}
+
+.no-update-message {
+    background: #E8F5E8;
+    border-left: 4px solid #4CAF50;
+}
+
+.update-error {
+    background: #FFEBEE;
+    border-left: 4px solid #F44336;
+}
+
+@keyframes slideInUp {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
 @media (max-width: 640px) {
     .help-modal {
         padding: 1rem 0.5rem;

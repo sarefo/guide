@@ -205,13 +205,55 @@ class LocationManager {
     }
 
     openHelpModal() {
-        console.log('📖 Opening help modal from location.js...');
         const modal = document.getElementById('help-modal');
         if (modal) {
             modal.style.display = 'flex';
-            console.log('✅ Help modal displayed successfully');
-        } else {
-            console.error('❌ Help modal not found!');
+            setTimeout(() => {
+                this.updateHelpModalInfo();
+            }, 100);
+        }
+    }
+
+    updateHelpModalInfo() {
+        const versionEl = document.getElementById('app-version');
+        const lastCheckEl = document.getElementById('last-update-check');
+        const updateBtn = document.getElementById('manual-update-btn');
+        
+        if (window.app && window.app.getAppInfo) {
+            try {
+                const appInfo = window.app.getAppInfo();
+                
+                if (versionEl && appInfo.version) {
+                    versionEl.textContent = appInfo.version;
+                }
+                
+                if (lastCheckEl && appInfo.lastUpdateCheck) {
+                    const lastCheck = new Date(appInfo.lastUpdateCheck);
+                    const diffMinutes = Math.floor((Date.now() - lastCheck) / (1000 * 60));
+                    
+                    let timeText = '';
+                    if (diffMinutes < 1) {
+                        timeText = 'Just checked';
+                    } else if (diffMinutes < 60) {
+                        timeText = `${diffMinutes}m ago`;
+                    } else {
+                        timeText = `${Math.floor(diffMinutes / 60)}h ago`;
+                    }
+                    
+                    lastCheckEl.textContent = `(${timeText})`;
+                }
+            } catch (error) {
+                // Silently fail
+            }
+        }
+        
+        if (updateBtn && !updateBtn.hasAttribute('data-listener-added')) {
+            updateBtn.addEventListener('click', () => {
+                if (window.app && window.app.manualUpdateCheck) {
+                    window.app.manualUpdateCheck();
+                }
+            });
+            updateBtn.setAttribute('data-listener-added', 'true');
         }
     }
 

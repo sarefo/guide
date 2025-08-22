@@ -42,7 +42,7 @@ This is a **mobile-first Progressive Web App** for displaying location-based bio
 
 ## Development Environment
 - **Local server already running** on port 8000 (python3 -m http.server 8000)
-- Access app at: http://localhost:8000
+- Access app at: http://localhost:8000/guide
 - No need to start new server unless explicitly stopped
 
 ## Version Management

@@ -70,8 +70,10 @@
   "notification.refresh.failed": "Actualización falló. Inténtalo de nuevo.",
   "notification.error": "Ocurrió un error. Por favor actualiza la página.",
   
-  "update.available": "¡Una nueva versión está disponible!",
-  "update.button": "Actualizar",
+  "update.available": "¡Nueva versión disponible!",
+  "update.description": "Haga clic en Actualizar para recargar con las últimas funciones",
+  "update.button": "Actualizar Ahora",
+  "update.updating": "Actualizando aplicación... Espere por favor.",
   "update.checking": "Buscando actualizaciones...",
   "update.none": "¡Tienes la versión más reciente!",
   "update.error": "Falló la búsqueda de actualizaciones. Por favor intenta de nuevo.",

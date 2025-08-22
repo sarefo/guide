@@ -70,8 +70,10 @@
   "notification.refresh.failed": "Actualisation échouée. Réessayez.",
   "notification.error": "Une erreur s'est produite. Veuillez actualiser la page.",
   
-  "update.available": "Une nouvelle version est disponible !",
-  "update.button": "Mettre à jour",
+  "update.available": "Nouvelle version disponible !",
+  "update.description": "Cliquez sur Mettre à jour pour recharger avec les dernières fonctionnalités",
+  "update.button": "Mettre à Jour Maintenant",
+  "update.updating": "Mise à jour de l'application... Veuillez patienter.",
   "update.checking": "Vérification des mises à jour...",
   "update.none": "Vous avez la dernière version !",
   "update.error": "Échec de la vérification des mises à jour. Veuillez réessayer.",

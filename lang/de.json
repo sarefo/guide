@@ -70,8 +70,10 @@
   "notification.refresh.failed": "Aktualisierung fehlgeschlagen. Bitte erneut versuchen.",
   "notification.error": "Ein Fehler ist aufgetreten. Bitte laden Sie die Seite neu.",
   
-  "update.available": "Eine neue Version ist verfügbar!",
-  "update.button": "Aktualisieren",
+  "update.available": "Neue Version verfügbar!",
+  "update.description": "Klicken Sie auf Aktualisieren, um mit den neuesten Funktionen neu zu laden",
+  "update.button": "Jetzt Aktualisieren",
+  "update.updating": "App wird aktualisiert... Bitte warten.",
   "update.checking": "Suche nach Updates...",
   "update.none": "Sie haben die neueste Version!",
   "update.error": "Update-Suche fehlgeschlagen. Bitte erneut versuchen.",

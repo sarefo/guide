@@ -395,15 +395,20 @@ class BiodiversityApp {
         updateNotification.innerHTML = `
             <div class="update-notification">
                 <div class="update-message">
-                    <strong>🔄 New version available!</strong>
-                    <br><small>Click Update to reload with the latest features</small>
+                    <strong data-i18n="update.available">New version available!</strong>
+                    <br><small data-i18n="update.description">Click Update to reload with the latest features</small>
                 </div>
-                <button id="update-btn" class="update-btn-primary">Update Now</button>
+                <button id="update-btn" class="update-btn-primary" data-i18n="update.button">Update Now</button>
                 <button id="dismiss-update" class="update-btn-dismiss" aria-label="Dismiss">&times;</button>
             </div>
         `;
 
         document.body.appendChild(updateNotification);
+
+        // Apply i18n to the dynamically created content
+        if (window.i18n) {
+            window.i18n.translatePage();
+        }
 
         // Add event listeners
         document.getElementById('update-btn').addEventListener('click', () => {
@@ -463,10 +468,15 @@ class BiodiversityApp {
         indicator.id = 'updating-indicator';
         indicator.innerHTML = `
             <div class="update-checking">
-                <span>Updating app... Please wait.</span>
+                <span data-i18n="update.updating">Updating app... Please wait.</span>
             </div>
         `;
         document.body.appendChild(indicator);
+        
+        // Apply i18n to the dynamically created content
+        if (window.i18n) {
+            window.i18n.translatePage();
+        }
     }
 
     showUpdateCheckingIndicator() {
@@ -474,10 +484,15 @@ class BiodiversityApp {
         indicator.id = 'update-checking';
         indicator.innerHTML = `
             <div class="update-checking">
-                <span>Checking for updates...</span>
+                <span data-i18n="update.checking">Checking for updates...</span>
             </div>
         `;
         document.body.appendChild(indicator);
+        
+        // Apply i18n to the dynamically created content
+        if (window.i18n) {
+            window.i18n.translatePage();
+        }
     }
 
     hideUpdateCheckingIndicator() {
@@ -492,10 +507,15 @@ class BiodiversityApp {
         message.id = 'no-update-message';
         message.innerHTML = `
             <div class="no-update-message">
-                <span>You have the latest version!</span>
+                <span data-i18n="update.none">You have the latest version!</span>
             </div>
         `;
         document.body.appendChild(message);
+        
+        // Apply i18n to the dynamically created content
+        if (window.i18n) {
+            window.i18n.translatePage();
+        }
 
         setTimeout(() => {
             message.remove();
@@ -507,10 +527,15 @@ class BiodiversityApp {
         error.id = 'update-error';
         error.innerHTML = `
             <div class="update-error">
-                <span>Update check failed. Please try again.</span>
+                <span data-i18n="update.error">Update check failed. Please try again.</span>
             </div>
         `;
         document.body.appendChild(error);
+        
+        // Apply i18n to the dynamically created content
+        if (window.i18n) {
+            window.i18n.translatePage();
+        }
 
         setTimeout(() => {
             error.remove();

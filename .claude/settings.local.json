@@ -15,7 +15,8 @@
       "Bash(git add:*)",
       "mcp__puppeteer__puppeteer_evaluate",
       "mcp__puppeteer__puppeteer_fill",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(git push:*)"
     ],
     "deny": [],
     "ask": []

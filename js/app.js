@@ -1,6 +1,6 @@
 class BiodiversityApp {
     constructor() {
-        this.version = '1.0.18'; // UPDATE THIS VERSION IN sw.js TOO!
+        this.version = '1.0.19'; // UPDATE THIS VERSION IN sw.js TOO!
         this.initialized = false;
         this.updateCheckInterval = null;
         this.lastUpdateCheck = null;
@@ -85,8 +85,11 @@ class BiodiversityApp {
                 this.onAppHidden();
             } else {
                 this.onAppVisible();
-                // Check for updates when app becomes visible
-                this.checkForUpdates();
+                // Only check for updates if significant time has passed (30+ minutes)
+                const timeSinceLastCheck = Date.now() - (this.lastUpdateCheck?.getTime() || 0);
+                if (timeSinceLastCheck > 30 * 60 * 1000) { // 30 minutes
+                    this.checkForUpdates();
+                }
             }
         });
 
@@ -129,12 +132,12 @@ class BiodiversityApp {
     }
 
     startPeriodicUpdateChecks() {
-        // Check for updates every hour
+        // Check for updates every 4 hours (less aggressive)
         this.updateCheckInterval = setInterval(() => {
             if (!document.hidden) {
                 this.checkForUpdates();
             }
-        }, 60 * 60 * 1000); // 1 hour
+        }, 4 * 60 * 60 * 1000); // 4 hours
     }
 
     initializeSharing() {
@@ -312,10 +315,13 @@ class BiodiversityApp {
     onAppVisible() {
         if (this.initialized && navigator.onLine) {
             const timeSinceLastUpdate = Date.now() - (this.lastUpdateTime || 0);
-            const updateInterval = 5 * 60 * 1000; // 5 minutes
+            const updateInterval = 15 * 60 * 1000; // 15 minutes (less aggressive)
 
             if (timeSinceLastUpdate > updateInterval) {
-                this.refreshData();
+                // Only refresh if data is actually stale
+                if (window.speciesManager && !window.speciesManager.currentSpecies.length) {
+                    this.refreshData();
+                }
             }
         }
     }

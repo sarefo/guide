@@ -150,7 +150,7 @@ class LocationManager {
     
     async waitForDependencies() {
         const maxWait = 3000;
-        const checkInterval = 50;
+        const checkInterval = 100; // Reduced frequency
         let waited = 0;
 
         while (waited < maxWait) {
@@ -277,6 +277,18 @@ class LocationManager {
                     radius: this.currentLocation.radius,
                     timestamp: Date.now()
                 };
+                
+                // Only save if location has actually changed
+                const existing = localStorage.getItem('savedLocation');
+                if (existing) {
+                    const existingData = JSON.parse(existing);
+                    if (Math.abs(existingData.lat - locationData.lat) < 0.001 && 
+                        Math.abs(existingData.lng - locationData.lng) < 0.001 &&
+                        existingData.name === locationData.name) {
+                        return; // Same location, skip save
+                    }
+                }
+                
                 localStorage.setItem('savedLocation', JSON.stringify(locationData));
                 console.log('📍 Location saved to storage:', locationData.name);
             } catch (error) {
@@ -318,8 +330,12 @@ class LocationManager {
 
     saveLanguageToStorage(lang) {
         try {
-            localStorage.setItem('savedLanguage', lang);
-            console.log('🌐 Language saved to storage:', lang);
+            // Only save if language has changed
+            const currentLang = localStorage.getItem('savedLanguage');
+            if (currentLang !== lang) {
+                localStorage.setItem('savedLanguage', lang);
+                console.log('🌐 Language saved to storage:', lang);
+            }
         } catch (error) {
             console.warn('Failed to save language to storage:', error);
         }
@@ -340,12 +356,20 @@ class LocationManager {
 
     saveLifeGroupToStorage(lifeGroup) {
         try {
+            const currentLifeGroup = localStorage.getItem('savedLifeGroup');
+            
             if (lifeGroup && lifeGroup !== 'all') {
-                localStorage.setItem('savedLifeGroup', lifeGroup);
-                console.log('🦋 Life group saved to storage:', lifeGroup);
+                // Only save if life group has changed
+                if (currentLifeGroup !== lifeGroup) {
+                    localStorage.setItem('savedLifeGroup', lifeGroup);
+                    console.log('🦋 Life group saved to storage:', lifeGroup);
+                }
             } else {
-                localStorage.removeItem('savedLifeGroup');
-                console.log('🦋 Life group cleared from storage (all selected)');
+                // Only remove if there was something to remove
+                if (currentLifeGroup) {
+                    localStorage.removeItem('savedLifeGroup');
+                    console.log('🦋 Life group cleared from storage (all selected)');
+                }
             }
         } catch (error) {
             console.warn('Failed to save life group to storage:', error);

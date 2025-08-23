@@ -1,4 +1,4 @@
-const VERSION = '1.0.18'; // UPDATE THIS VERSION IN app.js TOO!
+const VERSION = '1.0.19'; // UPDATE THIS VERSION IN app.js TOO!
 const CACHE_NAME = `biodiversity-explorer-v${VERSION}`;
 const API_CACHE_NAME = `biodiversity-api-v${VERSION}`;
 
@@ -132,7 +132,7 @@ function isStale(response) {
     if (!cachedAt) return false;
 
     const cacheAge = Date.now() - parseInt(cachedAt);
-    const maxAge = 10 * 60 * 1000; // 10 minutes for API responses
+    const maxAge = 15 * 60 * 1000; // 15 minutes for API responses
 
     return cacheAge > maxAge;
 }
@@ -184,20 +184,34 @@ self.addEventListener('install', event => {
                 return cache.addAll(STATIC_ASSETS);
             })
             .then(() => {
-                // Only notify about updates if there are existing clients and this isn't initial install
-                return self.clients.matchAll();
+                // Check if this is actually an update, not initial install
+                return Promise.all([
+                    self.clients.matchAll(),
+                    caches.keys()
+                ]);
             })
-            .then(clients => {
+            .then(([clients, cacheNames]) => {
                 // Only send update notification if:
                 // 1. We have existing clients (not initial install)
-                // 2. There's already an active service worker (this is an update)
-                if (clients.length > 0 && self.registration.active) {
+                // 2. There are existing caches with different versions (this is an update)
+                // 3. There's already an active service worker (this is an update)
+                const hasExistingCaches = cacheNames.some(name => 
+                    name.startsWith('biodiversity-explorer-v') && !name.includes(VERSION)
+                );
+                
+                const isActualUpdate = clients.length > 0 && 
+                                     (hasExistingCaches || self.registration.active);
+                
+                if (isActualUpdate) {
+                    console.log('🔄 SW: Notifying clients of update to version:', VERSION);
                     clients.forEach(client => {
                         client.postMessage({
                             type: 'SW_UPDATE_AVAILABLE',
                             version: VERSION
                         });
                     });
+                } else {
+                    console.log('📦 SW: Initial install, no update notification sent');
                 }
                 // Don't auto-skipWaiting - let user decide when to update
             })

@@ -9,6 +9,9 @@ class SpeciesManager {
         this.loadPromise = null; // Track current loading promise
         this.customTaxa = new Map(); // Store multiple custom taxa {id -> {name, rank}}
         this.predefinedIconicTaxa = ['all', '3', '40151', '47126', '47158', '47119', '26036', '20978', '47178', '47170', '47115'];
+        this.lastLoadTime = null; // Track when data was last loaded
+        this.lastLoadLocation = null; // Track location of last load
+        this.lastLoadFilter = null; // Track filter of last load
         this.loadCustomTaxaFromStorage();
         this.init();
     }
@@ -102,14 +105,20 @@ class SpeciesManager {
             this.loadPromise = null;
         }
         
+        // Check if we already have fresh data for this location and filter
+        if (this.isDataFresh()) {
+            console.log('📅 Using fresh species data, skipping reload');
+            return;
+        }
+        
         // Set loading immediately to prevent multiple calls
         this.loading = true;
         this.showLoadingOverlay();
         
-        // Debounce the actual loading by 150ms
+        // Debounce the actual loading by 300ms (increased)
         this.loadTimeout = setTimeout(() => {
             this._performLoad();
-        }, 150);
+        }, 300);
     }
 
     async _performLoad() {
@@ -204,6 +213,11 @@ class SpeciesManager {
                 this.currentSpecies = speciesData.map(species => 
                     window.api.formatSpeciesData(species)
                 );
+
+                // Update load tracking
+                this.lastLoadTime = Date.now();
+                this.lastLoadLocation = JSON.stringify(this.currentLocation);
+                this.lastLoadFilter = this.currentFilter;
 
                 this.displaySpecies();
                 
@@ -905,6 +919,25 @@ class SpeciesManager {
         
         // Ensure all filter button translations are properly applied
         this.ensureFilterButtonsTranslated();
+    }
+
+    isDataFresh() {
+        // Check if we have recent data for the same location and filter
+        if (!this.lastLoadTime || !this.currentLocation) {
+            return false;
+        }
+        
+        // Data is fresh if:
+        // 1. Loaded within last 10 minutes
+        // 2. Same location (within reasonable precision)
+        // 3. Same filter
+        const timeSinceLoad = Date.now() - this.lastLoadTime;
+        const dataAge = 10 * 60 * 1000; // 10 minutes
+        
+        const sameLocation = this.lastLoadLocation === JSON.stringify(this.currentLocation);
+        const sameFilter = this.lastLoadFilter === this.currentFilter;
+        
+        return timeSinceLoad < dataAge && sameLocation && sameFilter && this.currentSpecies.length > 0;
     }
 
     ensureFilterButtonsTranslated() {

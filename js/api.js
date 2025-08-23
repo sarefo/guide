@@ -191,20 +191,40 @@ class iNaturalistAPI {
             page = 1,
             quality = 'research',
             photos = true,
-            includeGenusLevel = true
+            includeGenusLevel = true,
+            locationData = null  // New parameter to pass country information
         } = options;
 
         try {
-            const baseParams = {
-                lat: lat,
-                lng: lng,
-                radius: radius,
-                per_page: perPage,
-                page: page,
-                locale: locale,
-                verifiable: true,
-                quality_grade: quality
-            };
+            // Check if this is a country with iNaturalist place_id
+            const isCountryWithPlace = locationData && locationData.isCountry && locationData.inatPlaceId;
+            
+            let baseParams;
+            
+            if (isCountryWithPlace) {
+                // Use place_id for countries to get proper boundary coverage
+                console.log(`🌍 Using iNat place_id ${locationData.inatPlaceId} for country "${locationData.name}"`);
+                baseParams = {
+                    place_id: locationData.inatPlaceId,
+                    per_page: perPage,
+                    page: page,
+                    locale: locale,
+                    verifiable: true,
+                    quality_grade: quality
+                };
+            } else {
+                // Use lat/lng/radius for cities and regions
+                baseParams = {
+                    lat: lat,
+                    lng: lng,
+                    radius: radius,
+                    per_page: perPage,
+                    page: page,
+                    locale: locale,
+                    verifiable: true,
+                    quality_grade: quality
+                };
+            }
 
             if (iconicTaxonId && iconicTaxonId !== 'all') {
                 baseParams.iconic_taxa = iconicTaxonId;
@@ -216,9 +236,12 @@ class iNaturalistAPI {
                 baseParams.photos = 'true';
             }
 
-            // Use lat/lng + filter type as unique request key to cancel previous requests
+            // Create unique request key to cancel previous requests
             const filterKey = iconicTaxonId || taxonId || 'all';
-            const requestKey = `species_${lat}_${lng}_${filterKey}`;
+            const locationKey = isCountryWithPlace ? 
+                `place_${locationData.inatPlaceId}` : 
+                `${lat}_${lng}`;
+            const requestKey = `species_${locationKey}_${filterKey}`;
             
             if (includeGenusLevel && !taxonId) {
                 // Only use rank filtering for iconic taxa, not custom taxa
@@ -261,9 +284,6 @@ class iNaturalistAPI {
                 
                 // Get genus-level observations separately (without quality_grade restriction)
                 const genusParams = {
-                    lat: lat,
-                    lng: lng,
-                    radius: radius,
                     taxon_id: taxonId,
                     hrank: 'genus',
                     lrank: 'genus',
@@ -271,6 +291,15 @@ class iNaturalistAPI {
                     locale: locale,
                     verifiable: true
                 };
+                
+                // Add location parameters based on type
+                if (isCountryWithPlace) {
+                    genusParams.place_id = locationData.inatPlaceId;
+                } else {
+                    genusParams.lat = lat;
+                    genusParams.lng = lng;
+                    genusParams.radius = radius;
+                }
                 
                 if (photos) {
                     genusParams.photos = 'true';

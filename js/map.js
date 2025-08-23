@@ -230,7 +230,12 @@ class MapManager {
                     lng: parseFloat(item.lon),
                     name: formattedName,
                     display_name: formattedName,
-                    bbox: item.boundingbox
+                    bbox: item.boundingbox,
+                    // Include Nominatim metadata for country detection
+                    osm_type: item.osm_type,
+                    class: item.class,
+                    type: item.type,
+                    place_rank: item.place_rank
                 };
             });
             

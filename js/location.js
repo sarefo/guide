@@ -103,6 +103,7 @@ class LocationManager {
         const name = urlParams.get('name') || urlParams.get('location');
         const urlLang = urlParams.get('lang');
         const lifeGroup = urlParams.get('life_group');
+        const isCountry = urlParams.get('country') === 'true';
         
         await this.waitForDependencies();
         
@@ -124,7 +125,9 @@ class LocationManager {
         
         if (lat && lng) {
             // New coordinate-based URL
-            await this.loadLocationFromCoordinates(parseFloat(lat), parseFloat(lng), name);
+            // Create metadata object for country detection from URL parameter
+            const metadata = isCountry ? { type: 'country', class: 'place' } : {};
+            await this.loadLocationFromCoordinates(parseFloat(lat), parseFloat(lng), name, metadata);
         } else {
             // Check for legacy place_id format
             const placeId = urlParams.get('place_id');
@@ -135,10 +138,13 @@ class LocationManager {
                 const savedLocation = this.loadLocationFromStorage();
                 if (savedLocation) {
                     console.log('📍 Using saved location for PWA launch');
+                    // Create metadata from saved country flag
+                    const metadata = savedLocation.isCountry ? { type: 'country', class: 'place' } : {};
                     await this.loadLocationFromCoordinates(
                         savedLocation.lat, 
                         savedLocation.lng, 
-                        savedLocation.name
+                        savedLocation.name,
+                        metadata
                     );
                 } else {
                     // No saved location - open location modal for user to choose
@@ -164,8 +170,13 @@ class LocationManager {
         console.warn('Dependencies not fully loaded, proceeding anyway');
     }
 
-    async loadLocationFromCoordinates(lat, lng, name = null) {
+    async loadLocationFromCoordinates(lat, lng, name = null, metadata = {}) {
         try {
+            
+            // Detect if this is a country based on Nominatim metadata
+            const isCountry = metadata.type === 'country' || 
+                             (metadata.class === 'place' && metadata.type === 'country') ||
+                             (metadata.class === 'boundary' && metadata.type === 'administrative' && metadata.place_rank <= 4);
             
             // Create location object
             this.currentLocation = {
@@ -173,8 +184,16 @@ class LocationManager {
                 lng: lng,
                 radius: this.radius,
                 name: name || `${lat.toFixed(4)}, ${lng.toFixed(4)}`,
-                source: 'coordinates'
+                source: 'coordinates',
+                isCountry: isCountry,
+                metadata: metadata
             };
+            
+            // If this is a country, try to find matching iNaturalist place_id
+            if (isCountry && window.api) {
+                this.currentLocation.inatPlaceId = await this.findINaturalistPlace(name);
+                console.log(`🌍 Country "${name}" detected, iNat place_id: ${this.currentLocation.inatPlaceId}`);
+            }
             
             // Save location to localStorage for PWA persistence
             this.saveLocationToStorage();
@@ -275,6 +294,7 @@ class LocationManager {
                     lng: this.currentLocation.lng,
                     name: this.currentLocation.name,
                     radius: this.currentLocation.radius,
+                    isCountry: this.currentLocation.isCountry,
                     timestamp: Date.now()
                 };
                 
@@ -619,8 +639,15 @@ class LocationManager {
 
         const resultsHTML = places.map(place => {
             const name = place.display_name || place.name;
+            // Store Nominatim metadata for country detection
+            const metadata = JSON.stringify({
+                type: place.type,
+                class: place.class,
+                osm_type: place.osm_type,
+                place_rank: place.place_rank
+            });
             return `
-                <div class="location-result" data-lat="${place.lat}" data-lng="${place.lng}" data-name="${name}">
+                <div class="location-result" data-lat="${place.lat}" data-lng="${place.lng}" data-name="${name}" data-metadata="${metadata.replace(/"/g, '&quot;')}">
                     <div class="location-info">
                         <h3 class="location-result-name">${name}</h3>
                     </div>
@@ -639,7 +666,16 @@ class LocationManager {
                 const lat = parseFloat(resultEl.dataset.lat);
                 const lng = parseFloat(resultEl.dataset.lng);
                 const name = resultEl.dataset.name;
-                this.selectLocationFromSearch(lat, lng, name);
+                const metadataStr = resultEl.dataset.metadata;
+                
+                let metadata = {};
+                try {
+                    metadata = JSON.parse(metadataStr.replace(/&quot;/g, '"'));
+                } catch (error) {
+                    console.warn('Failed to parse location metadata:', error);
+                }
+                
+                this.selectLocationFromSearch(lat, lng, name, metadata);
             }
         };
     }
@@ -678,9 +714,9 @@ class LocationManager {
         this.searchState = 'idle';
     }
 
-    async selectLocationFromSearch(lat, lng, name) {
+    async selectLocationFromSearch(lat, lng, name, metadata = {}) {
         // Show location selection instead of immediately loading
-        this.showLocationSelection(lat, lng, name);
+        this.showLocationSelection(lat, lng, name, metadata);
         
         // Also update the map to show this location
         if (window.mapManager) {
@@ -720,7 +756,7 @@ class LocationManager {
     }
 
     // Show location selection confirmation
-    showLocationSelection(lat, lng, name) {
+    showLocationSelection(lat, lng, name, metadata = {}) {
         
         // Update search field
         const searchInput = document.getElementById('location-search');
@@ -750,8 +786,8 @@ class LocationManager {
             console.error('🎯 Missing confirmation elements!');
         }
 
-        // Store pending location
-        this.pendingLocation = { lat, lng, name };
+        // Store pending location with metadata for country detection
+        this.pendingLocation = { lat, lng, name, metadata };
         
         // Clear and hide search results
         this.clearLocationResults();
@@ -764,7 +800,8 @@ class LocationManager {
             await this.loadLocationFromCoordinates(
                 this.pendingLocation.lat,
                 this.pendingLocation.lng,
-                this.pendingLocation.name
+                this.pendingLocation.name,
+                this.pendingLocation.metadata || {}
             );
             
             // Close modal
@@ -795,6 +832,13 @@ class LocationManager {
         url.searchParams.set('lat', this.currentLocation.lat.toFixed(3));
         url.searchParams.set('lng', this.currentLocation.lng.toFixed(3));
         url.searchParams.set('name', this.currentLocation.name);
+        
+        // Add country flag for proper boundary handling
+        if (this.currentLocation.isCountry) {
+            url.searchParams.set('country', 'true');
+        } else {
+            url.searchParams.delete('country');
+        }
         
         // Remove legacy place_id parameter
         url.searchParams.delete('place_id');
@@ -1047,6 +1091,49 @@ class LocationManager {
     getCurrentLifeGroup() {
         const urlParams = new URLSearchParams(window.location.search);
         return urlParams.get('life_group');
+    }
+    
+    // Search iNaturalist for a place matching the country name
+    async findINaturalistPlace(countryName) {
+        if (!window.api || !countryName) {
+            return null;
+        }
+        
+        try {
+            // Extract just the country name (remove region info if present)
+            const searchName = countryName.split(',')[0].trim();
+            
+            const places = await window.api.searchPlaces(searchName, 5);
+            
+            // Look for an exact country match
+            const countryPlace = places.find(place => {
+                // Check if this place represents a country
+                return place.place_type === 12 || // Country place type
+                       place.name.toLowerCase() === searchName.toLowerCase() ||
+                       (place.display_name && place.display_name.toLowerCase().includes(searchName.toLowerCase()));
+            });
+            
+            if (countryPlace) {
+                console.log(`✅ Found iNat place for "${searchName}":`, countryPlace);
+                return countryPlace.id;
+            }
+            
+            // If no exact match, try the first result if it seems relevant
+            if (places.length > 0) {
+                const firstPlace = places[0];
+                if (firstPlace.name.toLowerCase().includes(searchName.toLowerCase())) {
+                    console.log(`⚠️ Using best match for "${searchName}":`, firstPlace);
+                    return firstPlace.id;
+                }
+            }
+            
+            console.log(`❌ No iNat place found for "${searchName}"`);
+            return null;
+            
+        } catch (error) {
+            console.error(`Failed to find iNat place for "${countryName}":`, error);
+            return null;
+        }
     }
 }
 

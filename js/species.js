@@ -186,7 +186,8 @@ class SpeciesManager {
                 locale: this.currentLocale,
                 perPage: 50,
                 quality: 'research',
-                photos: true
+                photos: true,
+                locationData: this.currentLocation  // Pass full location data for country detection
             };
 
             // Determine if we're using iconic taxa or custom taxon

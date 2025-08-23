@@ -1,6 +1,6 @@
 class BiodiversityApp {
     constructor() {
-        this.version = '1.0.19'; // UPDATE THIS VERSION IN sw.js TOO!
+        this.version = '1.0.20'; // UPDATE THIS VERSION IN sw.js TOO!
         this.initialized = false;
         this.updateCheckInterval = null;
         this.lastUpdateCheck = null;

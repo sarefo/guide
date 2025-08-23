@@ -64,10 +64,19 @@ class QRManager {
             };
         }
 
-        modal.style.display = 'flex';
+        // Use unified modal manager
+        if (window.modalManager) {
+            window.modalManager.openModal(modal);
+        } else {
+            modal.style.display = 'flex';
+        }
 
         const closeModal = () => {
-            modal.style.display = 'none';
+            if (window.modalManager) {
+                window.modalManager.closeModal(modal);
+            } else {
+                modal.style.display = 'none';
+            }
         };
 
         modal.addEventListener('click', (e) => {

@@ -1,6 +1,6 @@
 class BiodiversityApp {
     constructor() {
-        this.version = '1.0.17'; // UPDATE THIS VERSION IN sw.js TOO!
+        this.version = '1.0.18'; // UPDATE THIS VERSION IN sw.js TOO!
         this.initialized = false;
         this.updateCheckInterval = null;
         this.lastUpdateCheck = null;
@@ -578,11 +578,14 @@ class BiodiversityApp {
 class ModalManager {
     constructor() {
         this.openModals = new Set();
+        this.modalHistoryStates = new Map();
+        this.historyStateCounter = 0;
         this.init();
     }
 
     init() {
         this.setupGlobalEventListeners();
+        this.setupHistoryHandling();
     }
 
     setupGlobalEventListeners() {
@@ -603,17 +606,45 @@ class ModalManager {
         });
     }
 
+    setupHistoryHandling() {
+        // Listen for popstate events (Android back button, browser back button)
+        window.addEventListener('popstate', (e) => {
+            // If we have open modals, close the top one instead of navigating back
+            if (this.openModals.size > 0) {
+                e.preventDefault();
+                this.closeTopModalFromHistory();
+                return false;
+            }
+            // If no modals are open, let the default behavior happen (handled by LocationManager)
+        });
+    }
+
     openModal(modal) {
         if (modal) {
             modal.style.display = 'flex';
             this.openModals.add(modal);
+            
+            // Push a history state for Android back button handling
+            const stateId = `modal-${this.historyStateCounter++}`;
+            const currentState = history.state || {};
+            history.pushState({ ...currentState, modalId: stateId }, '', window.location.href);
+            this.modalHistoryStates.set(modal, stateId);
         }
     }
 
-    closeModal(modal) {
+    closeModal(modal, fromHistory = false) {
         if (modal) {
             modal.style.display = 'none';
             this.openModals.delete(modal);
+            
+            // Only navigate history if not already triggered by history navigation
+            if (!fromHistory) {
+                const stateId = this.modalHistoryStates.get(modal);
+                if (stateId && history.state && history.state.modalId === stateId) {
+                    history.back();
+                }
+            }
+            this.modalHistoryStates.delete(modal);
 
             // Clear search input and results if present
             const searchInput = modal.querySelector('input[type="text"]');
@@ -634,6 +665,15 @@ class ModalManager {
             const modalsArray = Array.from(this.openModals);
             const topModal = modalsArray[modalsArray.length - 1];
             this.closeModal(topModal);
+        }
+    }
+
+    closeTopModalFromHistory() {
+        // Close the most recently opened modal (triggered by history navigation)
+        if (this.openModals.size > 0) {
+            const modalsArray = Array.from(this.openModals);
+            const topModal = modalsArray[modalsArray.length - 1];
+            this.closeModal(topModal, true);
         }
     }
 

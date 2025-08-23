@@ -63,8 +63,15 @@
 /* Mobile map optimizations */
 @media screen and (max-width: 767px) {
     .location-map {
-        height: 150px;
+        height: max(200px, min(35vh, 300px));
         margin-bottom: 0.75rem;
+        min-height: 180px;
+    }
+    
+    .location-modal .location-map {
+        height: calc(100% - 200px);
+        min-height: 180px;
+        flex: 1;
     }
     
     .my-location-btn {
@@ -390,6 +397,15 @@
     }
     
     /* Very small screen modal optimizations */
+    .location-modal .modal-content {
+        height: min(95vh, 500px);
+    }
+    
+    .location-modal .location-map {
+        height: calc(100% - 160px);
+        min-height: 120px;
+    }
+    
     .species-modal {
         padding: 0.25rem;
         padding-top: 2vh;

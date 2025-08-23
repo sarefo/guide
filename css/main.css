@@ -334,10 +334,15 @@ body {
     height: 100%;
     background: rgba(0, 0, 0, 0.8);
     z-index: 1000;
-    align-items: flex-start;
+    align-items: center;
     justify-content: center;
     padding: 1rem;
-    padding-top: 20vh;
+}
+
+/* Location modal specific layout */
+.location-modal {
+    align-items: flex-start;
+    padding-top: max(2vh, 1rem);
 }
 
 .modal-content {
@@ -345,10 +350,18 @@ body {
     border-radius: 1rem;
     max-width: 600px;
     width: 100%;
-    max-height: 90vh;
-    overflow: auto;
+    max-height: 95vh;
+    display: flex;
+    flex-direction: column;
     position: relative;
     animation: modalSlideIn 0.3s ease;
+    overflow: hidden;
+}
+
+/* Location modal content specific sizing */
+.location-modal .modal-content {
+    height: min(85vh, 700px);
+    max-height: 95vh;
 }
 
 @keyframes modalSlideIn {
@@ -385,6 +398,16 @@ body {
 
 .modal-body {
     padding: 2rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+/* Location modal body with proper flex layout */
+.location-modal .modal-body {
+    gap: 1rem;
+    overflow-y: auto;
 }
 
 .modal-body h2 {
@@ -400,6 +423,7 @@ body {
     border-radius: 0.5rem;
     font-size: 1rem;
     margin-bottom: 1rem;
+    flex-shrink: 0;
 }
 
 #location-search:focus {
@@ -408,9 +432,10 @@ body {
 }
 
 .location-results {
-    max-height: 180px;
+    max-height: 120px;
     overflow-y: auto;
     transition: opacity 0.2s ease;
+    flex-shrink: 0;
 }
 
 .location-result {
@@ -509,6 +534,7 @@ body {
     margin-bottom: 1rem;
     transition: all 0.2s ease;
     box-shadow: 0 2px 4px rgba(46, 125, 50, 0.2);
+    flex-shrink: 0;
 }
 
 .my-location-btn:hover:not(:disabled) {
@@ -532,12 +558,21 @@ body {
 /* Location Map */
 .location-map {
     width: 100%;
-    height: 200px;
+    height: max(300px, min(40vh, 400px));
     border: 2px solid #e0e0e0;
     border-radius: 0.5rem;
     margin-bottom: 1rem;
     overflow: hidden;
     position: relative;
+    flex: 1;
+    min-height: 250px;
+}
+
+/* Dynamic height calculation for location modal */
+.location-modal .location-map {
+    height: calc(100% - 180px); /* Account for other elements */
+    flex: 1;
+    min-height: 200px;
 }
 
 .location-map .leaflet-container {
@@ -598,6 +633,7 @@ body {
     background: rgba(46, 125, 50, 0.05);
     border: 1px solid rgba(46, 125, 50, 0.2);
     border-radius: 0.5rem;
+    flex-shrink: 0;
 }
 
 .selected-location {
@@ -901,7 +937,27 @@ body {
     }
     
     /* Position modals higher on mobile to avoid keyboard obstruction */
-    .location-modal,
+    .location-modal {
+        padding-top: max(1vh, 0.5rem);
+        padding-bottom: max(1vh, 0.5rem);
+        align-items: flex-start;
+    }
+    
+    .location-modal .modal-content {
+        height: min(90vh, 600px);
+        max-height: 95vh;
+    }
+    
+    .location-modal .modal-body {
+        padding: 1rem;
+        gap: 0.75rem;
+    }
+    
+    .location-modal .location-map {
+        height: calc(100% - 180px);
+        min-height: 150px;
+    }
+    
     .share-modal,
     .taxon-modal {
         padding-top: 10vh;

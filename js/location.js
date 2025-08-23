@@ -127,12 +127,8 @@ class LocationManager {
             if (placeId) {
                 await this.convertPlaceIdToCoordinates(placeId);
             } else {
-                // No location specified, use default
-                await this.loadLocationFromCoordinates(
-                    this.defaultLocation.lat, 
-                    this.defaultLocation.lng, 
-                    this.defaultLocation.name
-                );
+                // No location specified - open location modal for user to choose
+                this.openLocationModalOnFirstLoad();
             }
         }
     }
@@ -703,6 +699,26 @@ class LocationManager {
                 searchInput.focus();
             }
         }
+    }
+
+    openLocationModalOnFirstLoad() {
+        // Load default location first, then open modal
+        this.loadLocationFromCoordinates(
+            this.defaultLocation.lat, 
+            this.defaultLocation.lng, 
+            this.defaultLocation.name
+        ).then(() => {
+            // Small delay to ensure the UI is ready
+            setTimeout(() => {
+                this.openLocationModal();
+            }, 500);
+        }).catch(error => {
+            console.error('Failed to load default location:', error);
+            // Open modal anyway for user to select location
+            setTimeout(() => {
+                this.openLocationModal();
+            }, 500);
+        });
     }
 
     openHelpModal() {

@@ -17,7 +17,8 @@
       "mcp__puppeteer__puppeteer_fill",
       "Bash(grep:*)",
       "Bash(git push:*)",
-      "mcp__context7__get-library-docs"
+      "mcp__context7__get-library-docs",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []

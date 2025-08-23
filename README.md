@@ -1,5 +1,6 @@
 + location dialog:
   + larger, so it fills the available screen space with map
+  + pop up if app loaded on fresh browser without any parameters
 
 ## Future Functions
 + search/sort by name?

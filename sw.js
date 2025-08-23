@@ -1,4 +1,4 @@
-const VERSION = '1.0.16'; // UPDATE THIS VERSION IN app.js TOO!
+const VERSION = '1.0.17'; // UPDATE THIS VERSION IN app.js TOO!
 const CACHE_NAME = `biodiversity-explorer-v${VERSION}`;
 const API_CACHE_NAME = `biodiversity-api-v${VERSION}`;
 
@@ -184,16 +184,21 @@ self.addEventListener('install', event => {
                 return cache.addAll(STATIC_ASSETS);
             })
             .then(() => {
-                // Notify all clients about the update
+                // Only notify about updates if there are existing clients and this isn't initial install
                 return self.clients.matchAll();
             })
             .then(clients => {
-                clients.forEach(client => {
-                    client.postMessage({
-                        type: 'SW_UPDATE_AVAILABLE',
-                        version: VERSION
+                // Only send update notification if:
+                // 1. We have existing clients (not initial install)
+                // 2. There's already an active service worker (this is an update)
+                if (clients.length > 0 && self.registration.active) {
+                    clients.forEach(client => {
+                        client.postMessage({
+                            type: 'SW_UPDATE_AVAILABLE',
+                            version: VERSION
+                        });
                     });
-                });
+                }
                 // Don't auto-skipWaiting - let user decide when to update
             })
     );

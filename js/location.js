@@ -101,10 +101,13 @@ class LocationManager {
         const lat = urlParams.get('lat');
         const lng = urlParams.get('lng');
         const name = urlParams.get('name') || urlParams.get('location');
-        const lang = urlParams.get('lang') || 'en';
+        const urlLang = urlParams.get('lang');
         const lifeGroup = urlParams.get('life_group');
         
         await this.waitForDependencies();
+        
+        // Determine language: URL param takes priority, then saved preference, then default
+        const lang = urlLang || this.loadLanguageFromStorage() || 'en';
         this.setLanguage(lang);
         
         // Small delay to ensure language setting propagates to API and species manager
@@ -112,9 +115,10 @@ class LocationManager {
         
         // Handle life group selection BEFORE loading location
         // This ensures species manager has the correct filter when locationChanged fires
-        if (lifeGroup) {
+        const finalLifeGroup = lifeGroup || this.loadLifeGroupFromStorage();
+        if (finalLifeGroup) {
             window.dispatchEvent(new CustomEvent('lifeGroupFromURL', {
-                detail: { lifeGroup }
+                detail: { lifeGroup: finalLifeGroup }
             }));
         }
         
@@ -127,8 +131,19 @@ class LocationManager {
             if (placeId) {
                 await this.convertPlaceIdToCoordinates(placeId);
             } else {
-                // No location specified - open location modal for user to choose
-                this.openLocationModalOnFirstLoad();
+                // No URL location specified - try loading from localStorage
+                const savedLocation = this.loadLocationFromStorage();
+                if (savedLocation) {
+                    console.log('📍 Using saved location for PWA launch');
+                    await this.loadLocationFromCoordinates(
+                        savedLocation.lat, 
+                        savedLocation.lng, 
+                        savedLocation.name
+                    );
+                } else {
+                    // No saved location - open location modal for user to choose
+                    this.openLocationModalOnFirstLoad();
+                }
             }
         }
     }
@@ -160,6 +175,9 @@ class LocationManager {
                 name: name || `${lat.toFixed(4)}, ${lng.toFixed(4)}`,
                 source: 'coordinates'
             };
+            
+            // Save location to localStorage for PWA persistence
+            this.saveLocationToStorage();
             
             this.updateLocationDisplay();
             this.updateURL();
@@ -247,6 +265,106 @@ class LocationManager {
             return null;
         }
     }
+
+    // localStorage persistence methods
+    saveLocationToStorage() {
+        if (this.currentLocation) {
+            try {
+                const locationData = {
+                    lat: this.currentLocation.lat,
+                    lng: this.currentLocation.lng,
+                    name: this.currentLocation.name,
+                    radius: this.currentLocation.radius,
+                    timestamp: Date.now()
+                };
+                localStorage.setItem('savedLocation', JSON.stringify(locationData));
+                console.log('📍 Location saved to storage:', locationData.name);
+            } catch (error) {
+                console.warn('Failed to save location to storage:', error);
+            }
+        }
+    }
+
+    loadLocationFromStorage() {
+        try {
+            const saved = localStorage.getItem('savedLocation');
+            if (saved) {
+                const locationData = JSON.parse(saved);
+                // Check if location is not too old (e.g., within 30 days)
+                const maxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
+                if (Date.now() - locationData.timestamp < maxAge) {
+                    console.log('📍 Loaded location from storage:', locationData.name);
+                    return locationData;
+                } else {
+                    console.log('📍 Saved location is too old, clearing it');
+                    this.clearLocationFromStorage();
+                }
+            }
+        } catch (error) {
+            console.warn('Failed to load location from storage:', error);
+            this.clearLocationFromStorage();
+        }
+        return null;
+    }
+
+    clearLocationFromStorage() {
+        try {
+            localStorage.removeItem('savedLocation');
+            console.log('📍 Cleared saved location from storage');
+        } catch (error) {
+            console.warn('Failed to clear location from storage:', error);
+        }
+    }
+
+    saveLanguageToStorage(lang) {
+        try {
+            localStorage.setItem('savedLanguage', lang);
+            console.log('🌐 Language saved to storage:', lang);
+        } catch (error) {
+            console.warn('Failed to save language to storage:', error);
+        }
+    }
+
+    loadLanguageFromStorage() {
+        try {
+            const saved = localStorage.getItem('savedLanguage');
+            if (saved) {
+                console.log('🌐 Loaded language from storage:', saved);
+                return saved;
+            }
+        } catch (error) {
+            console.warn('Failed to load language from storage:', error);
+        }
+        return null;
+    }
+
+    saveLifeGroupToStorage(lifeGroup) {
+        try {
+            if (lifeGroup && lifeGroup !== 'all') {
+                localStorage.setItem('savedLifeGroup', lifeGroup);
+                console.log('🦋 Life group saved to storage:', lifeGroup);
+            } else {
+                localStorage.removeItem('savedLifeGroup');
+                console.log('🦋 Life group cleared from storage (all selected)');
+            }
+        } catch (error) {
+            console.warn('Failed to save life group to storage:', error);
+        }
+    }
+
+    loadLifeGroupFromStorage() {
+        try {
+            const saved = localStorage.getItem('savedLifeGroup');
+            if (saved) {
+                console.log('🦋 Loaded life group from storage:', saved);
+                return saved;
+            }
+        } catch (error) {
+            console.warn('Failed to load life group from storage:', error);
+        }
+        return null;
+    }
+
 
     // GPS Location functionality
     async getCurrentGPSLocation() {
@@ -667,8 +785,10 @@ class LocationManager {
             // Only modify life_group if explicitly provided
             if (lifeGroup && lifeGroup !== 'all') {
                 url.searchParams.set('life_group', lifeGroup);
+                this.saveLifeGroupToStorage(lifeGroup);
             } else {
                 url.searchParams.delete('life_group');
+                this.saveLifeGroupToStorage(null);
             }
         }
         // If lifeGroup is null, preserve the existing life_group parameter
@@ -794,6 +914,7 @@ class LocationManager {
             });
             updateBtn.setAttribute('data-listener-added', 'true');
         }
+
         
         if (window.i18n) {
             window.i18n.translatePage();
@@ -851,6 +972,7 @@ class LocationManager {
     
     changeLanguage(lang) {
         this.setLanguage(lang);
+        this.saveLanguageToStorage(lang);
         const urlParams = new URLSearchParams(window.location.search);
         const currentLifeGroup = urlParams.get('life_group');
         this.updateURL(currentLifeGroup);

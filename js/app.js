@@ -1,10 +1,11 @@
 class BiodiversityApp {
     constructor() {
-        this.version = '1.0.16'; // UPDATE THIS VERSION IN sw.js TOO!
+        this.version = '1.0.17'; // UPDATE THIS VERSION IN sw.js TOO!
         this.initialized = false;
         this.updateCheckInterval = null;
         this.lastUpdateCheck = null;
         this.updateAvailable = false;
+        this.lastUpdateNotification = null;
         this.init();
     }
 
@@ -113,8 +114,13 @@ class BiodiversityApp {
 
         switch (data.type) {
             case 'SW_UPDATE_AVAILABLE':
-                this.updateAvailable = true;
-                this.showUpdateNotification();
+                // Prevent showing update notifications too frequently (within 30 seconds)
+                const now = Date.now();
+                if (!this.lastUpdateNotification || (now - this.lastUpdateNotification) > 30000) {
+                    this.updateAvailable = true;
+                    this.lastUpdateNotification = now;
+                    this.showUpdateNotification();
+                }
                 break;
             case 'SW_UPDATE_COMPLETE':
                 this.hideUpdateNotification();
@@ -371,7 +377,10 @@ class BiodiversityApp {
     }
 
     showUpdateNotification() {
-        this.hideUpdateNotification(); // Remove any existing notification
+        // Check if notification already exists
+        if (document.getElementById('update-notification')) {
+            return; // Don't show duplicate notifications
+        }
 
         const updateNotification = document.createElement('div');
         updateNotification.id = 'update-notification';

@@ -66,7 +66,9 @@ class I18nManager {
             "help.links.donate": "Donate",
             "notification.copied": "URL copied to clipboard!",
             "notification.offline": "You are offline",
-            "notification.online": "Connection restored"
+            "notification.online": "Connection restored",
+            "status.offline": "Offline",
+            "status.online": "Online"
         };
     }
 

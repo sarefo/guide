@@ -1,6 +1,6 @@
 class BiodiversityApp {
     constructor() {
-        this.version = '1.0.22'; // UPDATE THIS VERSION IN sw.js TOO!
+        this.version = '1.0.23'; // UPDATE THIS VERSION IN sw.js TOO!
         this.initialized = false;
         this.updateCheckInterval = null;
         this.lastUpdateCheck = null;
@@ -266,12 +266,55 @@ class BiodiversityApp {
     }
 
     showNetworkStatus(status) {
-        const statusMessage = status === 'online' ?
-            'Connection restored' :
-            'You are offline';
+        const offlineBadge = document.getElementById('offline-badge');
+        const locationBtn = document.getElementById('location-btn');
+        const shareBtn = document.getElementById('share-btn');
+        
+        if (!offlineBadge) return;
 
-        const statusType = status === 'online' ? 'success' : 'warning';
-        this.showNotification(statusMessage, statusType);
+        if (status === 'offline') {
+            // Hide location and share buttons (useless offline)
+            if (locationBtn) locationBtn.style.display = 'none';
+            if (shareBtn) shareBtn.style.display = 'none';
+            
+            // Show offline badge persistently in their place
+            offlineBadge.classList.remove('online', 'hiding');
+            offlineBadge.style.display = 'block';
+            
+            // Update text for offline
+            const textEl = offlineBadge.querySelector('.offline-text');
+            if (textEl) {
+                const translation = window.i18n ? window.i18n.t('status.offline') : 'Offline';
+                textEl.textContent = translation !== 'status.offline' ? translation : 'Offline';
+            }
+        } else {
+            // Show brief "back online" indication, then restore buttons
+            offlineBadge.classList.add('online');
+            offlineBadge.classList.remove('hiding');
+            offlineBadge.style.display = 'block';
+            
+            // Update text for online
+            const textEl = offlineBadge.querySelector('.offline-text');
+            if (textEl) {
+                const translation = window.i18n ? window.i18n.t('status.online') : 'Online';
+                textEl.textContent = translation !== 'status.online' ? translation : 'Online';
+            }
+            
+            // Hide badge and restore buttons after 3 seconds
+            setTimeout(() => {
+                if (navigator.onLine && offlineBadge.classList.contains('online')) {
+                    offlineBadge.classList.add('hiding');
+                    setTimeout(() => {
+                        offlineBadge.style.display = 'none';
+                        offlineBadge.classList.remove('online', 'hiding');
+                        
+                        // Restore the buttons
+                        if (locationBtn) locationBtn.style.display = 'flex';
+                        if (shareBtn) shareBtn.style.display = 'flex';
+                    }, 300); // Match animation duration
+                }
+            }, 3000);
+        }
     }
 
     async retryFailedOperations() {

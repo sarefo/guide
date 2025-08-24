@@ -1,4 +1,4 @@
-const VERSION = '1.0.20'; // UPDATE THIS VERSION IN app.js TOO!
+const VERSION = '1.0.21'; // UPDATE THIS VERSION IN app.js TOO!
 const CACHE_NAME = `biodiversity-explorer-v${VERSION}`;
 const API_CACHE_NAME = `biodiversity-api-v${VERSION}`;
 
@@ -178,42 +178,16 @@ self.addEventListener('message', event => {
 
 // Notify clients when service worker is updated
 self.addEventListener('install', event => {
+    console.log('🔧 SW: Installing version:', VERSION);
+    
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => {
                 return cache.addAll(STATIC_ASSETS);
             })
             .then(() => {
-                // Check if this is actually an update, not initial install
-                return Promise.all([
-                    self.clients.matchAll(),
-                    caches.keys()
-                ]);
-            })
-            .then(([clients, cacheNames]) => {
-                // Only send update notification if:
-                // 1. We have existing clients (not initial install)
-                // 2. There are existing caches with different versions (this is an update)
-                // 3. There's already an active service worker (this is an update)
-                const hasExistingCaches = cacheNames.some(name => 
-                    name.startsWith('biodiversity-explorer-v') && !name.includes(VERSION)
-                );
-                
-                const isActualUpdate = clients.length > 0 && 
-                                     (hasExistingCaches || self.registration.active);
-                
-                if (isActualUpdate) {
-                    console.log('🔄 SW: Notifying clients of update to version:', VERSION);
-                    clients.forEach(client => {
-                        client.postMessage({
-                            type: 'SW_UPDATE_AVAILABLE',
-                            version: VERSION
-                        });
-                    });
-                } else {
-                    console.log('📦 SW: Initial install, no update notification sent');
-                }
-                // Don't auto-skipWaiting - let user decide when to update
+                console.log('📦 SW: Installation complete for version:', VERSION);
+                // Don't skipWaiting here - wait for user decision
             })
     );
 });

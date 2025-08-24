@@ -1,11 +1,12 @@
 class BiodiversityApp {
     constructor() {
-        this.version = '1.0.20'; // UPDATE THIS VERSION IN sw.js TOO!
+        this.version = '1.0.21'; // UPDATE THIS VERSION IN sw.js TOO!
         this.initialized = false;
         this.updateCheckInterval = null;
         this.lastUpdateCheck = null;
         this.updateAvailable = false;
         this.lastUpdateNotification = null;
+        this.updateFoundListenerAdded = false;
         this.init();
     }
 
@@ -69,7 +70,12 @@ class BiodiversityApp {
         this.setupAppEventListeners();
         this.initializeSharing();
         this.setupServiceWorkerListeners();
-        this.checkForUpdates();
+        
+        // Delay initial update check to avoid conflicts with SW installation
+        setTimeout(() => {
+            this.checkForUpdates();
+        }, 5000); // 5 seconds delay
+        
         this.startPeriodicUpdateChecks();
 
         if (window.locationManager) {
@@ -85,9 +91,9 @@ class BiodiversityApp {
                 this.onAppHidden();
             } else {
                 this.onAppVisible();
-                // Only check for updates if significant time has passed (30+ minutes)
+                // Only check for updates if significant time has passed (2+ hours)
                 const timeSinceLastCheck = Date.now() - (this.lastUpdateCheck?.getTime() || 0);
-                if (timeSinceLastCheck > 30 * 60 * 1000) { // 30 minutes
+                if (timeSinceLastCheck > 2 * 60 * 60 * 1000) { // 2 hours
                     this.checkForUpdates();
                 }
             }
@@ -116,15 +122,6 @@ class BiodiversityApp {
     handleServiceWorkerMessage(data) {
 
         switch (data.type) {
-            case 'SW_UPDATE_AVAILABLE':
-                // Prevent showing update notifications too frequently (within 30 seconds)
-                const now = Date.now();
-                if (!this.lastUpdateNotification || (now - this.lastUpdateNotification) > 30000) {
-                    this.updateAvailable = true;
-                    this.lastUpdateNotification = now;
-                    this.showUpdateNotification();
-                }
-                break;
             case 'SW_UPDATE_COMPLETE':
                 this.hideUpdateNotification();
                 break;
@@ -132,12 +129,12 @@ class BiodiversityApp {
     }
 
     startPeriodicUpdateChecks() {
-        // Check for updates every 4 hours (less aggressive)
+        // Check for updates every 8 hours (much less aggressive)
         this.updateCheckInterval = setInterval(() => {
             if (!document.hidden) {
                 this.checkForUpdates();
             }
-        }, 4 * 60 * 60 * 1000); // 4 hours
+        }, 8 * 60 * 60 * 1000); // 8 hours
     }
 
     initializeSharing() {
@@ -340,21 +337,25 @@ class BiodiversityApp {
                 const registration = await navigator.serviceWorker.getRegistration();
 
                 if (registration) {
-                    // Force update check
+                    // Only check for updates, don't set up duplicate listeners
                     await registration.update();
-
-                    // Listen for new worker
-                    registration.addEventListener('updatefound', () => {
-                        const newWorker = registration.installing;
-                        if (newWorker) {
-                            newWorker.addEventListener('statechange', () => {
-                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                    this.updateAvailable = true;
-                                    this.showUpdateNotification();
-                                }
-                            });
-                        }
-                    });
+                    
+                    // Only set up updatefound listener if we don't already have one
+                    if (!this.updateFoundListenerAdded) {
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            if (newWorker && navigator.serviceWorker.controller) {
+                                // Only show notification if there's an active worker (this is an update)
+                                newWorker.addEventListener('statechange', () => {
+                                    if (newWorker.state === 'installed') {
+                                        this.updateAvailable = true;
+                                        this.showUpdateNotification();
+                                    }
+                                });
+                            }
+                        });
+                        this.updateFoundListenerAdded = true;
+                    }
                 }
 
             } catch (error) {
@@ -383,6 +384,13 @@ class BiodiversityApp {
     }
 
     showUpdateNotification() {
+        // Prevent showing update notifications too frequently (within 60 seconds)
+        const now = Date.now();
+        if (this.lastUpdateNotification && (now - this.lastUpdateNotification) < 60000) {
+            return;
+        }
+        this.lastUpdateNotification = now;
+        
         // Check if notification already exists
         if (document.getElementById('update-notification')) {
             return; // Don't show duplicate notifications

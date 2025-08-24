@@ -465,15 +465,18 @@ class SpeciesManager {
         const loading = document.getElementById('loading');
         const grid = document.getElementById('species-grid');
         const error = document.getElementById('error-state');
+        const loadingOverlay = document.getElementById('loading-overlay');
 
         console.log('🔍 Debug - DOM elements:', {
             loading: !!loading,
             grid: !!grid,
-            error: !!error
+            error: !!error,
+            loadingOverlay: !!loadingOverlay
         });
 
         if (loading) loading.style.display = 'none';
         if (grid) grid.style.display = 'none';
+        if (loadingOverlay) loadingOverlay.style.display = 'none';
         if (error) {
             error.style.display = 'flex';
             error.style.minHeight = '200px';
@@ -481,6 +484,18 @@ class SpeciesManager {
             error.style.border = '2px solid #ddd';
             console.log('🔍 Debug - Error state set to flex with forced styling');
             console.log('🔍 Debug - Error computed style:', window.getComputedStyle(error).display);
+            const rect = error.getBoundingClientRect();
+            const computedStyle = window.getComputedStyle(error);
+            console.log('🔍 Debug - Error element position:', {
+                top: rect.top,
+                left: rect.left,
+                width: rect.width,
+                height: rect.height,
+                visibility: computedStyle.visibility,
+                opacity: computedStyle.opacity,
+                zIndex: computedStyle.zIndex,
+                position: computedStyle.position
+            });
             // Update error message for offline scenario
             const errorText = error.querySelector('p');
             const retryBtn = error.querySelector('#retry-btn');

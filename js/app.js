@@ -1,7 +1,7 @@
 class BiodiversityApp {
     constructor() {
         this.version = '1.0.25'; // UPDATE THIS VERSION IN sw.js TOO!
-        this.buildDate = '2025-08-24 15:37'; // UPDATE THIS WHEN CHANGING VERSION
+        this.buildDate = '2025-08-23 21:38'; // UPDATE THIS WHEN CHANGING VERSION
         this.initialized = false;
         this.updateCheckInterval = null;
         this.lastUpdateCheck = null;

@@ -69,6 +69,7 @@ class BiodiversityApp {
     initializeApp() {
         this.setupAppEventListeners();
         this.initializeSharing();
+        this.initializeCaching();
         this.setupServiceWorkerListeners();
         
         // Delay initial update check to avoid conflicts with SW installation
@@ -142,6 +143,15 @@ class BiodiversityApp {
         if (shareBtn) {
             shareBtn.addEventListener('click', () => {
                 this.shareLocation();
+            });
+        }
+    }
+
+    initializeCaching() {
+        const cacheBtn = document.getElementById('cache-btn');
+        if (cacheBtn) {
+            cacheBtn.addEventListener('click', () => {
+                this.cacheAllLifeGroups();
             });
         }
     }
@@ -574,6 +584,106 @@ class BiodiversityApp {
             } catch (error) {
                 console.warn('Could not message service worker for cache clearing:', error);
             }
+        }
+    }
+
+    async cacheAllLifeGroups() {
+        if (!window.locationManager || !window.locationManager.currentLocation) {
+            console.log('No current location available for caching');
+            return;
+        }
+
+        const cacheBtn = document.getElementById('cache-btn');
+        if (!cacheBtn) return;
+
+        // Show loading state
+        this.setCacheButtonState('loading');
+        this.showNotification(window.i18n ? window.i18n.t('cache.loading') : 'Caching data...');
+
+        try {
+            // Get predefined life groups (same list as in species.js)
+            const lifeGroups = ['all', '3', '40151', '47126', '47158', '47119', '26036', '20978', '47178', '47170', '47115'];
+            const location = window.locationManager.currentLocation;
+            
+            for (const group of lifeGroups) {
+                console.log(`📦 Caching life group: ${group}`);
+                
+                // Skip 'all' as it's covered by individual groups
+                if (group === 'all') continue;
+                
+                try {
+                    // Fetch species data for this life group
+                    const speciesData = await window.api.getSpeciesObservations(
+                        location.lat,
+                        location.lng,
+                        location.radius,
+                        {
+                            iconicTaxonId: group,
+                            locale: window.i18n ? window.i18n.getCurrentLang() : 'en',
+                            perPage: 50,
+                            locationData: location
+                        }
+                    );
+                    
+                    // Preload thumbnails for this group
+                    speciesData.forEach(speciesCount => {
+                        const species = window.api.formatSpeciesData(speciesCount);
+                        const photoUrl = species.photo?.thumbUrl || species.photo?.url;
+                        if (photoUrl && photoUrl !== 'null') {
+                            const img = new Image();
+                            img.src = photoUrl;
+                        }
+                    });
+                    
+                } catch (error) {
+                    console.warn(`Failed to cache life group ${group}:`, error);
+                }
+            }
+            
+            // Show success state
+            this.setCacheButtonState('complete');
+            this.showNotification(window.i18n ? window.i18n.t('cache.complete') : 'Ready for offline');
+            
+            // Reset button after 3 seconds
+            setTimeout(() => {
+                this.setCacheButtonState('idle');
+            }, 3000);
+            
+        } catch (error) {
+            console.error('Caching failed:', error);
+            this.setCacheButtonState('idle');
+            this.showNotification('Caching failed. Please try again.');
+        }
+    }
+
+    setCacheButtonState(state) {
+        const cacheBtn = document.getElementById('cache-btn');
+        if (!cacheBtn) return;
+
+        const iconDefault = cacheBtn.querySelector('.cache-icon');
+        const iconLoading = cacheBtn.querySelector('.cache-loading');
+        const iconComplete = cacheBtn.querySelector('.cache-complete');
+
+        // Hide all icons first
+        [iconDefault, iconLoading, iconComplete].forEach(icon => {
+            if (icon) icon.style.display = 'none';
+        });
+
+        // Show appropriate icon
+        switch (state) {
+            case 'loading':
+                if (iconLoading) iconLoading.style.display = 'block';
+                cacheBtn.disabled = true;
+                break;
+            case 'complete':
+                if (iconComplete) iconComplete.style.display = 'block';
+                cacheBtn.disabled = false;
+                break;
+            case 'idle':
+            default:
+                if (iconDefault) iconDefault.style.display = 'block';
+                cacheBtn.disabled = false;
+                break;
         }
     }
 

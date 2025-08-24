@@ -267,6 +267,21 @@ class SpeciesManager {
         });
 
         this.hideError();
+        
+        // Preload all thumbnails for offline caching
+        this.preloadThumbnails();
+    }
+
+    preloadThumbnails() {
+        // Preload thumbnails for all species in current list for offline caching
+        this.currentSpecies.forEach(species => {
+            const photoUrl = species.photo?.thumbUrl || species.photo?.url;
+            if (photoUrl && photoUrl !== 'null') {
+                const img = new Image();
+                img.src = photoUrl;
+                // No need to do anything with the loaded image - browser will cache it
+            }
+        });
     }
 
     createSpeciesCard(species) {
@@ -293,6 +308,7 @@ class SpeciesManager {
                         data-src="${photoUrl}"
                         alt="${vernacularName}"
                         loading="lazy"
+                        onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\\'species-image offline-placeholder\\'><div class=\\'offline-text\\'>' + (window.i18n ? window.i18n.t('image.offline') : 'Offline') + '</div></div>';"
                     />
                 ` : `
                     <div class="species-image no-photo">

@@ -75,6 +75,11 @@
   "notification.refresh.failed": "Actualización falló. Inténtalo de nuevo.",
   "notification.error": "Ocurrió un error. Por favor actualiza la página.",
   
+  "cache.button.tooltip": "Descargar para uso sin conexión",
+  "cache.loading": "Almacenando datos...",
+  "cache.complete": "Listo sin conexión",
+  "image.offline": "Sin conexión",
+  
   "update.available": "¡Nueva versión disponible!",
   "update.button": "Actualizar Ahora",
   "update.updating": "Actualizando aplicación... Espere por favor.",

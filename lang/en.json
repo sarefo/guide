@@ -74,6 +74,11 @@
   "notification.refresh.failed": "Refresh failed. Please try again.",
   "notification.error": "An error occurred. Please refresh the page.",
   
+  "cache.button.tooltip": "Download for offline use",
+  "cache.loading": "Caching data...",
+  "cache.complete": "Ready for offline",
+  "image.offline": "Offline",
+  
   "update.available": "New version available!",
   "update.button": "Update Now",
   "update.updating": "Updating app... Please wait.",

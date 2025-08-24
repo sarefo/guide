@@ -75,6 +75,11 @@
   "notification.refresh.failed": "Actualisation échouée. Réessayez.",
   "notification.error": "Une erreur s'est produite. Veuillez actualiser la page.",
   
+  "cache.button.tooltip": "Télécharger pour usage hors ligne",
+  "cache.loading": "Mise en cache...",
+  "cache.complete": "Prêt hors ligne",
+  "image.offline": "Hors ligne",
+  
   "update.available": "Nouvelle version disponible !",
   "update.button": "Mettre à Jour Maintenant",
   "update.updating": "Mise à jour de l'application... Veuillez patienter.",

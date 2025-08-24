@@ -75,6 +75,11 @@
   "notification.refresh.failed": "Aktualisierung fehlgeschlagen. Bitte erneut versuchen.",
   "notification.error": "Ein Fehler ist aufgetreten. Bitte laden Sie die Seite neu.",
   
+  "cache.button.tooltip": "Für Offline-Nutzung herunterladen",
+  "cache.loading": "Daten werden zwischengespeichert...",
+  "cache.complete": "Offline bereit",
+  "image.offline": "Offline",
+  
   "update.available": "Neue Version verfügbar!",
   "update.button": "Jetzt Aktualisieren",
   "update.updating": "App wird aktualisiert... Bitte warten.",

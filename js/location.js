@@ -949,7 +949,22 @@ class LocationManager {
                 version = window.app.version;
             }
             
-            versionEl.textContent = version;
+            // Add build date if available
+            let displayVersion = version;
+            if (window.app && window.app.getAppInfo) {
+                try {
+                    const appInfo = window.app.getAppInfo();
+                    if (appInfo && appInfo.buildDate) {
+                        displayVersion = `${version} (${appInfo.buildDate})`;
+                    }
+                } catch (error) {
+                    console.log('Could not get build date:', error);
+                }
+            } else if (window.app && window.app.buildDate) {
+                displayVersion = `${version} (${window.app.buildDate})`;
+            }
+            
+            versionEl.textContent = displayVersion;
         }
         
         if (lastCheckEl && window.app && window.app.getAppInfo) {

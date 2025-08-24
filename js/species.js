@@ -474,14 +474,25 @@ class SpeciesManager {
             loadingOverlay: !!loadingOverlay
         });
 
-        if (loading) loading.style.display = 'none';
-        if (grid) grid.style.display = 'none';
-        if (loadingOverlay) loadingOverlay.style.display = 'none';
+        if (loading) {
+            loading.style.display = 'none';
+            console.log('🔍 Debug - Loading hidden');
+        }
+        if (grid) {
+            grid.style.display = 'none';
+            console.log('🔍 Debug - Grid hidden, computed style:', window.getComputedStyle(grid).display);
+        }
+        if (loadingOverlay) {
+            loadingOverlay.style.display = 'none';
+            console.log('🔍 Debug - Loading overlay hidden');
+        }
         if (error) {
             error.style.display = 'flex';
             error.style.minHeight = '200px';
             error.style.backgroundColor = '#f5f5f5';
             error.style.border = '2px solid #ddd';
+            error.style.zIndex = '1000';
+            error.style.position = 'relative';
             console.log('🔍 Debug - Error state set to flex with forced styling');
             console.log('🔍 Debug - Error computed style:', window.getComputedStyle(error).display);
             const rect = error.getBoundingClientRect();

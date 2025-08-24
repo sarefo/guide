@@ -1,7 +1,7 @@
 class BiodiversityApp {
     constructor() {
         this.version = '1.0.25'; // UPDATE THIS VERSION IN sw.js TOO!
-        this.buildDate = '2025-08-23 21:38'; // UPDATE THIS WHEN CHANGING VERSION
+        this.buildDate = '2025-08-23 21:55'; // UPDATE THIS WHEN CHANGING VERSION
         this.initialized = false;
         this.updateCheckInterval = null;
         this.lastUpdateCheck = null;
@@ -155,6 +155,9 @@ class BiodiversityApp {
                 this.cacheAllLifeGroups();
             });
         }
+        
+        // Check if current location is already cached on app load
+        this.checkCachedState();
     }
 
 
@@ -642,7 +645,7 @@ class BiodiversityApp {
 
         // Show loading state
         this.setCacheButtonState('loading');
-        this.showNotification(window.i18n ? window.i18n.t('cache.loading') : 'Caching data...');
+        this.showCacheStatus('caching');
 
         try {
             // Get predefined life groups (same list as in species.js)
@@ -684,19 +687,25 @@ class BiodiversityApp {
                 }
             }
             
+            // Mark location as cached
+            this.markLocationAsCached(location);
+            
             // Show success state
             this.setCacheButtonState('complete');
-            this.showNotification(window.i18n ? window.i18n.t('cache.complete') : 'Ready for offline');
+            this.showCacheStatus('cached');
             
-            // Reset button after 3 seconds
+            // Keep cached state visible for 3 seconds, then hide badge
             setTimeout(() => {
-                this.setCacheButtonState('idle');
+                this.hideCacheStatus();
             }, 3000);
             
         } catch (error) {
             console.error('Caching failed:', error);
             this.setCacheButtonState('idle');
-            this.showNotification('Caching failed. Please try again.');
+            this.showCacheStatus('failed');
+            setTimeout(() => {
+                this.hideCacheStatus();
+            }, 3000);
         }
     }
 
@@ -720,6 +729,7 @@ class BiodiversityApp {
                 cacheBtn.disabled = true;
                 break;
             case 'complete':
+            case 'cached':
                 if (iconComplete) iconComplete.style.display = 'block';
                 cacheBtn.disabled = false;
                 break;
@@ -728,6 +738,126 @@ class BiodiversityApp {
                 if (iconDefault) iconDefault.style.display = 'block';
                 cacheBtn.disabled = false;
                 break;
+        }
+    }
+
+    showCacheStatus(status) {
+        const offlineBadge = document.getElementById('offline-badge');
+        const locationBtn = document.getElementById('location-btn');
+        const shareBtn = document.getElementById('share-btn');
+        
+        if (!offlineBadge) return;
+
+        // Show badge
+        offlineBadge.classList.remove('online', 'hiding');
+        offlineBadge.style.display = 'block';
+        
+        // Hide location and share buttons while showing cache status
+        if (locationBtn) locationBtn.style.display = 'none';
+        if (shareBtn) shareBtn.style.display = 'none';
+        
+        // Update text and color based on status
+        const textEl = offlineBadge.querySelector('.offline-text');
+        if (textEl) {
+            let text, className;
+            
+            switch (status) {
+                case 'caching':
+                    text = window.i18n ? window.i18n.t('cache.loading') : 'Caching...';
+                    className = 'caching';
+                    break;
+                case 'cached':
+                    text = window.i18n ? window.i18n.t('cache.complete') : 'Cached';
+                    className = 'online'; // Use green color
+                    break;
+                case 'failed':
+                    text = window.i18n ? window.i18n.t('cache.failed') : 'Cache failed';
+                    className = 'failed';
+                    break;
+            }
+            
+            textEl.textContent = text;
+            offlineBadge.className = `offline-badge ${className}`;
+        }
+    }
+
+    hideCacheStatus() {
+        const offlineBadge = document.getElementById('offline-badge');
+        const locationBtn = document.getElementById('location-btn');
+        const shareBtn = document.getElementById('share-btn');
+        
+        if (!offlineBadge) return;
+
+        // Only hide if we're not actually offline
+        if (navigator.onLine) {
+            offlineBadge.classList.add('hiding');
+            setTimeout(() => {
+                offlineBadge.style.display = 'none';
+                offlineBadge.classList.remove('online', 'hiding', 'caching', 'failed');
+                
+                // Restore the buttons
+                if (locationBtn) locationBtn.style.display = 'flex';
+                if (shareBtn) shareBtn.style.display = 'flex';
+            }, 300);
+        }
+    }
+
+    markLocationAsCached(location) {
+        if (!location) return;
+        
+        const cacheKey = `cached_location_${location.lat}_${location.lng}_${location.radius}`;
+        const cacheData = {
+            timestamp: Date.now(),
+            location: location,
+            cached: true
+        };
+        
+        try {
+            localStorage.setItem(cacheKey, JSON.stringify(cacheData));
+        } catch (error) {
+            console.warn('Failed to store cache marker:', error);
+        }
+    }
+
+    isLocationCached(location) {
+        if (!location) return false;
+        
+        const cacheKey = `cached_location_${location.lat}_${location.lng}_${location.radius}`;
+        
+        try {
+            const cacheData = localStorage.getItem(cacheKey);
+            if (cacheData) {
+                const parsed = JSON.parse(cacheData);
+                // Consider cache valid for 24 hours
+                const cacheAge = Date.now() - parsed.timestamp;
+                return cacheAge < (24 * 60 * 60 * 1000);
+            }
+        } catch (error) {
+            console.warn('Failed to check cache status:', error);
+        }
+        
+        return false;
+    }
+
+    checkCachedState() {
+        // Check when location changes
+        if (window.locationManager && window.locationManager.currentLocation) {
+            this.updateCacheButtonForLocation(window.locationManager.currentLocation);
+        }
+        
+        // Listen for location changes
+        document.addEventListener('locationChanged', (event) => {
+            if (event.detail && event.detail.location) {
+                this.updateCacheButtonForLocation(event.detail.location);
+            }
+        });
+    }
+
+    updateCacheButtonForLocation(location) {
+        if (this.isLocationCached(location)) {
+            this.setCacheButtonState('cached');
+        } else {
+            this.setCacheButtonState('idle');
         }
     }
 

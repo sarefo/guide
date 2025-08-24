@@ -78,6 +78,7 @@
   "cache.button.tooltip": "Télécharger pour usage hors ligne",
   "cache.loading": "Mise en cache...",
   "cache.complete": "Prêt hors ligne",
+  "cache.failed": "Échec du cache",
   "image.offline": "Hors ligne",
   
   "update.available": "Nouvelle version disponible !",

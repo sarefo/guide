@@ -78,6 +78,7 @@
   "cache.button.tooltip": "Descargar para uso sin conexión",
   "cache.loading": "Almacenando datos...",
   "cache.complete": "Listo sin conexión",
+  "cache.failed": "Error de caché",
   "image.offline": "Sin conexión",
   
   "update.available": "¡Nueva versión disponible!",

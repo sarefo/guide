@@ -349,6 +349,16 @@ body {
     filter: none;
 }
 
+/* Caching status with blue color */
+.offline-badge.caching {
+    background: rgba(33, 150, 243, 0.9);
+}
+
+/* Failed status with red color */
+.offline-badge.failed {
+    background: rgba(244, 67, 54, 0.9);
+}
+
 @keyframes slideInFromRight {
     from {
         transform: translateX(120%);

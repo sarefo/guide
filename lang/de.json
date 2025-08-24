@@ -78,6 +78,7 @@
   "cache.button.tooltip": "Für Offline-Nutzung herunterladen",
   "cache.loading": "Daten werden zwischengespeichert...",
   "cache.complete": "Offline bereit",
+  "cache.failed": "Cache fehlgeschlagen",
   "image.offline": "Offline",
   
   "update.available": "Neue Version verfügbar!",

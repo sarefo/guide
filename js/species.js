@@ -695,8 +695,9 @@ class SpeciesManager {
         
         if (!modal || !modalBody) return;
 
-        const photoUrl = species.photo?.url || species.photo?.thumbUrl;
-        const hasPhoto = photoUrl && photoUrl !== 'null';
+        const mediumPhotoUrl = species.photo?.url;
+        const thumbPhotoUrl = species.photo?.thumbUrl;
+        const hasPhoto = (mediumPhotoUrl && mediumPhotoUrl !== 'null') || (thumbPhotoUrl && thumbPhotoUrl !== 'null');
 
         const wikipediaUrl = species.wikipediaUrl ? 
             window.api.convertWikipediaURL(species.wikipediaUrl) :
@@ -706,9 +707,10 @@ class SpeciesManager {
             <div style="text-align: center;">
                 ${hasPhoto ? `
                     <img 
-                        src="${photoUrl}" 
+                        src="${mediumPhotoUrl || thumbPhotoUrl}" 
                         alt="${species.name}"
                         class="species-modal-image"
+                        data-thumb-url="${thumbPhotoUrl || ''}"
                         style="width: min(40vh, 350px); height: min(40vh, 350px); max-width: 100%; object-fit: cover; border-radius: 0.5rem; margin: 0 auto 1rem; display: block;"
                     />
                 ` : ''}
@@ -731,6 +733,26 @@ class SpeciesManager {
                 ` : ''}
             </div>
         `;
+
+        // Set up image fallback handler
+        const modalImage = modal.querySelector('.species-modal-image');
+        if (modalImage && modalImage.dataset.thumbUrl) {
+            modalImage.addEventListener('error', function(e) {
+                const thumbUrl = this.dataset.thumbUrl;
+                if (thumbUrl && thumbUrl !== 'null' && thumbUrl !== '' && this.src !== thumbUrl) {
+                    console.log('📸 Medium image failed, trying thumbnail:', thumbUrl);
+                    this.src = thumbUrl;
+                    this.style.imageRendering = 'smooth';
+                } else {
+                    console.log('📸 No thumbnail available, showing placeholder');
+                    this.style.display = 'none';
+                    const placeholder = document.createElement('div');
+                    placeholder.style.cssText = 'width: min(40vh, 350px); height: min(40vh, 350px); max-width: 100%; border-radius: 0.5rem; margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; background: #f5f5f5; color: #666;';
+                    placeholder.innerHTML = '<span>📸 Image unavailable offline</span>';
+                    this.parentNode.insertBefore(placeholder, this.nextSibling);
+                }
+            });
+        }
 
         // Use unified modal manager
         if (window.modalManager) {

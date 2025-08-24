@@ -1,7 +1,7 @@
 class BiodiversityApp {
     constructor() {
-        this.version = '1.0.25'; // UPDATE THIS VERSION IN sw.js TOO!
-        this.buildDate = '2025-08-23 22:06'; // UPDATE THIS WHEN CHANGING VERSION
+        this.version = '1.0.26'; // UPDATE THIS VERSION IN sw.js TOO!
+        this.buildDate = '2025-08-23 22:17'; // UPDATE THIS WHEN CHANGING VERSION
         this.initialized = false;
         this.updateCheckInterval = null;
         this.lastUpdateCheck = null;
@@ -665,25 +665,62 @@ class BiodiversityApp {
             const lifeGroups = ['all', '3', '40151', '47126', '47158', '47119', '26036', '20978', '47178', '47170', '47115'];
             const location = window.locationManager.currentLocation;
             
+            // Add existing custom life groups to cache list
+            if (window.speciesManager && window.speciesManager.customTaxa) {
+                const customTaxaIds = Array.from(window.speciesManager.customTaxa.keys());
+                lifeGroups.push(...customTaxaIds);
+                console.log(`📦 Found ${customTaxaIds.length} custom taxa to cache:`, customTaxaIds);
+            }
+            
             for (const group of lifeGroups) {
                 console.log(`📦 Caching life group: ${group}`);
                 
-                // Skip 'all' as it's covered by individual groups
-                if (group === 'all') continue;
-                
                 try {
+                    // Determine options for this life group (same logic as in species.js)
+                    const options = {
+                        iconicTaxonId: null,
+                        taxonId: null,
+                        locale: window.i18n ? window.i18n.getCurrentLang() : 'en',
+                        perPage: 50,
+                        quality: 'research',
+                        photos: true,
+                        locationData: location
+                    };
+                    
+                    // Set the appropriate filter option
+                    if (group === 'all') {
+                        // No filter for "all"
+                    } else if (['3', '40151', '47126', '47158', '47119', '26036', '20978', '47178', '47170', '47115'].includes(group)) {
+                        // Use iconic taxon filter for predefined groups
+                        options.iconicTaxonId = group;
+                    } else {
+                        // Use custom taxon filter for custom taxa
+                        options.taxonId = group;
+                    }
+                    
                     // Fetch species data for this life group
                     const speciesData = await window.api.getSpeciesObservations(
                         location.lat,
                         location.lng,
                         location.radius,
-                        {
-                            iconicTaxonId: group,
-                            locale: window.i18n ? window.i18n.getCurrentLang() : 'en',
-                            perPage: 50,
-                            locationData: location
-                        }
+                        options
                     );
+                    
+                    // Format and cache the species data in the species manager's cache
+                    if (window.speciesManager && speciesData) {
+                        const formattedSpecies = speciesData.map(species => 
+                            window.api.formatSpeciesData(species)
+                        );
+                        
+                        // Create cache key using same logic as species manager
+                        const cacheKey = `${JSON.stringify(location)}_${group}`;
+                        window.speciesManager.speciesCache.set(cacheKey, {
+                            species: formattedSpecies,
+                            timestamp: Date.now()
+                        });
+                        
+                        console.log(`✅ Cached ${formattedSpecies.length} species for group ${group}`);
+                    }
                     
                     // Preload thumbnails for this group
                     speciesData.forEach(speciesCount => {

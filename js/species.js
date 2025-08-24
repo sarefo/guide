@@ -198,6 +198,21 @@ class SpeciesManager {
 
     async _doLoadSpecies() {
         try {
+            // Check if we're offline first
+            if (!navigator.onLine) {
+                // Try to load from cache when offline
+                const cacheLoaded = this.loadCachedSpeciesData();
+                if (cacheLoaded) {
+                    console.log('📦 Loaded species from cache (offline)');
+                    this.displaySpecies();
+                    return;
+                } else {
+                    // No cached data available
+                    console.log('📵 No cached data available for current filter');
+                    this.showOfflineMessage();
+                    return;
+                }
+            }
             
             const options = {
                 iconicTaxonId: null,
@@ -259,10 +274,25 @@ class SpeciesManager {
             // Only log errors when online - offline errors are expected
             if (navigator.onLine) {
                 console.error('Failed to load species:', error);
+                
+                // Try to load from cache as fallback when API fails
+                const cacheLoaded = this.loadCachedSpeciesData();
+                if (cacheLoaded) {
+                    console.log('📦 Loaded species from cache (API failed)');
+                    this.displaySpecies();
+                    return;
+                }
             }
             
             // Check if we're offline and show appropriate message
             if (!navigator.onLine || error.message.includes('Failed to fetch') || error.message === 'Unable to load species data') {
+                // Try cache one more time for offline scenarios
+                const cacheLoaded = this.loadCachedSpeciesData();
+                if (cacheLoaded) {
+                    console.log('📦 Loaded species from cache (offline fallback)');
+                    this.displaySpecies();
+                    return;
+                }
                 this.showOfflineMessage();
             } else {
                 this.showError();

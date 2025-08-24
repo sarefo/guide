@@ -1,5 +1,3 @@
-+ also cache "all" and custom life groups when caching all for offline use
-
 + cached data does not persist between app loads
 
 ## Future Functions

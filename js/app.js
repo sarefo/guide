@@ -1,7 +1,7 @@
 class BiodiversityApp {
     constructor() {
-        this.version = '1.0.26'; // UPDATE THIS VERSION IN sw.js TOO!
-        this.buildDate = '2025-08-23 22:17'; // UPDATE THIS WHEN CHANGING VERSION
+        this.version = '1.1.0'; // UPDATE THIS VERSION IN sw.js TOO!
+        this.buildDate = '2025-08-23 22:44'; // UPDATE THIS WHEN CHANGING VERSION
         this.initialized = false;
         this.updateCheckInterval = null;
         this.lastUpdateCheck = null;
@@ -75,6 +75,7 @@ class BiodiversityApp {
         this.initializeCaching();
         this.initializeLanguageSelector();
         this.setupServiceWorkerListeners();
+        this.requestPersistentStorage();
         
         // Delay initial update check to avoid conflicts with SW installation
         setTimeout(() => {
@@ -124,6 +125,32 @@ class BiodiversityApp {
             navigator.serviceWorker.addEventListener('message', (event) => {
                 this.handleServiceWorkerMessage(event.data);
             });
+        }
+    }
+
+    async requestPersistentStorage() {
+        if ('storage' in navigator && 'persist' in navigator.storage) {
+            try {
+                const isPersisted = await navigator.storage.persisted();
+                if (!isPersisted) {
+                    const granted = await navigator.storage.persist();
+                    if (granted) {
+                        console.log('✅ Persistent storage granted');
+                    } else {
+                        console.log('⚠️ Persistent storage denied - cache may be cleared by browser');
+                    }
+                } else {
+                    console.log('✅ Storage is already persistent');
+                }
+                
+                // Log storage estimate for debugging
+                if ('estimate' in navigator.storage) {
+                    const estimate = await navigator.storage.estimate();
+                    console.log(`📊 Storage: ${(estimate.usage / 1024 / 1024).toFixed(2)}MB used of ${(estimate.quota / 1024 / 1024).toFixed(2)}MB`);
+                }
+            } catch (error) {
+                console.warn('Persistent storage request failed:', error);
+            }
         }
     }
 
@@ -878,9 +905,9 @@ class BiodiversityApp {
             const cacheData = localStorage.getItem(cacheKey);
             if (cacheData) {
                 const parsed = JSON.parse(cacheData);
-                // Consider cache valid for 24 hours
+                // Consider cache valid for 7 days
                 const cacheAge = Date.now() - parsed.timestamp;
-                return cacheAge < (24 * 60 * 60 * 1000);
+                return cacheAge < (7 * 24 * 60 * 60 * 1000);
             }
         } catch (error) {
             console.warn('Failed to check cache status:', error);

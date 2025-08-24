@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cache Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .result {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 5px;
+        }
+        .success { background: #d4edda; }
+        .error { background: #f8d7da; }
+        button {
+            margin: 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Biodiversity App Cache Test</h1>
+    
+    <div id="results"></div>
+    
+    <button onclick="testPersistentStorage()">Test Persistent Storage</button>
+    <button onclick="testIndexedDB()">Test IndexedDB</button>
+    <button onclick="testCacheExpiry()">Test Cache Expiry</button>
+    <button onclick="clearAllData()">Clear All Data</button>
+
+    <script>
+        const results = document.getElementById('results');
+        
+        function log(message, type = 'result') {
+            const div = document.createElement('div');
+            div.className = `result ${type}`;
+            div.textContent = message;
+            results.appendChild(div);
+        }
+
+        async function testPersistentStorage() {
+            results.innerHTML = '';
+            
+            if ('storage' in navigator && 'persist' in navigator.storage) {
+                const isPersisted = await navigator.storage.persisted();
+                log(`Storage persisted: ${isPersisted}`, isPersisted ? 'success' : 'error');
+                
+                if (!isPersisted) {
+                    const granted = await navigator.storage.persist();
+                    log(`Persist request: ${granted ? 'Granted' : 'Denied'}`, granted ? 'success' : 'error');
+                }
+                
+                if ('estimate' in navigator.storage) {
+                    const estimate = await navigator.storage.estimate();
+                    const used = (estimate.usage / 1024 / 1024).toFixed(2);
+                    const quota = (estimate.quota / 1024 / 1024).toFixed(2);
+                    log(`Storage: ${used}MB used of ${quota}MB`);
+                }
+            } else {
+                log('Persistent storage API not available', 'error');
+            }
+        }
+
+        async function testIndexedDB() {
+            results.innerHTML = '';
+            
+            try {
+                const request = indexedDB.open('BiodiversityCache', 1);
+                
+                request.onsuccess = (event) => {
+                    const db = event.target.result;
+                    log('IndexedDB opened successfully', 'success');
+                    
+                    if (db.objectStoreNames.contains('speciesCache')) {
+                        const transaction = db.transaction(['speciesCache'], 'readonly');
+                        const store = transaction.objectStore('speciesCache');
+                        const countRequest = store.count();
+                        
+                        countRequest.onsuccess = () => {
+                            log(`Species cache entries: ${countRequest.result}`);
+                        };
+                    }
+                    
+                    db.close();
+                };
+                
+                request.onerror = () => {
+                    log('IndexedDB failed to open', 'error');
+                };
+            } catch (error) {
+                log(`IndexedDB error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testCacheExpiry() {
+            results.innerHTML = '';
+            
+            // Check localStorage cache markers
+            let cacheMarkers = 0;
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith('cached_location_')) {
+                    cacheMarkers++;
+                    const data = JSON.parse(localStorage.getItem(key));
+                    const age = Date.now() - data.timestamp;
+                    const days = (age / (24 * 60 * 60 * 1000)).toFixed(1);
+                    log(`Cache marker age: ${days} days (expires in ${(7 - parseFloat(days)).toFixed(1)} days)`);
+                }
+            }
+            
+            if (cacheMarkers === 0) {
+                log('No cache markers found');
+            }
+            
+            // Check service worker caches
+            if ('caches' in window) {
+                const cacheNames = await caches.keys();
+                log(`Service worker caches: ${cacheNames.length}`);
+                for (const name of cacheNames) {
+                    const cache = await caches.open(name);
+                    const keys = await cache.keys();
+                    log(`  ${name}: ${keys.length} entries`);
+                }
+            }
+        }
+
+        async function clearAllData() {
+            results.innerHTML = '';
+            
+            // Clear IndexedDB
+            try {
+                await indexedDB.deleteDatabase('BiodiversityCache');
+                log('IndexedDB cleared', 'success');
+            } catch (error) {
+                log('Failed to clear IndexedDB', 'error');
+            }
+            
+            // Clear localStorage cache markers
+            const keysToRemove = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith('cached_location_')) {
+                    keysToRemove.push(key);
+                }
+            }
+            keysToRemove.forEach(key => localStorage.removeItem(key));
+            log(`Cleared ${keysToRemove.length} cache markers`, 'success');
+            
+            // Clear service worker caches
+            if ('caches' in window) {
+                const cacheNames = await caches.keys();
+                await Promise.all(cacheNames.map(name => caches.delete(name)));
+                log(`Cleared ${cacheNames.length} service worker caches`, 'success');
+            }
+        }
+    </script>
+</body>
+</html>

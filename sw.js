@@ -1,4 +1,4 @@
-const VERSION = '1.0.26'; // UPDATE THIS VERSION IN app.js TOO!
+const VERSION = '1.1.0'; // UPDATE THIS VERSION IN app.js TOO!
 const CACHE_NAME = `biodiversity-explorer-v${VERSION}`;
 const API_CACHE_NAME = `biodiversity-api-v${VERSION}`;
 
@@ -180,13 +180,8 @@ self.addEventListener('message', event => {
         console.log('📍 SW: Location changed, updating cache strategy');
         const newLocationKey = event.data.locationKey;
         
-        // If location actually changed, clear old API cache
-        if (currentLocation && currentLocation !== newLocationKey) {
-            console.log('🗑️ SW: Clearing old location cache');
-            caches.delete(API_CACHE_NAME).then(() => {
-                console.log('✅ SW: Old API cache cleared');
-            });
-        }
+        // No longer clear cache on location change - let it expire naturally after 7 days
+        // This allows multiple locations to be cached simultaneously
         
         currentLocation = newLocationKey;
         console.log('📍 SW: Current location set to:', currentLocation);

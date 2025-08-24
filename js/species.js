@@ -14,6 +14,8 @@ class SpeciesManager {
         this.lastLoadTime = null; // Track when data was last loaded
         this.lastLoadLocation = null; // Track location of last load
         this.lastLoadFilter = null; // Track filter of last load
+        this.db = null; // IndexedDB instance
+        this.initIndexedDB();
         this.loadCustomTaxaFromStorage();
         this.init();
         this.setupOnlineOfflineListeners();
@@ -22,6 +24,111 @@ class SpeciesManager {
     init() {
         this.setupEventListeners();
         this.setupIntersectionObserver();
+    }
+
+    async initIndexedDB() {
+        try {
+            const request = indexedDB.open('BiodiversityCache', 1);
+            
+            request.onerror = () => {
+                console.error('IndexedDB failed to open');
+            };
+            
+            request.onsuccess = (event) => {
+                this.db = event.target.result;
+                console.log('✅ IndexedDB initialized');
+                // Load cached data from IndexedDB into memory
+                this.loadFromIndexedDB();
+            };
+            
+            request.onupgradeneeded = (event) => {
+                const db = event.target.result;
+                
+                // Create object store for species data
+                if (!db.objectStoreNames.contains('speciesCache')) {
+                    const store = db.createObjectStore('speciesCache', { keyPath: 'cacheKey' });
+                    store.createIndex('timestamp', 'timestamp', { unique: false });
+                }
+            };
+        } catch (error) {
+            console.error('IndexedDB initialization failed:', error);
+        }
+    }
+
+    async loadFromIndexedDB() {
+        if (!this.db) return;
+        
+        try {
+            const transaction = this.db.transaction(['speciesCache'], 'readonly');
+            const store = transaction.objectStore('speciesCache');
+            const request = store.getAll();
+            
+            request.onsuccess = () => {
+                const records = request.result;
+                const now = Date.now();
+                const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 days
+                
+                records.forEach(record => {
+                    // Only load non-expired cache entries
+                    if (now - record.timestamp < maxAge) {
+                        this.speciesCache.set(record.cacheKey, {
+                            species: record.species,
+                            timestamp: record.timestamp
+                        });
+                    }
+                });
+                
+                console.log(`📦 Loaded ${this.speciesCache.size} cache entries from IndexedDB`);
+            };
+        } catch (error) {
+            console.error('Failed to load from IndexedDB:', error);
+        }
+    }
+
+    async saveToIndexedDB(cacheKey, data) {
+        if (!this.db) return;
+        
+        try {
+            const transaction = this.db.transaction(['speciesCache'], 'readwrite');
+            const store = transaction.objectStore('speciesCache');
+            
+            const record = {
+                cacheKey: cacheKey,
+                species: data.species,
+                timestamp: data.timestamp
+            };
+            
+            store.put(record);
+        } catch (error) {
+            console.error('Failed to save to IndexedDB:', error);
+        }
+    }
+
+    async cleanupIndexedDB() {
+        if (!this.db) return;
+        
+        try {
+            const transaction = this.db.transaction(['speciesCache'], 'readwrite');
+            const store = transaction.objectStore('speciesCache');
+            const index = store.index('timestamp');
+            
+            const now = Date.now();
+            const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 days
+            const cutoff = now - maxAge;
+            
+            const range = IDBKeyRange.upperBound(cutoff);
+            const request = index.openCursor(range);
+            
+            request.onsuccess = (event) => {
+                const cursor = event.target.result;
+                if (cursor) {
+                    store.delete(cursor.primaryKey);
+                    cursor.continue();
+                }
+            };
+        } catch (error) {
+            console.error('Failed to cleanup IndexedDB:', error);
+        }
     }
 
     setupEventListeners() {
@@ -1070,11 +1177,11 @@ class SpeciesManager {
         }
         
         // Data is fresh if:
-        // 1. Loaded within last 10 minutes
+        // 1. Loaded within last 7 days
         // 2. Same location (within reasonable precision)
         // 3. Same filter
         const timeSinceLoad = Date.now() - this.lastLoadTime;
-        const dataAge = 10 * 60 * 1000; // 10 minutes
+        const dataAge = 7 * 24 * 60 * 60 * 1000; // 7 days
         
         const sameLocation = this.lastLoadLocation === JSON.stringify(this.currentLocation);
         const sameFilter = this.lastLoadFilter === this.currentFilter;
@@ -1129,10 +1236,16 @@ class SpeciesManager {
         const cacheKey = this.getCacheKey();
         if (!cacheKey) return;
         
-        this.speciesCache.set(cacheKey, {
+        const cacheData = {
             species: [...this.currentSpecies], // Deep copy
             timestamp: Date.now()
-        });
+        };
+        
+        // Save to in-memory cache
+        this.speciesCache.set(cacheKey, cacheData);
+        
+        // Also save to IndexedDB for persistence
+        this.saveToIndexedDB(cacheKey, cacheData);
     }
 
     loadCachedSpeciesData() {
@@ -1142,9 +1255,10 @@ class SpeciesManager {
         const cached = this.speciesCache.get(cacheKey);
         if (!cached) return false;
         
-        // Check if cache is still valid (within 10 minutes)
+        // Check if cache is still valid (within 7 days)
         const cacheAge = Date.now() - cached.timestamp;
-        if (cacheAge > 10 * 60 * 1000) {
+        const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 days
+        if (cacheAge > maxAge) {
             this.speciesCache.delete(cacheKey);
             return false;
         }

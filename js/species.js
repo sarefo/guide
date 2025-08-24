@@ -236,10 +236,18 @@ class SpeciesManager {
             
             console.error('Failed to load species:', error);
             
+            // Debug logging
+            console.log('🔍 Debug - navigator.onLine:', navigator.onLine);
+            console.log('🔍 Debug - error.message:', error.message);
+            console.log('🔍 Debug - includes Failed to fetch:', error.message.includes('Failed to fetch'));
+            console.log('🔍 Debug - equals Unable to load species data:', error.message === 'Unable to load species data');
+            
             // Check if we're offline and show appropriate message
             if (!navigator.onLine || error.message.includes('Failed to fetch') || error.message === 'Unable to load species data') {
+                console.log('🔍 Debug - Calling showOfflineMessage()');
                 this.showOfflineMessage();
             } else {
+                console.log('🔍 Debug - Calling showError()');
                 this.showError();
             }
         }
@@ -453,21 +461,34 @@ class SpeciesManager {
     }
 
     showOfflineMessage() {
+        console.log('🔍 Debug - showOfflineMessage() called');
         const loading = document.getElementById('loading');
         const grid = document.getElementById('species-grid');
         const error = document.getElementById('error-state');
+
+        console.log('🔍 Debug - DOM elements:', {
+            loading: !!loading,
+            grid: !!grid,
+            error: !!error
+        });
 
         if (loading) loading.style.display = 'none';
         if (grid) grid.style.display = 'none';
         if (error) {
             error.style.display = 'flex';
+            console.log('🔍 Debug - Error state set to flex');
             // Update error message for offline scenario
             const errorText = error.querySelector('p');
             const retryBtn = error.querySelector('#retry-btn');
+            console.log('🔍 Debug - Error elements:', {
+                errorText: !!errorText,
+                retryBtn: !!retryBtn
+            });
             if (errorText) {
                 errorText.textContent = window.i18n ? 
                     window.i18n.t('notification.offline') : 
                     'You are offline';
+                console.log('🔍 Debug - Error text set to:', errorText.textContent);
             }
             if (retryBtn) {
                 retryBtn.textContent = window.i18n ?

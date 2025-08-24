@@ -719,10 +719,10 @@ class SpeciesManager {
                     `<p style="margin-bottom: 1rem;"><strong>${window.i18n.t('species.scientificName')}:</strong> <em>${species.scientificName}</em></p>` : ''
                 }
                 <div class="modal-actions" style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; margin-bottom: 1rem;">
-                    <a href="${wikipediaUrl}" target="_blank" class="modal-action-btn">
+                    <a href="${wikipediaUrl}" target="_blank" class="modal-action-btn wiki-btn">
                         ${window.i18n.t('modal.wikipedia')}
                     </a>
-                    <a href="${species.inatUrl}" target="_blank" class="modal-action-btn">
+                    <a href="${species.inatUrl}" target="_blank" class="modal-action-btn inat-btn">
                         ${window.i18n.t('modal.inaturalist')}
                     </a>
                 </div>
@@ -782,6 +782,9 @@ class SpeciesManager {
                 btn.style.background = '#2E7D32';
             });
         });
+
+        // Set up offline/online state for action buttons AFTER styling is applied
+        this.updateModalActionButtons(modal, navigator.onLine);
 
         // Close button handler (redundant with global handler but kept for explicitness)
         const closeBtn = modal.querySelector('.modal-close');
@@ -1295,6 +1298,7 @@ class SpeciesManager {
         window.addEventListener('online', () => {
             console.log('📶 App went online');
             this.updateOfflineUiElements(true);
+            this.updateAllModalActionButtons(true);
             // Only reload if we're currently showing an offline message
             if (this.isShowingOfflineMessage) {
                 console.log('🔄 Auto-reloading offline group now that we\'re online');
@@ -1306,6 +1310,7 @@ class SpeciesManager {
         window.addEventListener('offline', () => {
             console.log('📵 App went offline');
             this.updateOfflineUiElements(false);
+            this.updateAllModalActionButtons(false);
         });
     }
     
@@ -1338,6 +1343,55 @@ class SpeciesManager {
             window.app.showNotification(message, 'warning');
         } else {
             console.warn(message);
+        }
+    }
+
+    updateModalActionButtons(modal, isOnline) {
+        if (!modal) {
+            console.log('❌ No modal provided to updateModalActionButtons');
+            return;
+        }
+        
+        const wikiBtn = modal.querySelector('.wiki-btn');
+        const inatBtn = modal.querySelector('.inat-btn');
+        
+        console.log('🔧 Updating modal buttons:', { 
+            wikiBtn: !!wikiBtn, 
+            inatBtn: !!inatBtn, 
+            isOnline 
+        });
+        
+        [wikiBtn, inatBtn].forEach(btn => {
+            if (btn) {
+                if (isOnline) {
+                    btn.style.opacity = '1';
+                    btn.style.pointerEvents = 'auto';
+                    btn.style.cursor = 'pointer';
+                    btn.removeAttribute('title');
+                } else {
+                    btn.style.opacity = '0.5';
+                    btn.style.pointerEvents = 'none';
+                    btn.style.cursor = 'not-allowed';
+                    btn.setAttribute('title', 'Requires internet connection');
+                }
+            }
+        });
+    }
+
+    updateAllModalActionButtons(isOnline) {
+        // Update buttons in currently open species modal
+        const speciesModal = document.getElementById('species-modal');
+        if (speciesModal) {
+            // Check if modal is visible using multiple methods
+            const isVisible = speciesModal.style.display === 'flex' || 
+                             speciesModal.style.display === 'block' ||
+                             (window.getComputedStyle && window.getComputedStyle(speciesModal).display !== 'none') ||
+                             speciesModal.offsetParent !== null;
+            
+            if (isVisible) {
+                console.log('📱 Updating modal buttons, online:', isOnline);
+                this.updateModalActionButtons(speciesModal, isOnline);
+            }
         }
     }
 }

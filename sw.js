@@ -1,4 +1,4 @@
-const VERSION = '1.1.1'; // UPDATE THIS VERSION IN app.js TOO!
+const VERSION = '1.1.2'; // UPDATE THIS VERSION IN app.js TOO!
 const CACHE_NAME = `biodiversity-explorer-v${VERSION}`;
 const API_CACHE_NAME = `biodiversity-api-v${VERSION}`;
 

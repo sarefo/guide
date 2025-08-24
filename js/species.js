@@ -4,9 +4,11 @@ class SpeciesManager {
         this.currentFilter = 'all';
         this.currentLocation = null; // Changed from currentPlaceId to currentLocation
         this.currentLocale = 'en';
+        this.speciesCache = new Map(); // Cache species data by location+filter key
         this.loading = false;
         this.loadTimeout = null;
         this.loadPromise = null; // Track current loading promise
+        this.isShowingOfflineMessage = false; // Track if currently showing offline message
         this.customTaxa = new Map(); // Store multiple custom taxa {id -> {name, rank}}
         this.predefinedIconicTaxa = ['all', '3', '40151', '47126', '47158', '47119', '26036', '20978', '47178', '47170', '47115'];
         this.lastLoadTime = null; // Track when data was last loaded
@@ -14,6 +16,7 @@ class SpeciesManager {
         this.lastLoadFilter = null; // Track filter of last load
         this.loadCustomTaxaFromStorage();
         this.init();
+        this.setupOnlineOfflineListeners();
     }
 
     init() {
@@ -107,7 +110,20 @@ class SpeciesManager {
         
         // Check if we already have fresh data for this location and filter
         if (this.isDataFresh()) {
-            console.log('📅 Using fresh species data, skipping reload');
+            console.log('📅 Using fresh species data, skipping reload', {
+                speciesCount: this.currentSpecies.length,
+                filter: this.currentFilter,
+                lastFilter: this.lastLoadFilter
+            });
+            // Ensure cached data is displayed and error state is hidden
+            this.displaySpecies();
+            return;
+        }
+
+        // Check if we have cached data for this location and filter combination
+        if (this.loadCachedSpeciesData()) {
+            console.log('📦 Using cached species data');
+            this.displaySpecies();
             return;
         }
         
@@ -215,6 +231,9 @@ class SpeciesManager {
                     window.api.formatSpeciesData(species)
                 );
 
+                // Cache the species data
+                this.cacheSpeciesData();
+
                 // Update load tracking
                 this.lastLoadTime = Date.now();
                 this.lastLoadLocation = JSON.stringify(this.currentLocation);
@@ -262,6 +281,9 @@ class SpeciesManager {
         ).join('');
 
         grid.innerHTML = speciesHTML;
+        
+        // Ensure grid is visible
+        grid.style.display = 'grid';
 
         const images = grid.querySelectorAll('img[data-src]');
         images.forEach(img => this.imageObserver.observe(img));
@@ -278,6 +300,9 @@ class SpeciesManager {
         });
 
         this.hideError();
+        
+        // Clear offline message flag since we're showing species
+        this.isShowingOfflineMessage = false;
         
         // Preload all thumbnails for offline caching
         this.preloadThumbnails();
@@ -465,6 +490,9 @@ class SpeciesManager {
         const grid = document.getElementById('species-grid');
         const error = document.getElementById('error-state');
         const loadingOverlay = document.getElementById('loading-overlay');
+
+        // Track that we're showing offline message
+        this.isShowingOfflineMessage = true;
 
         if (loading) loading.style.display = 'none';
         if (grid) grid.style.display = 'none';
@@ -1050,6 +1078,57 @@ class SpeciesManager {
                     }
                 }
             }
+        });
+    }
+
+    getCacheKey() {
+        if (!this.currentLocation) return null;
+        return `${JSON.stringify(this.currentLocation)}_${this.currentFilter}`;
+    }
+
+    cacheSpeciesData() {
+        const cacheKey = this.getCacheKey();
+        if (!cacheKey) return;
+        
+        this.speciesCache.set(cacheKey, {
+            species: [...this.currentSpecies], // Deep copy
+            timestamp: Date.now()
+        });
+    }
+
+    loadCachedSpeciesData() {
+        const cacheKey = this.getCacheKey();
+        if (!cacheKey) return false;
+        
+        const cached = this.speciesCache.get(cacheKey);
+        if (!cached) return false;
+        
+        // Check if cache is still valid (within 10 minutes)
+        const cacheAge = Date.now() - cached.timestamp;
+        if (cacheAge > 10 * 60 * 1000) {
+            this.speciesCache.delete(cacheKey);
+            return false;
+        }
+        
+        // Load cached species data
+        this.currentSpecies = cached.species;
+        return true;
+    }
+
+    setupOnlineOfflineListeners() {
+        // Listen for online event
+        window.addEventListener('online', () => {
+            console.log('📶 App went online');
+            // Only reload if we're currently showing an offline message
+            if (this.isShowingOfflineMessage) {
+                console.log('🔄 Auto-reloading offline group now that we\'re online');
+                this.loadSpecies();
+            }
+        });
+
+        // Listen for offline event (optional, for logging)
+        window.addEventListener('offline', () => {
+            console.log('📵 App went offline');
         });
     }
 }

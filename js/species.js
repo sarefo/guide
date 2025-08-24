@@ -476,7 +476,11 @@ class SpeciesManager {
         if (grid) grid.style.display = 'none';
         if (error) {
             error.style.display = 'flex';
-            console.log('🔍 Debug - Error state set to flex');
+            error.style.minHeight = '200px';
+            error.style.backgroundColor = '#f5f5f5';
+            error.style.border = '2px solid #ddd';
+            console.log('🔍 Debug - Error state set to flex with forced styling');
+            console.log('🔍 Debug - Error computed style:', window.getComputedStyle(error).display);
             // Update error message for offline scenario
             const errorText = error.querySelector('p');
             const retryBtn = error.querySelector('#retry-btn');
@@ -488,6 +492,9 @@ class SpeciesManager {
                 errorText.textContent = window.i18n ? 
                     window.i18n.t('notification.offline') : 
                     'You are offline';
+                errorText.style.fontSize = '1.2rem';
+                errorText.style.fontWeight = 'bold';
+                errorText.style.color = '#333';
                 console.log('🔍 Debug - Error text set to:', errorText.textContent);
             }
             if (retryBtn) {

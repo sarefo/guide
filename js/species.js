@@ -230,8 +230,16 @@ class SpeciesManager {
             
         } catch (error) {
             // Don't show error for cancelled requests
-            if (error.message !== 'Request cancelled' && error.message !== 'Unable to load species data') {
-                console.error('Failed to load species:', error);
+            if (error.message === 'Request cancelled') {
+                return;
+            }
+            
+            console.error('Failed to load species:', error);
+            
+            // Check if we're offline and show appropriate message
+            if (!navigator.onLine || error.message.includes('Failed to fetch') || error.message === 'Unable to load species data') {
+                this.showOfflineMessage();
+            } else {
                 this.showError();
             }
         }
@@ -444,9 +452,49 @@ class SpeciesManager {
         if (error) error.style.display = 'flex';
     }
 
+    showOfflineMessage() {
+        const loading = document.getElementById('loading');
+        const grid = document.getElementById('species-grid');
+        const error = document.getElementById('error-state');
+
+        if (loading) loading.style.display = 'none';
+        if (grid) grid.style.display = 'none';
+        if (error) {
+            error.style.display = 'flex';
+            // Update error message for offline scenario
+            const errorText = error.querySelector('p');
+            const retryBtn = error.querySelector('#retry-btn');
+            if (errorText) {
+                errorText.textContent = window.i18n ? 
+                    window.i18n.t('notification.offline') : 
+                    'You are offline';
+            }
+            if (retryBtn) {
+                retryBtn.textContent = window.i18n ?
+                    window.i18n.t('error.retry') :
+                    'Retry';
+            }
+        }
+    }
+
     hideError() {
         const error = document.getElementById('error-state');
-        if (error) error.style.display = 'none';
+        if (error) {
+            error.style.display = 'none';
+            // Restore original error message
+            const errorText = error.querySelector('p');
+            const retryBtn = error.querySelector('#retry-btn');
+            if (errorText) {
+                errorText.textContent = window.i18n ? 
+                    window.i18n.t('error.network') : 
+                    'Unable to load data. Please check your connection and try again.';
+            }
+            if (retryBtn) {
+                retryBtn.textContent = window.i18n ?
+                    window.i18n.t('error.retry') :
+                    'Retry';
+            }
+        }
     }
 
     showEmptyState() {

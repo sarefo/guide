@@ -68,7 +68,10 @@
   
   "notification.copied": "URL copiée dans le presse-papiers !",
   "notification.copy.failed": "Copie échouée. Veuillez copier manuellement.",
-  "notification.offline": "Vous êtes hors ligne", 
+  "notification.offline": "Vous êtes hors ligne",
+  "notification.offline.search": "La recherche nécessite une connexion internet",
+  "notification.offline.cache": "La mise en cache nécessite une connexion internet",
+  "notification.offline.language": "Le changement de langue nécessite une connexion internet", 
   "notification.online": "Connexion rétablie",
   "notification.refreshing": "Actualisation des données...",
   "notification.refresh.success": "Données actualisées avec succès",

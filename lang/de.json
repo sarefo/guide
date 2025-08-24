@@ -68,7 +68,10 @@
   
   "notification.copied": "URL in Zwischenablage kopiert!",
   "notification.copy.failed": "Kopieren fehlgeschlagen. Bitte manuell kopieren.",
-  "notification.offline": "Sie sind offline", 
+  "notification.offline": "Sie sind offline",
+  "notification.offline.search": "Suche erfordert Internetverbindung",
+  "notification.offline.cache": "Zwischenspeicherung erfordert Internetverbindung",
+  "notification.offline.language": "Sprachwechsel erfordert Internetverbindung", 
   "notification.online": "Verbindung wiederhergestellt",
   "notification.refreshing": "Daten werden aktualisiert...",
   "notification.refresh.success": "Daten erfolgreich aktualisiert",

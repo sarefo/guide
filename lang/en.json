@@ -73,6 +73,9 @@
   "notification.refresh.success": "Data refreshed successfully",
   "notification.refresh.failed": "Refresh failed. Please try again.",
   "notification.error": "An error occurred. Please refresh the page.",
+  "notification.offline.search": "Search requires internet connection",
+  "notification.offline.cache": "Caching requires internet connection",
+  "notification.offline.language": "Language change requires internet connection",
   
   "cache.button.tooltip": "Download for offline use",
   "cache.loading": "Caching data...",

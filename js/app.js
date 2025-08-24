@@ -1,7 +1,7 @@
 class BiodiversityApp {
     constructor() {
         this.version = '1.0.25'; // UPDATE THIS VERSION IN sw.js TOO!
-        this.buildDate = '2025-08-23 21:55'; // UPDATE THIS WHEN CHANGING VERSION
+        this.buildDate = '2025-08-23 22:06'; // UPDATE THIS WHEN CHANGING VERSION
         this.initialized = false;
         this.updateCheckInterval = null;
         this.lastUpdateCheck = null;
@@ -59,11 +59,13 @@ class BiodiversityApp {
     setupNetworkMonitoring() {
         window.addEventListener('online', () => {
             this.showNetworkStatus('online');
+            this.updateOfflineUiElements(true);
             this.retryFailedOperations();
         });
 
         window.addEventListener('offline', () => {
             this.showNetworkStatus('offline');
+            this.updateOfflineUiElements(false);
         });
     }
 
@@ -71,6 +73,7 @@ class BiodiversityApp {
         this.setupAppEventListeners();
         this.initializeSharing();
         this.initializeCaching();
+        this.initializeLanguageSelector();
         this.setupServiceWorkerListeners();
         
         // Delay initial update check to avoid conflicts with SW installation
@@ -79,6 +82,9 @@ class BiodiversityApp {
         }, 5000); // 5 seconds delay
         
         this.startPeriodicUpdateChecks();
+        
+        // Initial offline state setup
+        this.updateOfflineUiElements(navigator.onLine);
 
         if (window.locationManager) {
         }
@@ -152,6 +158,13 @@ class BiodiversityApp {
         const cacheBtn = document.getElementById('cache-btn');
         if (cacheBtn) {
             cacheBtn.addEventListener('click', () => {
+                // Block caching when offline
+                if (!navigator.onLine) {
+                    if (window.speciesManager) {
+                        window.speciesManager.showOfflineNotification('cache');
+                    }
+                    return;
+                }
                 this.cacheAllLifeGroups();
             });
         }
@@ -858,6 +871,71 @@ class BiodiversityApp {
             this.setCacheButtonState('cached');
         } else {
             this.setCacheButtonState('idle');
+        }
+    }
+
+    initializeLanguageSelector() {
+        const languageSelect = document.getElementById('language-select');
+        if (languageSelect) {
+            languageSelect.addEventListener('change', (e) => {
+                // Block language changing when offline
+                if (!navigator.onLine) {
+                    // Revert to previous selection
+                    const currentLang = window.i18n ? window.i18n.getCurrentLang() : 'en';
+                    e.target.value = currentLang;
+                    
+                    if (window.speciesManager) {
+                        window.speciesManager.showOfflineNotification('language');
+                    }
+                    return;
+                }
+                
+                // Allow language change when online
+                if (window.i18n) {
+                    window.i18n.setLanguage(e.target.value);
+                }
+            });
+        }
+    }
+    
+    updateOfflineUiElements(isOnline) {
+        // Update cache button state (but preserve visual state if already cached)
+        const cacheBtn = document.getElementById('cache-btn');
+        if (cacheBtn) {
+            if (isOnline) {
+                cacheBtn.disabled = false;
+                cacheBtn.style.opacity = '1';
+                cacheBtn.style.pointerEvents = 'auto';
+            } else {
+                // Only disable if not showing cached state
+                const iconComplete = cacheBtn.querySelector('.cache-complete');
+                const isShowingCached = iconComplete && iconComplete.style.display !== 'none';
+                
+                if (!isShowingCached) {
+                    cacheBtn.disabled = true;
+                    cacheBtn.style.opacity = '0.5';
+                    cacheBtn.style.pointerEvents = 'none';
+                } else {
+                    // Keep visual appearance but block functionality
+                    cacheBtn.disabled = true;
+                    cacheBtn.style.pointerEvents = 'none';
+                    // Don't change opacity - keep checkmark visible
+                }
+            }
+        }
+        
+        // Update language selector state
+        const languageSelect = document.getElementById('language-select');
+        if (languageSelect) {
+            if (isOnline) {
+                languageSelect.disabled = false;
+                languageSelect.style.opacity = '1';
+                languageSelect.style.pointerEvents = 'auto';
+            } else {
+                languageSelect.disabled = true;
+                languageSelect.style.opacity = '0.5';
+                languageSelect.style.pointerEvents = 'none';
+            }
         }
     }
 

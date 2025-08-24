@@ -66,6 +66,9 @@ class SpeciesManager {
                     this.setFilter(group);
                 }
             });
+            
+            // Initial offline state setup
+            this.updateOfflineUiElements(navigator.onLine);
         } else {
             console.error('🔧 Filter container not found!');
         }
@@ -662,6 +665,12 @@ class SpeciesManager {
     }
 
     openTaxonModal() {
+        // Block taxon modal when offline
+        if (!navigator.onLine) {
+            this.showOfflineNotification('search');
+            return;
+        }
+        
         const modal = document.getElementById('taxon-modal');
         const searchInput = document.getElementById('taxon-search');
         const resultsContainer = document.getElementById('taxon-results');
@@ -1119,6 +1128,7 @@ class SpeciesManager {
         // Listen for online event
         window.addEventListener('online', () => {
             console.log('📶 App went online');
+            this.updateOfflineUiElements(true);
             // Only reload if we're currently showing an offline message
             if (this.isShowingOfflineMessage) {
                 console.log('🔄 Auto-reloading offline group now that we\'re online');
@@ -1126,10 +1136,43 @@ class SpeciesManager {
             }
         });
 
-        // Listen for offline event (optional, for logging)
+        // Listen for offline event
         window.addEventListener('offline', () => {
             console.log('📵 App went offline');
+            this.updateOfflineUiElements(false);
         });
+    }
+    
+    updateOfflineUiElements(isOnline) {
+        // Update "other" filter button state
+        const otherBtn = document.querySelector('.filter-btn[data-group="other"]');
+        if (otherBtn) {
+            if (isOnline) {
+                otherBtn.disabled = false;
+                otherBtn.style.opacity = '1';
+                otherBtn.style.pointerEvents = 'auto';
+            } else {
+                otherBtn.disabled = true;
+                otherBtn.style.opacity = '0.5';
+                otherBtn.style.pointerEvents = 'none';
+            }
+        }
+    }
+    
+    showOfflineNotification(feature) {
+        const messages = {
+            search: window.i18n ? window.i18n.t('notification.offline.search') : 'Search requires internet connection',
+            cache: window.i18n ? window.i18n.t('notification.offline.cache') : 'Caching requires internet connection',
+            language: window.i18n ? window.i18n.t('notification.offline.language') : 'Language change requires internet connection'
+        };
+        
+        const message = messages[feature] || messages.search;
+        
+        if (window.app) {
+            window.app.showNotification(message, 'warning');
+        } else {
+            console.warn(message);
+        }
     }
 }
 

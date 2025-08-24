@@ -68,7 +68,10 @@
   
   "notification.copied": "¡URL copiada al portapapeles!",
   "notification.copy.failed": "Copia falló. Por favor copia manualmente.",
-  "notification.offline": "Estás desconectado", 
+  "notification.offline": "Estás desconectado",
+  "notification.offline.search": "La búsqueda requiere conexión a internet",
+  "notification.offline.cache": "El almacenamiento requiere conexión a internet",
+  "notification.offline.language": "El cambio de idioma requiere conexión a internet", 
   "notification.online": "Conexión restaurada",
   "notification.refreshing": "Actualizando datos...",
   "notification.refresh.success": "Datos actualizados exitosamente",

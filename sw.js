@@ -2,6 +2,9 @@ const VERSION = '1.0.21'; // UPDATE THIS VERSION IN app.js TOO!
 const CACHE_NAME = `biodiversity-explorer-v${VERSION}`;
 const API_CACHE_NAME = `biodiversity-api-v${VERSION}`;
 
+// Track current location for cache management
+let currentLocation = null;
+
 const STATIC_ASSETS = [
     './',
     './index.html',
@@ -132,7 +135,7 @@ function isStale(response) {
     if (!cachedAt) return false;
 
     const cacheAge = Date.now() - parseInt(cachedAt);
-    const maxAge = 15 * 60 * 1000; // 15 minutes for API responses
+    const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 days for API responses
 
     return cacheAge > maxAge;
 }
@@ -173,6 +176,20 @@ self.addEventListener('message', event => {
         if (event.ports && event.ports[0]) {
             event.ports[0].postMessage({ success: true });
         }
+    } else if (event.data && event.data.type === 'LOCATION_CHANGED') {
+        console.log('📍 SW: Location changed, updating cache strategy');
+        const newLocationKey = event.data.locationKey;
+        
+        // If location actually changed, clear old API cache
+        if (currentLocation && currentLocation !== newLocationKey) {
+            console.log('🗑️ SW: Clearing old location cache');
+            caches.delete(API_CACHE_NAME).then(() => {
+                console.log('✅ SW: Old API cache cleared');
+            });
+        }
+        
+        currentLocation = newLocationKey;
+        console.log('📍 SW: Current location set to:', currentLocation);
     }
 });
 

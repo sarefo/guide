@@ -211,6 +211,9 @@ class LocationManager {
                 detail: this.currentLocation
             }));
             
+            // Notify service worker about location change for cache management
+            this.notifyServiceWorkerLocationChange();
+            
         } catch (error) {
             console.error('Failed to load location from coordinates:', error);
             this.handleLocationError();
@@ -1133,6 +1136,23 @@ class LocationManager {
         } catch (error) {
             console.error(`Failed to find iNat place for "${countryName}":`, error);
             return null;
+        }
+    }
+
+    // Notify service worker about location change for cache management
+    notifyServiceWorkerLocationChange() {
+        if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+            // Create location key from coordinates
+            const locationKey = this.currentLocation ? 
+                `${this.currentLocation.lat.toFixed(4)}_${this.currentLocation.lng.toFixed(4)}` : 
+                'default';
+            
+            navigator.serviceWorker.controller.postMessage({
+                type: 'LOCATION_CHANGED',
+                locationKey: locationKey
+            });
+            
+            console.log('📍 App: Notified service worker of location change:', locationKey);
         }
     }
 }

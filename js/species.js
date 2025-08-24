@@ -236,18 +236,10 @@ class SpeciesManager {
             
             console.error('Failed to load species:', error);
             
-            // Debug logging
-            console.log('🔍 Debug - navigator.onLine:', navigator.onLine);
-            console.log('🔍 Debug - error.message:', error.message);
-            console.log('🔍 Debug - includes Failed to fetch:', error.message.includes('Failed to fetch'));
-            console.log('🔍 Debug - equals Unable to load species data:', error.message === 'Unable to load species data');
-            
             // Check if we're offline and show appropriate message
             if (!navigator.onLine || error.message.includes('Failed to fetch') || error.message === 'Unable to load species data') {
-                console.log('🔍 Debug - Calling showOfflineMessage()');
                 this.showOfflineMessage();
             } else {
-                console.log('🔍 Debug - Calling showError()');
                 this.showError();
             }
         }
@@ -445,9 +437,14 @@ class SpeciesManager {
     hideLoading() {
         const loading = document.getElementById('loading');
         const grid = document.getElementById('species-grid');
+        const error = document.getElementById('error-state');
 
         if (loading) loading.style.display = 'none';
-        if (grid) grid.style.display = 'grid';
+        
+        // Only show grid if error state is not visible
+        if (grid && (!error || getComputedStyle(error).display === 'none')) {
+            grid.style.display = 'grid';
+        }
     }
 
     showError() {
@@ -461,67 +458,23 @@ class SpeciesManager {
     }
 
     showOfflineMessage() {
-        console.log('🔍 Debug - showOfflineMessage() called');
         const loading = document.getElementById('loading');
         const grid = document.getElementById('species-grid');
         const error = document.getElementById('error-state');
         const loadingOverlay = document.getElementById('loading-overlay');
 
-        console.log('🔍 Debug - DOM elements:', {
-            loading: !!loading,
-            grid: !!grid,
-            error: !!error,
-            loadingOverlay: !!loadingOverlay
-        });
-
-        if (loading) {
-            loading.style.display = 'none';
-            console.log('🔍 Debug - Loading hidden');
-        }
-        if (grid) {
-            grid.style.display = 'none';
-            console.log('🔍 Debug - Grid hidden, computed style:', window.getComputedStyle(grid).display);
-        }
-        if (loadingOverlay) {
-            loadingOverlay.style.display = 'none';
-            console.log('🔍 Debug - Loading overlay hidden');
-        }
+        if (loading) loading.style.display = 'none';
+        if (grid) grid.style.display = 'none';
+        if (loadingOverlay) loadingOverlay.style.display = 'none';
         if (error) {
             error.style.display = 'flex';
-            error.style.minHeight = '200px';
-            error.style.backgroundColor = '#f5f5f5';
-            error.style.border = '2px solid #ddd';
-            error.style.zIndex = '1000';
-            error.style.position = 'relative';
-            console.log('🔍 Debug - Error state set to flex with forced styling');
-            console.log('🔍 Debug - Error computed style:', window.getComputedStyle(error).display);
-            const rect = error.getBoundingClientRect();
-            const computedStyle = window.getComputedStyle(error);
-            console.log('🔍 Debug - Error element position:', {
-                top: rect.top,
-                left: rect.left,
-                width: rect.width,
-                height: rect.height,
-                visibility: computedStyle.visibility,
-                opacity: computedStyle.opacity,
-                zIndex: computedStyle.zIndex,
-                position: computedStyle.position
-            });
             // Update error message for offline scenario
             const errorText = error.querySelector('p');
             const retryBtn = error.querySelector('#retry-btn');
-            console.log('🔍 Debug - Error elements:', {
-                errorText: !!errorText,
-                retryBtn: !!retryBtn
-            });
             if (errorText) {
                 errorText.textContent = window.i18n ? 
                     window.i18n.t('notification.offline') : 
                     'You are offline';
-                errorText.style.fontSize = '1.2rem';
-                errorText.style.fontWeight = 'bold';
-                errorText.style.color = '#333';
-                console.log('🔍 Debug - Error text set to:', errorText.textContent);
             }
             if (retryBtn) {
                 retryBtn.textContent = window.i18n ?

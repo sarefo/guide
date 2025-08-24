@@ -62,7 +62,10 @@ class iNaturalistAPI {
                 throw new Error('Request cancelled');
             }
             
-            console.error('API request error:', error);
+            // Only log errors when online - offline errors are expected
+            if (navigator.onLine) {
+                console.error('API request error:', error);
+            }
             throw error;
         }
     }
@@ -347,7 +350,10 @@ class iNaturalistAPI {
             if (error.message === 'Request cancelled') {
                 return []; // Return empty array for cancelled requests
             }
-            console.error('Failed to get species observations:', error);
+            // Only log errors when online - offline errors are expected
+            if (navigator.onLine) {
+                console.error('Failed to get species observations:', error);
+            }
             throw new Error('Unable to load species data');
         }
     }

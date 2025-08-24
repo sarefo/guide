@@ -234,7 +234,10 @@ class SpeciesManager {
                 return;
             }
             
-            console.error('Failed to load species:', error);
+            // Only log errors when online - offline errors are expected
+            if (navigator.onLine) {
+                console.error('Failed to load species:', error);
+            }
             
             // Check if we're offline and show appropriate message
             if (!navigator.onLine || error.message.includes('Failed to fetch') || error.message === 'Unable to load species data') {

@@ -1,8 +1,4 @@
 + cached data does not persist between app loads
-+ when offline:
-  + use low-res thumbnail instead of showing image placeholder
-  + disable wiki + iNat buttons
-  + re-enable everything when online again!
 
 + go through entire code:
   + streamline

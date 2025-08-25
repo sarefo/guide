@@ -18,7 +18,8 @@
       "Bash(grep:*)",
       "Bash(git push:*)",
       "mcp__context7__get-library-docs",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(mv:*)"
     ],
     "deny": [],
     "ask": []

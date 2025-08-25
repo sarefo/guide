@@ -3,11 +3,11 @@
 ## Project Context
 This is a **mobile-first Progressive Web App** for displaying location-based biodiversity data using the iNaturalist API. The app shows species images with elegant text overlays and supports multi-language functionality.
 
-## Key Working Files
-- **PROJECT_STATUS.md** - Current development phase and session memory
-- **IMPLEMENTATION_CHECKLIST.md** - Step-by-step development tasks  
-- **API_INTEGRATION.md** - iNaturalist API endpoints and examples
-- **README_START_HERE.md** - Quick start guide for new sessions
+## Key Working Files  
+- **docs/PROJECT_STATUS.md** - Current development phase and session memory
+- **docs/IMPLEMENTATION_CHECKLIST.md** - Step-by-step development tasks  
+- **docs/API_INTEGRATION.md** - iNaturalist API endpoints and examples
+- **README.md** - User-facing project documentation
 
 ## Current Status
 **Phase**: Ready for development (setup complete)  
@@ -28,11 +28,12 @@ This is a **mobile-first Progressive Web App** for displaying location-based bio
 - URL-driven location loading
 
 ## Session Workflow
-1. **Check PROJECT_STATUS.md** for current phase
-2. **Update TodoWrite** tool to track progress
-3. **Follow IMPLEMENTATION_CHECKLIST.md** for tasks
-4. **Update PROJECT_STATUS.md** when completing phases
-5. **Reference API_INTEGRATION.md** for API details
+1. **Check docs/PROJECT_STATUS.md** for current phase
+2. **Update TodoWrite** tool to track progress  
+3. **Follow docs/IMPLEMENTATION_CHECKLIST.md** for tasks
+4. **Update docs/PROJECT_STATUS.md** when completing phases
+5. **Reference docs/API_INTEGRATION.md** for API details
+6. **Maintain documentation** - Update docs/ files and README.md to reflect actual app state
 
 ## Technical Stack
 - HTML5/CSS3/Vanilla JS (PWA)
@@ -51,5 +52,12 @@ When incrementing version (user request):
 2. Update `sw.js` line 1: `const VERSION = '1.0.X'`  
 3. Increment only the last digit (patch version)
 4. HTML version updates automatically from app.js
+
+## Documentation Maintenance
+**IMPORTANT**: After implementing features or making significant changes:
+- Update docs/PROJECT_STATUS.md with current phase and completed features
+- Verify docs/IMPLEMENTATION_CHECKLIST.md reflects remaining tasks  
+- Update README.md if user-facing functionality changes
+- Keep this CLAUDE.md file current with actual project structure
 
 Always maintain session continuity by updating status files and using TodoWrite tool.

@@ -142,21 +142,21 @@ class UpdateService {
             if (registration && registration.waiting) {
                 registration.waiting.postMessage({ type: 'SKIP_WAITING' });
 
-                // Listen for the activation and reload
+                // Listen for the activation and reload with cache busting
                 navigator.serviceWorker.addEventListener('controllerchange', () => {
-                    window.location.reload(true);
+                    this.hardReload();
                 });
                 
                 // Fallback reload
                 setTimeout(() => {
-                    window.location.reload(true);
+                    this.hardReload();
                 }, 3000);
             } else {
-                window.location.reload(true);
+                this.hardReload();
             }
         } catch (error) {
             console.error('Update application failed:', error);
-            window.location.reload(true);
+            this.hardReload();
         }
     }
 
@@ -215,7 +215,7 @@ class UpdateService {
             
             setTimeout(() => {
                 indicator.remove();
-                window.location.reload(true);
+                this.hardReload();
             }, 1000);
         } catch (error) {
             console.error('Manual update check failed:', error);
@@ -273,6 +273,14 @@ class UpdateService {
             clearInterval(this.updateCheckInterval);
             this.updateCheckInterval = null;
         }
+    }
+
+    hardReload() {
+        // Force a hard reload with cache busting
+        // This ensures all cached resources are refreshed
+        const url = new URL(window.location);
+        url.searchParams.set('v', Date.now()); // Cache bust parameter
+        window.location.replace(url.toString());
     }
 }
 

@@ -1,4 +1,4 @@
-const VERSION = '1.1.4'; // UPDATE THIS VERSION IN app.js TOO!
+const VERSION = '1.1.5'; // UPDATE THIS VERSION IN app.js TOO!
 const CACHE_NAME = `biodiversity-explorer-v${VERSION}`;
 const API_CACHE_NAME = `biodiversity-api-v${VERSION}`;
 
@@ -11,11 +11,17 @@ const STATIC_ASSETS = [
     './manifest.json',
     './css/main.css',
     './css/mobile.css',
+    './js/config.js',
+    './js/notifications.js',
+    './js/cache.js',
+    './js/updates.js',
     './js/app.js',
     './js/api.js',
     './js/location.js',
     './js/species.js',
     './js/i18n.js',
+    './js/map.js',
+    './js/qr.js',
     './assets/icons.svg',
     './lang/en.json',
     './lang/es.json',

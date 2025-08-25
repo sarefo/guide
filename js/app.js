@@ -1,7 +1,8 @@
 class BiodiversityApp {
     constructor() {
-        this.version = '1.1.2'; // UPDATE THIS VERSION IN sw.js TOO!
-        this.buildDate = '2025-08-23 23:27'; // UPDATE THIS WHEN CHANGING VERSION
+        // Version from centralized config
+        this.version = window.APP_CONFIG.version;
+        this.buildDate = window.APP_CONFIG.buildDate;
         this.initialized = false;
         this.updateCheckInterval = null;
         this.lastUpdateCheck = null;
@@ -164,12 +165,12 @@ class BiodiversityApp {
     }
 
     startPeriodicUpdateChecks() {
-        // Check for updates every 8 hours (much less aggressive)
+        // Check for updates using config interval
         this.updateCheckInterval = setInterval(() => {
             if (!document.hidden) {
                 this.checkForUpdates();
             }
-        }, 8 * 60 * 60 * 1000); // 8 hours
+        }, window.APP_CONFIG.updateCheckInterval);
     }
 
     initializeSharing() {

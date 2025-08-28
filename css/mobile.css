@@ -156,9 +156,9 @@
     }
     
     .species-modal-image {
-        width: min(25vh, 200px) !important;
-        height: min(25vh, 200px) !important;
-        max-width: 90% !important;
+        width: min(calc(100vw - 5rem), 240px) !important;
+        height: min(calc(100vw - 5rem), 240px) !important;
+        max-width: 100% !important;
     }
 }
 
@@ -422,9 +422,9 @@
     
     /* Responsive image sizing in modal */
     .species-modal-image {
-        width: min(30vh, 200px) !important;
-        height: min(30vh, 200px) !important;
-        max-width: 90% !important;
+        width: min(calc(100vw - 3rem), 260px) !important;
+        height: min(calc(100vw - 3rem), 260px) !important;
+        max-width: 100% !important;
     }
 }
 

@@ -979,6 +979,17 @@ body {
     background: #1B5E20;
 }
 
+/* Species Modal Image */
+.species-modal-image {
+    width: min(60vw, 300px);
+    height: min(60vw, 300px);
+    max-width: 100%;
+    object-fit: cover;
+    border-radius: 0.5rem;
+    margin: 0 auto;
+    display: block;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .species-grid {
@@ -1105,9 +1116,9 @@ body {
     
     /* Responsive modal image on mobile */
     .species-modal-image {
-        width: min(35vh, 250px) !important;
-        height: min(35vh, 250px) !important;
-        max-width: 90% !important;
+        width: min(calc(100vw - 4rem), 320px) !important;
+        height: min(calc(100vw - 4rem), 320px) !important;
+        max-width: 100% !important;
     }
     
     /* Offline badge extra small mobile sizing */

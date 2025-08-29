@@ -90,6 +90,10 @@ class LocationManager {
 
         // URL change handler
         window.addEventListener('popstate', () => {
+            // Don't reload location if this is a modal-related popstate event
+            if (window.modalManager && window.modalManager.handlingModalPopstate) {
+                return;
+            }
             this.loadLocationFromURL();
         });
     }

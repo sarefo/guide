@@ -1049,11 +1049,15 @@ class ModalManager {
     }
 
     setupHistoryHandling() {
+        // Flag to track if we're handling modal-related history navigation
+        this.handlingModalPopstate = false;
+        
         // Listen for popstate events (Android back button, browser back button)
         window.addEventListener('popstate', (e) => {
             // If we have open modals, close the top one instead of navigating back
             if (this.openModals.size > 0) {
                 e.preventDefault();
+                e.stopImmediatePropagation(); // Prevent other popstate handlers from running
                 this.closeTopModalFromHistory();
                 return false;
             }
@@ -1083,7 +1087,25 @@ class ModalManager {
             if (!fromHistory) {
                 const stateId = this.modalHistoryStates.get(modal);
                 if (stateId && history.state && history.state.modalId === stateId) {
-                    history.back();
+                    // Set flag to prevent location manager from reacting to this popstate
+                    this.handlingModalPopstate = true;
+                    
+                    // Use history.replaceState instead of history.back() to avoid popstate event
+                    const currentState = history.state || {};
+                    const newState = { ...currentState };
+                    delete newState.modalId;
+                    
+                    // If the new state is empty, go back in history
+                    if (Object.keys(newState).length === 0) {
+                        history.back();
+                    } else {
+                        history.replaceState(newState, '', window.location.href);
+                    }
+                    
+                    // Clear flag after a short delay
+                    setTimeout(() => {
+                        this.handlingModalPopstate = false;
+                    }, 100);
                 }
             }
             this.modalHistoryStates.delete(modal);

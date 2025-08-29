@@ -1,0 +1,46 @@
+/* =============================================================================
+   HEADER COMPONENT
+   ============================================================================= */
+
+.header {
+    background: linear-gradient(135deg, #2E7D32 0%, #388E3C 100%);
+    color: white;
+    padding: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.header__content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.header__title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+    flex: 1;
+    min-width: 0;
+}
+
+.header__location {
+    display: block;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+.header__location:hover {
+    opacity: 0.8;
+}
+
+.header__controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}

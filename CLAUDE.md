@@ -61,3 +61,4 @@ When incrementing version (user request):
 - Keep this CLAUDE.md file current with actual project structure
 
 Always maintain session continuity by updating status files and using TodoWrite tool.
+- server already running at :8000

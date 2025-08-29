@@ -1,0 +1,117 @@
+/* =============================================================================
+   SPECIES GRID & CARD COMPONENTS
+   ============================================================================= */
+
+.species-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+    padding: 1rem;
+    align-content: start;
+    position: relative;
+}
+
+.species-card {
+    position: relative;
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    background: #f5f5f5;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    aspect-ratio: 4/3;
+}
+
+.species-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.species-card:active {
+    transform: translateY(0);
+}
+
+.species-card__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.species-card__placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #e8e8e8;
+    color: #666;
+}
+
+.species-card__placeholder--no-photo {
+    background: #f0f0f0;
+}
+
+.species-card__placeholder-text {
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    opacity: 0.8;
+}
+
+.species-card__placeholder-icon {
+    font-size: 3rem;
+    opacity: 0.3;
+}
+
+.species-card__overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+    padding: 2rem 1rem 1rem;
+    color: white;
+}
+
+.species-card__name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.species-card__name--scientific {
+    font-style: italic;
+}
+
+.species-card__scientific {
+    font-size: 0.9rem;
+    font-style: italic;
+    opacity: 0.9;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.species-card__count {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 1rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+/* Species Modal Image */
+.species-modal__image {
+    width: min(60vw, 300px);
+    height: min(60vw, 300px);
+    max-width: 100%;
+    object-fit: cover;
+    border-radius: 0.5rem;
+    margin: 0 auto;
+    display: block;
+}

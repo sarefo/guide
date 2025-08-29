@@ -1,16 +1,19 @@
-/* Mobile-First Enhancements */
+/* =============================================================================
+   MOBILE BIODIVERSITY PWA - RESPONSIVE STYLES
+   BEM methodology with mobile-first approach
+   ============================================================================= */
 
-/* Touch-friendly interactions */
+/* -----------------------------------------------------------------------------
+   01. MOBILE TOUCH & ACCESSIBILITY ENHANCEMENTS
+   ----------------------------------------------------------------------------- */
 @media (pointer: coarse) {
-    .filter-btn,
+    .filter__btn,
     .species-card,
-    .location-result,
-    .icon-btn,
-    .language-select,
-    .retry-btn,
-    .copy-btn,
-    .my-location-btn,
-    .use-location-btn {
+    .search-results__item,
+    .btn--icon,
+    .select,
+    .btn--secondary,
+    .btn--primary {
         min-height: 44px;
         -webkit-touch-callout: none;
         -webkit-user-select: none;
@@ -18,23 +21,23 @@
     }
 }
 
-/* iOS Safari specific fixes */
+/* iOS Safari optimizations */
 @supports (-webkit-touch-callout: none) {
     body {
         -webkit-text-size-adjust: 100%;
     }
     
-    .app-header {
+    .header {
         padding-top: max(1rem, env(safe-area-inset-top));
         padding-left: max(1rem, env(safe-area-inset-left));
         padding-right: max(1rem, env(safe-area-inset-right));
     }
     
-    .main-content {
+    .app__content {
         padding-bottom: env(safe-area-inset-bottom);
     }
     
-    input[type="text"] {
+    .input {
         -webkit-appearance: none;
         border-radius: 0.5rem;
     }
@@ -45,85 +48,299 @@
     }
 }
 
-/* Prevent zoom on input focus (iOS) */
+/* Prevent zoom on input focus */
 @media screen and (max-width: 767px) {
-    input[type="text"] {
+    .input {
         font-size: 16px;
     }
 }
 
-/* High-DPI screens */
+/* High-DPI screen optimizations */
 @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-    .species-image {
+    .species-card__image {
         image-rendering: -webkit-optimize-contrast;
         image-rendering: crisp-edges;
     }
 }
 
-/* Mobile map optimizations */
-@media screen and (max-width: 767px) {
-    .location-map {
+/* -----------------------------------------------------------------------------
+   02. MOBILE LAYOUT (max-width: 768px)
+   ----------------------------------------------------------------------------- */
+@media (max-width: 768px) {
+    /* Species grid mobile layout */
+    .species-grid {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 0.75rem;
+        padding: 0.75rem;
+    }
+    
+    .species-card {
+        border-radius: 0.75rem;
+        aspect-ratio: 1;
+    }
+    
+    .species-card__overlay {
+        padding: 1.5rem 0.75rem 0.75rem;
+    }
+    
+    .species-card__name {
+        font-size: 1rem;
+    }
+    
+    .species-card__scientific {
+        font-size: 0.8rem;
+    }
+    
+    /* Filter adjustments */
+    .filter__container {
+        padding: 0 0.75rem;
+    }
+    
+    .filter__btn {
+        min-width: 60px;
+        padding: 0.5rem;
+    }
+    
+    .filter__icon {
+        font-size: 1.25rem;
+    }
+    
+    .filter__text {
+        font-size: 0.75rem;
+    }
+    
+    /* Status badge mobile sizing */
+    .status-badge {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+    }
+    
+    /* Map mobile optimizations */
+    .map {
         height: max(200px, min(35vh, 300px));
         margin-bottom: 0.75rem;
         min-height: 180px;
     }
     
-    .location-modal .location-map {
+    .modal--location .map {
         height: calc(100% - 200px);
         min-height: 180px;
         flex: 1;
     }
     
-    .my-location-btn {
+    .btn--primary {
         padding: 1rem;
         font-size: 1.1rem;
         min-height: 52px;
     }
     
-    /* Improve map controls on mobile */
-    .location-map .leaflet-control-zoom {
+    /* Map controls mobile enhancement */
+    .map .leaflet-control-zoom {
         margin-left: 8px;
         margin-top: 8px;
     }
     
-    .location-map .leaflet-control-zoom a {
+    .map .leaflet-control-zoom a {
         width: 36px;
         height: 36px;
         line-height: 34px;
         font-size: 20px;
     }
     
-    /* Make attribution smaller on mobile */
-    .location-map .leaflet-control-attribution {
+    .map .leaflet-control-attribution {
         font-size: 0.6rem;
         padding: 2px 4px;
     }
+    
+    /* Pull-to-refresh space */
+    .app__content {
+        overscroll-behavior-y: contain;
+    }
 }
 
-/* Landscape orientation on mobile */
+/* -----------------------------------------------------------------------------
+   03. SMALL MOBILE LAYOUT (max-width: 480px)
+   ----------------------------------------------------------------------------- */
+@media (max-width: 480px) {
+    .header__content {
+        gap: 0.5rem;
+    }
+    
+    .header__title {
+        font-size: 1.1rem;
+    }
+    
+    .btn--icon,
+    .select {
+        min-width: 40px;
+        min-height: 40px;
+        padding: 0.4rem;
+    }
+    
+    .species-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 0.5rem;
+        padding: 0.5rem;
+    }
+    
+    /* Modal optimizations */
+    .modal__content {
+        margin: 0.5rem;
+        border-radius: 0.75rem;
+    }
+    
+    .modal__body {
+        padding: 1.5rem;
+    }
+    
+    /* Location modal mobile positioning */
+    .modal--location {
+        padding-top: max(1vh, 0.5rem);
+        padding-bottom: max(1vh, 0.5rem);
+        align-items: flex-start;
+    }
+    
+    .modal--location .modal__content {
+        height: min(90vh, 600px);
+        max-height: 95vh;
+    }
+    
+    .modal--location .modal__body {
+        padding: 1rem;
+        gap: 0.75rem;
+    }
+    
+    .modal--location .map {
+        height: calc(100% - 180px);
+        min-height: 150px;
+    }
+    
+    .modal--share,
+    .modal--taxon {
+        padding-top: 10vh;
+        align-items: flex-start;
+    }
+    
+    /* Species modal mobile optimization */
+    .modal--species {
+        padding: 0.5rem;
+        padding-top: 5vh;
+        align-items: flex-start;
+    }
+    
+    .modal--species .modal__content {
+        max-height: 85vh;
+        margin: 0;
+    }
+    
+    .modal--species .modal__body {
+        padding: 1rem;
+    }
+    
+    /* Modal image responsive sizing */
+    .species-modal__image {
+        width: min(calc(100vw - 4rem), 320px) !important;
+        height: min(calc(100vw - 4rem), 320px) !important;
+        max-width: 100% !important;
+    }
+    
+    /* Status badge extra small sizing */
+    .status-badge {
+        font-size: 0.75rem;
+        padding: 0.3rem 0.6rem;
+        margin: 0 0.25rem 0 0;
+    }
+}
+
+/* -----------------------------------------------------------------------------
+   04. EXTRA SMALL MOBILE (max-width: 360px)
+   ----------------------------------------------------------------------------- */
+@media (max-width: 360px) {
+    .header__controls {
+        gap: 0.25rem;
+    }
+    
+    .btn--icon,
+    .select {
+        min-width: 36px;
+        min-height: 36px;
+        padding: 0.3rem;
+    }
+    
+    .species-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    }
+    
+    .filter__container {
+        gap: 0.25rem;
+    }
+    
+    .filter__btn {
+        min-width: 50px;
+        padding: 0.4rem 0.2rem;
+    }
+    
+    .filter__text {
+        font-size: 0.7rem;
+    }
+    
+    /* Very small screen modal optimizations */
+    .modal--location .modal__content {
+        height: min(95vh, 500px);
+    }
+    
+    .modal--location .map {
+        height: calc(100% - 160px);
+        min-height: 120px;
+    }
+    
+    .modal--species {
+        padding: 0.25rem;
+        padding-top: 2vh;
+    }
+    
+    .modal--species .modal__content {
+        max-height: 90vh;
+        border-radius: 0.5rem;
+    }
+    
+    .modal--species .modal__body {
+        padding: 0.75rem;
+    }
+    
+    .species-modal__image {
+        width: min(calc(100vw - 3rem), 260px) !important;
+        height: min(calc(100vw - 3rem), 260px) !important;
+        max-width: 100% !important;
+    }
+}
+
+/* -----------------------------------------------------------------------------
+   05. LANDSCAPE MOBILE ORIENTATION
+   ----------------------------------------------------------------------------- */
 @media screen and (max-height: 500px) and (orientation: landscape) {
-    .app-header {
+    .header {
         padding: 0.5rem 1rem;
     }
     
-    .app-title {
+    .header__title {
         font-size: 1rem;
     }
     
-    .life-group-filter {
+    .filter {
         padding: 0.25rem 0;
     }
     
-    .filter-btn {
+    .filter__btn {
         padding: 0.5rem;
         min-width: 55px;
     }
     
-    .filter-icon {
+    .filter__icon {
         font-size: 1.1rem;
     }
     
-    .filter-text {
+    .filter__text {
         font-size: 0.7rem;
     }
     
@@ -133,36 +350,78 @@
         padding: 0.5rem;
     }
     
-    .species-overlay {
+    .species-card__overlay {
         padding: 1rem 0.5rem 0.5rem;
     }
     
-    .species-name {
+    .species-card__name {
         font-size: 0.9rem;
     }
     
-    .species-scientific {
+    .species-card__scientific {
         font-size: 0.75rem;
     }
     
-    /* Modal optimizations for landscape */
-    .species-modal {
+    /* Modal landscape optimizations */
+    .modal--species {
         padding: 0.25rem;
         padding-top: 1vh;
     }
     
-    .species-modal .modal-content {
+    .modal--species .modal__content {
         max-height: 95vh;
     }
     
-    .species-modal-image {
+    .species-modal__image {
         width: min(calc(100vw - 5rem), 240px) !important;
         height: min(calc(100vw - 5rem), 240px) !important;
         max-width: 100% !important;
     }
 }
 
-/* Dark mode support */
+/* -----------------------------------------------------------------------------
+   06. PWA STANDALONE MODE
+   ----------------------------------------------------------------------------- */
+@media all and (display-mode: standalone) {
+    .header {
+        padding-top: max(1rem, env(safe-area-inset-top));
+        -webkit-app-region: drag;
+    }
+    
+    .header__controls {
+        -webkit-app-region: no-drag;
+    }
+    
+    .header__title {
+        -webkit-app-region: no-drag;
+    }
+}
+
+/* -----------------------------------------------------------------------------
+   07. TABLET LANDSCAPE (768px - 1024px)
+   ----------------------------------------------------------------------------- */
+@media screen and (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
+    .species-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+        padding: 1rem;
+    }
+    
+    .filter__container {
+        justify-content: center;
+        max-width: 100%;
+        flex-wrap: wrap;
+    }
+    
+    .app__content {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+}
+
+/* -----------------------------------------------------------------------------
+   08. DARK MODE SUPPORT
+   ----------------------------------------------------------------------------- */
 @media (prefers-color-scheme: dark) {
     :root {
         color-scheme: dark;
@@ -173,11 +432,11 @@
         color: #ffffff;
     }
     
-    #app {
+    .app {
         background-color: #121212;
     }
     
-    .main-content {
+    .app__content {
         background-color: #121212;
     }
     
@@ -190,129 +449,187 @@
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     }
     
-    .life-group-filter {
+    .filter {
         background: #1e1e1e;
         border-bottom-color: #333;
     }
     
-    /* Dark mode scroll indicator */
-    .life-group-filter::after {
-        background: linear-gradient(to left, rgba(30, 30, 30, 0.9), transparent);
-    }
-    
-    .filter-btn {
+    .filter__btn {
         background: rgba(30, 30, 30, 0.8);
         border-color: rgba(76, 175, 80, 0.2);
         color: #ccc;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
     }
     
-    .filter-btn:hover {
+    .filter__btn:hover {
         background: rgba(46, 125, 50, 0.15);
         border-color: rgba(76, 175, 80, 0.4);
         box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2);
     }
     
-    .filter-btn.active {
+    .filter__btn.is-active {
         background: rgba(46, 125, 50, 0.25);
         border-color: #4CAF50;
         color: #4CAF50;
         box-shadow: 0 3px 12px rgba(76, 175, 80, 0.3);
     }
     
-    .modal-content {
+    .filter__icon {
+        filter: drop-shadow(0 1px 2px rgba(255, 255, 255, 0.1)) grayscale(100%);
+    }
+    
+    .filter__btn:hover .filter__icon,
+    .filter__btn.is-active .filter__icon {
+        filter: drop-shadow(0 1px 2px rgba(255, 255, 255, 0.1)) grayscale(0%);
+    }
+    
+    .modal__content {
         background: #1e1e1e;
         color: #ffffff;
     }
     
-    .modal-content h2 {
+    .modal__title {
         color: #e8e8e8;
         font-weight: 600;
         text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
     }
     
-    .modal-content p {
+    .modal__body p {
         color: #b8b8b8;
     }
     
-    .modal-content p strong {
+    .modal__body p strong {
         color: #e0e0e0;
     }
     
-    .modal-content .photo-attribution {
-        color: #aaaaaa;
-    }
-    
-    .modal-close {
+    .modal__close {
         background: rgba(255, 255, 255, 0.1);
     }
     
-    .modal-close:hover {
+    .modal__close:hover {
         background: rgba(255, 255, 255, 0.2);
     }
     
-    #location-search {
+    .input {
         background: #2a2a2a;
         border-color: #444;
         color: #ffffff;
     }
     
-    #location-search::placeholder {
+    .input::placeholder {
         color: #aaa;
     }
     
-    .location-result {
+    .search-results__item {
         background: #2a2a2a;
         border-color: #444;
     }
     
-    .location-result:hover {
+    .search-results__item:hover {
         background: rgba(46, 125, 50, 0.1);
     }
     
-    .location-result-name {
+    .search-results__primary-name {
         color: #ffffff;
     }
     
-    .location-coords {
+    .search-results__coords,
+    .search-results__secondary-name {
         color: #aaa;
     }
     
-    .share-url {
+    .search-results__rank {
+        background: #404040;
+        color: #aaa;
+    }
+    
+    .share__url {
         background: #2a2a2a;
         color: #ffffff;
     }
     
-    .loading-spinner {
+    .loading__spinner {
         border-color: #444;
         border-top-color: #4CAF50;
     }
     
-    /* Location confirmation dark mode */
     .location-confirm {
         background: rgba(76, 175, 80, 0.1);
         border-color: rgba(76, 175, 80, 0.3);
     }
     
-    #selected-location-name {
+    .location-confirm__name {
         color: #e8e8e8;
     }
     
-    #selected-location-coords {
+    .location-confirm__coords {
         color: #aaa;
     }
     
-    .use-location-btn {
-        background: linear-gradient(135deg, #2E7D32 0%, #388E3C 100%);
-        color: white;
+    /* Help modal dark mode */
+    .help__title {
+        color: #4CAF50;
     }
     
-    .use-location-btn:hover {
-        background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%);
+    .help__content a {
+        color: #4CAF50;
+    }
+    
+    .help__version {
+        color: #aaa;
+    }
+    
+    .help__version-number {
+        color: #4CAF50;
+    }
+    
+    .help__check-time {
+        color: #666;
+    }
+    
+    .help__update-btn {
+        color: #4CAF50;
+        border-color: #4CAF50;
+    }
+    
+    .help__update-btn:hover {
+        background: #4CAF50;
+        color: #1e1e1e;
+    }
+    
+    /* Photo attribution in dark mode */
+    .photo-attribution {
+        color: #aaaaaa;
     }
 }
 
-/* Reduced motion */
+/* -----------------------------------------------------------------------------
+   09. HIGH CONTRAST MODE
+   ----------------------------------------------------------------------------- */
+@media (prefers-contrast: high) {
+    .species-card__overlay {
+        background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
+    }
+    
+    .species-card__name,
+    .species-card__scientific {
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+    }
+    
+    .filter__btn.is-active {
+        border-color: #000;
+        background: #fff;
+        color: #000;
+    }
+    
+    .header {
+        background: #000;
+    }
+}
+
+/* -----------------------------------------------------------------------------
+   10. REDUCED MOTION
+   ----------------------------------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
     * {
         animation-duration: 0.01ms !important;
@@ -321,145 +638,38 @@
         scroll-behavior: auto !important;
     }
     
-    .loading-spinner {
+    .loading__spinner {
         animation: none;
         border: 3px solid #2E7D32;
     }
 }
 
-/* High contrast mode */
-@media (prefers-contrast: high) {
-    .species-overlay {
-        background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
+/* -----------------------------------------------------------------------------
+   11. HELP MODAL RESPONSIVE
+   ----------------------------------------------------------------------------- */
+@media (max-width: 640px) {
+    .modal--help {
+        padding: 1rem 0.5rem;
+        padding-top: 5vh !important;
     }
     
-    .species-name,
-    .species-scientific {
-        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+    .modal--help .modal__content {
+        margin: 0;
+        border-radius: 0.75rem;
     }
     
-    .filter-btn.active {
-        border-color: #000;
-        background: #fff;
-        color: #000;
+    .modal--help .modal__body {
+        padding: 1.5rem;
     }
     
-    .app-header {
-        background: #000;
-    }
-}
-
-/* Scroll enhancements for mobile */
-.life-group-filter {
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-}
-
-.life-group-filter::-webkit-scrollbar {
-    display: none;
-}
-
-/* Pull-to-refresh indicator space */
-@media screen and (max-width: 767px) {
-    .main-content {
-        overscroll-behavior-y: contain;
-    }
-}
-
-/* Improved touch targets for small screens */
-@media (max-width: 360px) {
-    .header-controls {
-        gap: 0.25rem;
+    .help__content p {
+        font-size: 1rem;
+        margin-bottom: 0.7rem;
+        line-height: 1.5;
     }
     
-    .icon-btn,
-    .language-select {
-        min-width: 36px;
-        min-height: 36px;
-        padding: 0.3rem;
-    }
-    
-    .species-grid {
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    }
-    
-    .filter-container {
-        gap: 0.25rem;
-    }
-    
-    .filter-btn {
-        min-width: 50px;
-        padding: 0.4rem 0.2rem;
-    }
-    
-    .filter-text {
-        font-size: 0.7rem;
-    }
-    
-    /* Very small screen modal optimizations */
-    .location-modal .modal-content {
-        height: min(95vh, 500px);
-    }
-    
-    .location-modal .location-map {
-        height: calc(100% - 160px);
-        min-height: 120px;
-    }
-    
-    .species-modal {
-        padding: 0.25rem;
-        padding-top: 2vh;
-    }
-    
-    .species-modal .modal-content {
-        max-height: 90vh;
-        border-radius: 0.5rem;
-    }
-    
-    .species-modal .modal-body {
-        padding: 0.75rem;
-    }
-    
-    /* Responsive image sizing in modal */
-    .species-modal-image {
-        width: min(calc(100vw - 3rem), 260px) !important;
-        height: min(calc(100vw - 3rem), 260px) !important;
-        max-width: 100% !important;
-    }
-}
-
-/* PWA display mode adjustments */
-@media all and (display-mode: standalone) {
-    .app-header {
-        padding-top: max(1rem, env(safe-area-inset-top));
-        -webkit-app-region: drag;
-    }
-    
-    .header-controls {
-        -webkit-app-region: no-drag;
-    }
-    
-    .app-title {
-        -webkit-app-region: no-drag;
-    }
-}
-
-/* Tablet landscape optimizations */
-@media screen and (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
-    .species-grid {
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 1rem;
-        padding: 1rem;
-    }
-    
-    .filter-container {
-        justify-content: center;
-        max-width: 100%;
-        flex-wrap: wrap;
-    }
-    
-    .main-content {
-        max-width: 1200px;
-        margin: 0 auto;
+    .help__links a {
+        font-size: 1rem;
+        padding: 0.8rem 1.6rem;
     }
 }

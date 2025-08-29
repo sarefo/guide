@@ -83,7 +83,7 @@ class QRManager {
             if (e.target === modal) closeModal();
         });
 
-        const closeBtn = modal.querySelector('.modal-close');
+        const closeBtn = modal.querySelector('.modal__close');
         if (closeBtn) {
             closeBtn.onclick = closeModal;
         }

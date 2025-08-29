@@ -1,34 +1,80 @@
-/* CSS Reset & Base Styles */
-* {
+/* =============================================================================
+   MOBILE BIODIVERSITY PWA - CSS ARCHITECTURE
+   BEM methodology with Single Responsibility Principle
+   ============================================================================= */
+
+/* -----------------------------------------------------------------------------
+   01. CSS RESET & BASE STYLES
+   ----------------------------------------------------------------------------- */
+*,
+*::before,
+*::after {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
 }
 
-html, body {
+html {
+    height: 100%;
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body {
     height: 100%;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     line-height: 1.5;
     color: #333;
     background-color: #ffffff;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
-
-
-body {
     overflow-x: hidden;
 }
 
-/* App Container */
-#app {
+/* -----------------------------------------------------------------------------
+   02. UTILITIES & HELPERS
+   ----------------------------------------------------------------------------- */
+.u-visually-hidden {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+.u-no-scroll {
+    overflow: hidden;
+}
+
+.u-text-truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* -----------------------------------------------------------------------------
+   03. APP LAYOUT
+   ----------------------------------------------------------------------------- */
+.app {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
 }
 
-/* Header Styles */
-.app-header {
+.app__content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* -----------------------------------------------------------------------------
+   04. HEADER COMPONENT
+   ----------------------------------------------------------------------------- */
+.header {
     background: linear-gradient(135deg, #2E7D32 0%, #388E3C 100%);
     color: white;
     padding: 1rem;
@@ -38,7 +84,7 @@ body {
     z-index: 100;
 }
 
-.header-content {
+.header__content {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -46,7 +92,7 @@ body {
     margin: 0 auto;
 }
 
-.app-title {
+.header__title {
     font-size: 1.25rem;
     font-weight: 600;
     margin: 0;
@@ -54,59 +100,105 @@ body {
     min-width: 0;
 }
 
-#location-name {
+.header__location {
     display: block;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
     cursor: pointer;
     transition: opacity 0.2s ease;
 }
 
-#location-name:hover {
+.header__location:hover {
     opacity: 0.8;
 }
 
-.header-controls {
+.header__controls {
     display: flex;
     align-items: center;
     gap: 0.5rem;
     flex-shrink: 0;
 }
 
-.icon-btn {
-    background: rgba(255, 255, 255, 0.2);
+/* -----------------------------------------------------------------------------
+   05. BUTTON COMPONENTS
+   ----------------------------------------------------------------------------- */
+.btn {
     border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn--icon {
+    background: rgba(255, 255, 255, 0.2);
     color: white;
     padding: 0.5rem;
     border-radius: 0.5rem;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     min-width: 44px;
     min-height: 44px;
 }
 
-.icon-btn:hover {
+.btn--icon:hover {
     background: rgba(255, 255, 255, 0.3);
 }
 
-.icon-btn:active {
+.btn--icon:active {
     background: rgba(255, 255, 255, 0.4);
 }
 
-.cache-loading {
+.btn--icon.is-loading {
     animation: spin 1s linear infinite;
 }
 
-@keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+.btn--primary {
+    background: linear-gradient(135deg, #2E7D32 0%, #388E3C 100%);
+    color: white;
+    padding: 0.875rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(46, 125, 50, 0.2);
+    width: 100%;
 }
 
-.language-select {
+.btn--primary:hover:not(:disabled) {
+    background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%);
+    box-shadow: 0 4px 8px rgba(46, 125, 50, 0.3);
+    transform: translateY(-1px);
+}
+
+.btn--primary:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(46, 125, 50, 0.2);
+}
+
+.btn--primary:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.btn--secondary {
+    background: transparent;
+    color: #2E7D32;
+    border: 1px solid #2E7D32;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+}
+
+.btn--secondary:hover {
+    background: #2E7D32;
+    color: white;
+}
+
+/* -----------------------------------------------------------------------------
+   06. SELECT COMPONENT
+   ----------------------------------------------------------------------------- */
+.select {
     background: rgba(255, 255, 255, 0.2);
     border: none;
     color: white;
@@ -115,42 +207,43 @@ body {
     cursor: pointer;
     font-size: 0.9rem;
     min-height: 44px;
-    font-family: 'Noto Color Emoji', 'Apple Color Emoji', 'Segoe UI Emoji', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Noto Color Emoji', 'Apple Color Emoji', 'Segoe UI Emoji', 
+                 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-.language-select option {
+.select__option {
     background: #2E7D32;
     color: white;
-    font-family: 'Noto Color Emoji', 'Apple Color Emoji', 'Segoe UI Emoji', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: inherit;
 }
 
-/* Main Content */
-.main-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-}
-
-/* Life Group Filter */
-.life-group-filter {
+/* -----------------------------------------------------------------------------
+   07. FILTER COMPONENT
+   ----------------------------------------------------------------------------- */
+.filter {
     background: white;
     border-bottom: 1px solid #e0e0e0;
     padding: 0.5rem 0;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
-    position: relative;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 }
 
-.filter-container {
+.filter::-webkit-scrollbar {
+    display: none;
+}
+
+.filter__container {
     display: flex;
     gap: 0.5rem;
     padding: 0 1rem;
-    padding-right: 3rem; /* Extra space to ensure last items are fully visible */
+    padding-right: 3rem;
     min-width: fit-content;
-    width: max-content; /* Ensure container accommodates all buttons */
+    width: max-content;
 }
 
-.filter-btn {
+.filter__btn {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -165,16 +258,17 @@ body {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
+    position: relative;
 }
 
-.filter-btn:hover {
+.filter__btn:hover {
     background: rgba(46, 125, 50, 0.08);
     border-color: rgba(46, 125, 50, 0.25);
     box-shadow: 0 2px 8px rgba(46, 125, 50, 0.15);
     transform: translateY(-1px);
 }
 
-.filter-btn.active {
+.filter__btn.is-active {
     background: rgba(46, 125, 50, 0.12);
     border-color: #2E7D32;
     color: #2E7D32;
@@ -182,19 +276,19 @@ body {
     transform: translateY(-1px);
 }
 
-.filter-icon {
+.filter__icon {
     font-size: 1.5rem;
     margin-bottom: 0.375rem;
     filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1)) grayscale(100%);
     transition: filter 0.2s ease;
 }
 
-.filter-btn:hover .filter-icon,
-.filter-btn.active .filter-icon {
+.filter__btn:hover .filter__icon,
+.filter__btn.is-active .filter__icon {
     filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1)) grayscale(0%);
 }
 
-.filter-text {
+.filter__text {
     font-size: 0.8rem;
     font-weight: 600;
     text-align: center;
@@ -202,7 +296,32 @@ body {
     letter-spacing: 0.01em;
 }
 
-/* Species Grid */
+.filter__remove {
+    position: absolute;
+    top: -0.25rem;
+    right: -0.25rem;
+    background: #d32f2f;
+    color: white;
+    border: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    font-size: 0.8rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.filter__btn:hover .filter__remove {
+    opacity: 1;
+}
+
+/* -----------------------------------------------------------------------------
+   08. SPECIES GRID COMPONENT
+   ----------------------------------------------------------------------------- */
 .species-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -212,6 +331,9 @@ body {
     position: relative;
 }
 
+/* -----------------------------------------------------------------------------
+   09. SPECIES CARD COMPONENT
+   ----------------------------------------------------------------------------- */
 .species-card {
     position: relative;
     border-radius: 1rem;
@@ -232,14 +354,14 @@ body {
     transform: translateY(0);
 }
 
-.species-image {
+.species-card__image {
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
 }
 
-.offline-placeholder {
+.species-card__placeholder {
     width: 100%;
     height: 100%;
     display: flex;
@@ -249,7 +371,11 @@ body {
     color: #666;
 }
 
-.offline-text {
+.species-card__placeholder--no-photo {
+    background: #f0f0f0;
+}
+
+.species-card__placeholder-text {
     font-size: 0.9rem;
     font-weight: 500;
     text-transform: uppercase;
@@ -257,21 +383,12 @@ body {
     opacity: 0.8;
 }
 
-.no-photo {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #f0f0f0;
-}
-
-.no-photo-icon {
+.species-card__placeholder-icon {
     font-size: 3rem;
     opacity: 0.3;
 }
 
-.species-overlay {
+.species-card__overlay {
     position: absolute;
     bottom: 0;
     left: 0;
@@ -281,25 +398,25 @@ body {
     color: white;
 }
 
-.species-name {
+.species-card__name {
     font-size: 1.1rem;
     font-weight: 600;
     margin-bottom: 0.25rem;
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 }
 
-.species-name.scientific-name {
+.species-card__name--scientific {
     font-style: italic;
 }
 
-.species-scientific {
+.species-card__scientific {
     font-size: 0.9rem;
     font-style: italic;
     opacity: 0.9;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
-.species-count {
+.species-card__count {
     position: absolute;
     top: 0.75rem;
     right: 0.75rem;
@@ -311,10 +428,11 @@ body {
     font-weight: 500;
 }
 
-/* Offline Status Badge - replaces header buttons when offline */
-.offline-badge {
+/* -----------------------------------------------------------------------------
+   10. STATUS BADGE COMPONENT
+   ----------------------------------------------------------------------------- */
+.status-badge {
     display: none;
-    background: rgba(255, 152, 0, 0.9);
     border-radius: 0.5rem;
     color: white;
     font-weight: 600;
@@ -324,70 +442,46 @@ body {
     animation: slideInFromRight 0.3s ease-out;
 }
 
-.offline-badge-content {
+.status-badge.is-visible {
+    display: block;
+}
+
+.status-badge.is-hiding {
+    animation: slideOutToRight 0.3s ease-out forwards;
+}
+
+.status-badge--offline {
+    background: rgba(255, 152, 0, 0.9);
+}
+
+.status-badge--online {
+    background: rgba(76, 175, 80, 0.9);
+}
+
+.status-badge--caching {
+    background: rgba(33, 150, 243, 0.9);
+}
+
+.status-badge--failed {
+    background: rgba(244, 67, 54, 0.9);
+}
+
+.status-badge__content {
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.offline-icon {
-    display: none; /* Hide icons */
-}
-
-.offline-text {
+.status-badge__text {
     white-space: nowrap;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
     text-align: center;
 }
 
-/* Online status with green color */
-.offline-badge.online {
-    background: rgba(76, 175, 80, 0.9);
-}
-
-.offline-badge.online .offline-icon {
-    filter: none;
-}
-
-/* Caching status with blue color */
-.offline-badge.caching {
-    background: rgba(33, 150, 243, 0.9);
-}
-
-/* Failed status with red color */
-.offline-badge.failed {
-    background: rgba(244, 67, 54, 0.9);
-}
-
-@keyframes slideInFromRight {
-    from {
-        transform: translateX(120%);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
-}
-
-/* Hide badge animation */
-.offline-badge.hiding {
-    animation: slideOutToRight 0.3s ease-out forwards;
-}
-
-@keyframes slideOutToRight {
-    from {
-        transform: translateX(0);
-        opacity: 1;
-    }
-    to {
-        transform: translateX(120%);
-        opacity: 0;
-    }
-}
-
-/* Loading & Error States */
-.loading-state {
+/* -----------------------------------------------------------------------------
+   11. LOADING COMPONENT
+   ----------------------------------------------------------------------------- */
+.loading {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -396,7 +490,7 @@ body {
     color: #666;
 }
 
-.loading-spinner {
+.loading__spinner {
     width: 40px;
     height: 40px;
     border: 3px solid #e0e0e0;
@@ -406,12 +500,10 @@ body {
     margin-bottom: 1rem;
 }
 
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-.error-state {
+/* -----------------------------------------------------------------------------
+   12. ERROR COMPONENT
+   ----------------------------------------------------------------------------- */
+.error {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -421,28 +513,16 @@ body {
     text-align: center;
 }
 
-.retry-btn {
-    margin-top: 1rem;
-    background: #2E7D32;
-    color: white;
-    border: none;
-    padding: 0.75rem 1.5rem;
-    border-radius: 0.5rem;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: background-color 0.2s ease;
+.error--search {
+    color: #d32f2f;
+    padding: 1rem;
+    font-style: italic;
 }
 
-.retry-btn:hover {
-    background: #1B5E20;
-}
-
-/* Modal Styles */
-.species-modal,
-.location-modal,
-.share-modal,
-.taxon-modal,
-.help-modal {
+/* -----------------------------------------------------------------------------
+   13. MODAL COMPONENT
+   ----------------------------------------------------------------------------- */
+.modal {
     display: none;
     position: fixed;
     top: 0;
@@ -456,13 +536,13 @@ body {
     padding: 1rem;
 }
 
-/* Location modal specific layout */
-.location-modal {
+
+.modal--location {
     align-items: flex-start;
     padding-top: max(2vh, 1rem);
 }
 
-.modal-content {
+.modal__content {
     background: white;
     border-radius: 1rem;
     max-width: 600px;
@@ -475,24 +555,12 @@ body {
     overflow: hidden;
 }
 
-/* Location modal content specific sizing */
-.location-modal .modal-content {
+.modal--location .modal__content {
     height: min(85vh, 700px);
     max-height: 95vh;
 }
 
-@keyframes modalSlideIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.modal-close {
+.modal__close {
     position: absolute;
     top: 1rem;
     right: 1rem;
@@ -507,13 +575,14 @@ body {
     align-items: center;
     justify-content: center;
     z-index: 1001;
+    transition: background-color 0.2s ease;
 }
 
-.modal-close:hover {
+.modal__close:hover {
     background: rgba(0, 0, 0, 0.2);
 }
 
-.modal-body {
+.modal__body {
     padding: 2rem;
     flex: 1;
     display: flex;
@@ -521,67 +590,103 @@ body {
     min-height: 0;
 }
 
-/* Location modal body with proper flex layout */
-.location-modal .modal-body {
+.modal--location .modal__body {
     gap: 1rem;
     overflow-y: auto;
 }
 
-.modal-body h2 {
+.modal__title {
     margin-bottom: 1rem;
     color: #333;
 }
 
-/* Location Search Modal */
-#location-search {
+/* -----------------------------------------------------------------------------
+   14. FORM COMPONENTS
+   ----------------------------------------------------------------------------- */
+.input {
     width: 100%;
     padding: 0.75rem;
     border: 2px solid #e0e0e0;
     border-radius: 0.5rem;
     font-size: 1rem;
-    margin-bottom: 1rem;
-    flex-shrink: 0;
+    font-family: inherit;
+    transition: border-color 0.2s ease;
 }
 
-#location-search:focus {
+.input:focus {
     outline: none;
     border-color: #2E7D32;
 }
 
-.location-results {
-    max-height: 120px;
+/* -----------------------------------------------------------------------------
+   15. SEARCH RESULTS COMPONENT
+   ----------------------------------------------------------------------------- */
+.search-results {
+    max-height: 400px;
     overflow-y: auto;
     transition: opacity 0.2s ease;
+}
+
+.search-results--location {
+    max-height: 120px;
     flex-shrink: 0;
 }
 
-.location-result {
+.search-results__item {
     padding: 1rem;
     border: 1px solid #e0e0e0;
     border-radius: 0.5rem;
     margin-bottom: 0.5rem;
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: all 0.2s ease;
 }
 
-.location-result:hover {
+.search-results__item:hover {
     background: rgba(46, 125, 50, 0.05);
+    border-color: #2E7D32;
 }
 
-.location-result-name {
+.search-results__item--taxon {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.search-results__names {
+    flex: 1;
+}
+
+.search-results__primary-name {
     font-size: 1rem;
     font-weight: 600;
     margin-bottom: 0.25rem;
     color: #333;
 }
 
-.location-coords {
+.search-results__secondary-name {
+    font-size: 0.9rem;
+    color: #666;
+    font-style: italic;
+}
+
+.search-results__coords {
     font-size: 0.9rem;
     color: #666;
     margin: 0;
 }
 
-/* Search State Styles */
+.search-results__rank {
+    font-size: 0.8rem;
+    color: #888;
+    background: #f5f5f5;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    text-transform: capitalize;
+}
+
+/* -----------------------------------------------------------------------------
+   16. SEARCH STATE COMPONENT
+   ----------------------------------------------------------------------------- */
 .search-state {
     text-align: center;
     padding: 1.5rem 1rem;
@@ -589,20 +694,20 @@ body {
     font-style: italic;
 }
 
-.search-state p {
+.search-state__text {
     margin: 0;
     font-size: 0.9rem;
 }
 
-.search-prompt {
+.search-state--prompt .search-state__text {
     color: #888;
 }
 
-.search-loading {
+.search-state--loading .search-state__text {
     color: #2E7D32;
 }
 
-.search-loading .loading-spinner {
+.search-state--loading .search-state__spinner {
     margin: 0 auto 0.75rem auto;
     width: 24px;
     height: 24px;
@@ -612,68 +717,18 @@ body {
     animation: spin 1s linear infinite;
 }
 
-.search-error {
+.search-state--error .search-state__text {
     color: #d32f2f;
 }
 
-.no-results {
+.search-state--no-results .search-state__text {
     color: #888;
 }
 
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-.no-results,
-.error {
-    text-align: center;
-    color: #666;
-    padding: 2rem;
-    font-style: italic;
-}
-
-.error {
-    color: #d32f2f;
-}
-
-/* My Location Button */
-.my-location-btn {
-    width: 100%;
-    padding: 0.875rem 1rem;
-    background: linear-gradient(135deg, #2E7D32 0%, #388E3C 100%);
-    color: white;
-    border: none;
-    border-radius: 0.5rem;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    margin-bottom: 1rem;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 4px rgba(46, 125, 50, 0.2);
-    flex-shrink: 0;
-}
-
-.my-location-btn:hover:not(:disabled) {
-    background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%);
-    box-shadow: 0 4px 8px rgba(46, 125, 50, 0.3);
-    transform: translateY(-1px);
-}
-
-.my-location-btn:active:not(:disabled) {
-    transform: translateY(0);
-    box-shadow: 0 2px 4px rgba(46, 125, 50, 0.2);
-}
-
-.my-location-btn:disabled {
-    background: #ccc;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-}
-
-/* Location Map */
-.location-map {
+/* -----------------------------------------------------------------------------
+   17. MAP COMPONENT
+   ----------------------------------------------------------------------------- */
+.map {
     width: 100%;
     height: max(300px, min(40vh, 400px));
     border: 2px solid #e0e0e0;
@@ -685,35 +740,19 @@ body {
     min-height: 250px;
 }
 
-/* Dynamic height calculation for location modal */
-.location-modal .location-map {
-    height: calc(100% - 180px); /* Account for other elements */
+.modal--location .map {
+    height: calc(100% - 180px);
     flex: 1;
     min-height: 200px;
 }
 
-.location-map .leaflet-container {
+.map__container {
     height: 100%;
     width: 100%;
     border-radius: 0.5rem;
 }
 
-/* Leaflet Attribution Positioning */
-.location-map .leaflet-control-attribution {
-    font-size: 0.7rem;
-    background: rgba(255, 255, 255, 0.8);
-    margin: 0;
-}
-
-/* Leaflet Control Positioning */
-.location-map .leaflet-control-zoom {
-    margin-left: 10px;
-    margin-top: 10px;
-}
-
-/* Custom map loading overlay */
-.location-map::before {
-    content: "🗺️ Loading map...";
+.map__loading {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -727,11 +766,22 @@ body {
     pointer-events: none;
 }
 
-.location-map.map-loaded::before {
+.map.is-loaded .map__loading {
     display: none;
 }
 
-/* Map marker popup styling */
+/* Leaflet overrides */
+.map .leaflet-control-attribution {
+    font-size: 0.7rem;
+    background: rgba(255, 255, 255, 0.8);
+    margin: 0;
+}
+
+.map .leaflet-control-zoom {
+    margin-left: 10px;
+    margin-top: 10px;
+}
+
 .leaflet-popup-content-wrapper {
     border-radius: 0.5rem;
     font-family: inherit;
@@ -743,7 +793,9 @@ body {
     line-height: 1.4;
 }
 
-/* Location Confirmation */
+/* -----------------------------------------------------------------------------
+   18. LOCATION CONFIRMATION COMPONENT
+   ----------------------------------------------------------------------------- */
 .location-confirm {
     margin-top: 1rem;
     padding: 1rem;
@@ -753,209 +805,34 @@ body {
     flex-shrink: 0;
 }
 
-.selected-location {
+.location-confirm__selection {
     margin-bottom: 0.75rem;
 }
 
-#selected-location-name {
+.location-confirm__name {
     display: block;
     font-weight: 600;
     color: #333;
     margin-bottom: 0.25rem;
 }
 
-#selected-location-coords {
+.location-confirm__coords {
     display: block;
     font-size: 0.85rem;
     color: #666;
     font-family: 'Courier New', monospace;
 }
 
-.use-location-btn {
-    width: 100%;
-    padding: 0.875rem 1rem;
-    background: linear-gradient(135deg, #2E7D32 0%, #388E3C 100%);
-    color: white;
-    border: none;
-    border-radius: 0.5rem;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 4px rgba(46, 125, 50, 0.2);
-}
-
-.use-location-btn:hover {
-    background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%);
-    box-shadow: 0 4px 8px rgba(46, 125, 50, 0.3);
-    transform: translateY(-1px);
-}
-
-.use-location-btn:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 4px rgba(46, 125, 50, 0.2);
-}
-
-/* Taxon Search Modal */
-#taxon-search {
-    width: 100%;
-    padding: 0.75rem;
-    border: 2px solid #e0e0e0;
-    border-radius: 0.5rem;
-    font-size: 1rem;
-    margin-bottom: 1rem;
-}
-
-#taxon-search:focus {
-    outline: none;
-    border-color: #2E7D32;
-}
-
-.taxon-results {
-    max-height: 400px;
-    overflow-y: auto;
-}
-
-.taxon-result {
-    padding: 1rem;
-    border: 1px solid #e0e0e0;
-    border-radius: 0.5rem;
-    margin-bottom: 0.5rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: var(--card-bg, white);
-}
-
-.taxon-result:hover {
-    background: rgba(46, 125, 50, 0.05);
-    border-color: #2E7D32;
-}
-
-.taxon-names {
-    flex: 1;
-}
-
-.taxon-common-name {
-    font-size: 1rem;
-    font-weight: 600;
-    margin-bottom: 0.25rem;
-    color: var(--text-primary, #333);
-}
-
-.taxon-scientific-name {
-    font-size: 0.9rem;
-    color: var(--text-secondary, #666);
-    font-style: italic;
-}
-
-.taxon-rank {
-    font-size: 0.8rem;
-    color: var(--text-tertiary, #888);
-    background: var(--rank-bg, #f5f5f5);
-    padding: 0.25rem 0.5rem;
-    border-radius: 0.25rem;
-    text-transform: capitalize;
-}
-
-/* Dark mode overrides */
-@media (prefers-color-scheme: dark) {
-    html, body {
-        background-color: #121212;
-        color: #ffffff;
-    }
-    
-    .life-group-filter {
-        background: #1e1e1e;
-        border-bottom-color: #333333;
-    }
-    
-    .filter-btn {
-        background: rgba(255, 255, 255, 0.08);
-        border-color: rgba(255, 255, 255, 0.12);
-        color: #cccccc;
-    }
-    
-    .filter-btn:hover {
-        background: rgba(46, 125, 50, 0.15);
-        border-color: rgba(76, 175, 80, 0.3);
-    }
-    
-    .filter-btn.active {
-        background: rgba(46, 125, 50, 0.25);
-        border-color: #4CAF50;
-        color: #4CAF50;
-    }
-    
-    .filter-icon {
-        filter: drop-shadow(0 1px 2px rgba(255, 255, 255, 0.1)) grayscale(100%);
-    }
-    
-    .filter-btn:hover .filter-icon,
-    .filter-btn.active .filter-icon {
-        filter: drop-shadow(0 1px 2px rgba(255, 255, 255, 0.1)) grayscale(0%);
-    }
-    
-    .taxon-result {
-        --card-bg: #2a2a2a;
-        --text-primary: #ffffff;
-        --text-secondary: #cccccc;
-        --text-tertiary: #aaaaaa;
-        --rank-bg: #404040;
-        border-color: #444444;
-    }
-    
-    .taxon-result:hover {
-        background: rgba(46, 125, 50, 0.15);
-        border-color: #4CAF50;
-    }
-}
-
-.search-error {
-    text-align: center;
-    color: #d32f2f;
-    padding: 1rem;
-    font-style: italic;
-}
-
-/* Custom Filter Button Styles */
-.filter-btn .remove-custom {
-    position: absolute;
-    top: -0.25rem;
-    right: -0.25rem;
-    background: #d32f2f;
-    color: white;
-    border: none;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    font-size: 0.8rem;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-}
-
-.filter-btn:hover .remove-custom {
-    opacity: 1;
-}
-
-.filter-btn {
-    position: relative;
-}
-
-/* QR Code Modal */
-.qr-code-container {
+/* -----------------------------------------------------------------------------
+   19. SHARE COMPONENT
+   ----------------------------------------------------------------------------- */
+.share__qr {
     display: flex;
     justify-content: center;
     margin: 1rem 0;
 }
 
-.share-url {
+.share__url {
     background: #f5f5f5;
     padding: 1rem;
     border-radius: 0.5rem;
@@ -964,23 +841,71 @@ body {
     margin: 1rem 0;
 }
 
-.copy-btn {
-    background: #2E7D32;
-    color: white;
-    border: none;
-    padding: 0.75rem 1.5rem;
-    border-radius: 0.5rem;
-    cursor: pointer;
-    font-size: 1rem;
-    width: 100%;
+/* -----------------------------------------------------------------------------
+   20. ANIMATIONS
+   ----------------------------------------------------------------------------- */
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }
 
-.copy-btn:hover {
-    background: #1B5E20;
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInFromRight {
+    from {
+        transform: translateX(120%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutToRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(120%);
+        opacity: 0;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+@keyframes slideInUp {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
 /* Species Modal Image */
-.species-modal-image {
+.species-modal__image {
     width: min(60vw, 300px);
     height: min(60vw, 300px);
     max-width: 100%;
@@ -990,260 +915,9 @@ body {
     display: block;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-    .species-grid {
-        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-        gap: 0.75rem;
-        padding: 0.75rem;
-    }
-    
-    .species-card {
-        border-radius: 0.75rem;
-        aspect-ratio: 1;
-    }
-    
-    .species-overlay {
-        padding: 1.5rem 0.75rem 0.75rem;
-    }
-    
-    .species-name {
-        font-size: 1rem;
-    }
-    
-    .species-scientific {
-        font-size: 0.8rem;
-    }
-    
-    .filter-container {
-        padding: 0 0.75rem;
-    }
-    
-    .filter-btn {
-        min-width: 60px;
-        padding: 0.5rem;
-    }
-    
-    .filter-icon {
-        font-size: 1.25rem;
-    }
-    
-    .filter-text {
-        font-size: 0.75rem;
-    }
-    
-    /* Offline badge mobile sizing */
-    .offline-badge {
-        font-size: 0.8rem;
-        padding: 0.4rem 0.8rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .header-content {
-        gap: 0.5rem;
-    }
-    
-    .app-title {
-        font-size: 1.1rem;
-    }
-    
-    .icon-btn,
-    .language-select {
-        min-width: 40px;
-        min-height: 40px;
-        padding: 0.4rem;
-    }
-    
-    .species-grid {
-        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-        gap: 0.5rem;
-        padding: 0.5rem;
-    }
-    
-    .modal-content {
-        margin: 0.5rem;
-        border-radius: 0.75rem;
-    }
-    
-    .modal-body {
-        padding: 1.5rem;
-    }
-    
-    /* Position modals higher on mobile to avoid keyboard obstruction */
-    .location-modal {
-        padding-top: max(1vh, 0.5rem);
-        padding-bottom: max(1vh, 0.5rem);
-        align-items: flex-start;
-    }
-    
-    .location-modal .modal-content {
-        height: min(90vh, 600px);
-        max-height: 95vh;
-    }
-    
-    .location-modal .modal-body {
-        padding: 1rem;
-        gap: 0.75rem;
-    }
-    
-    .location-modal .location-map {
-        height: calc(100% - 180px);
-        min-height: 150px;
-    }
-    
-    .share-modal,
-    .taxon-modal {
-        padding-top: 10vh;
-        align-items: flex-start;
-    }
-    
-    /* Optimize species modal for small screens */
-    .species-modal {
-        padding: 0.5rem;
-        padding-top: 5vh;
-        align-items: flex-start;
-    }
-    
-    .species-modal .modal-content {
-        max-height: 85vh;
-        margin: 0;
-    }
-    
-    .species-modal .modal-body {
-        padding: 1rem;
-    }
-    
-    /* Responsive modal image on mobile */
-    .species-modal-image {
-        width: min(calc(100vw - 4rem), 320px) !important;
-        height: min(calc(100vw - 4rem), 320px) !important;
-        max-width: 100% !important;
-    }
-    
-    /* Offline badge extra small mobile sizing */
-    .offline-badge {
-        font-size: 0.75rem;
-        padding: 0.3rem 0.6rem;
-        margin: 0 0.25rem 0 0;
-    }
-}
-
-/* Help Modal Specific Styles */
-.help-modal {
-    padding-top: 10vh !important;
-    align-items: flex-start !important;
-}
-
-.help-modal .modal-body h2 {
-    font-size: 1.3rem;
-    margin-bottom: 1rem;
-    color: #2E7D32;
-    font-weight: 600;
-}
-
-.help-content p {
-    margin-bottom: 0.75rem;
-    line-height: 1.6;
-    font-size: 1.1rem;
-}
-
-.help-content p:last-of-type {
-    margin-bottom: 1rem;
-}
-
-.help-links {
-    margin-top: 0.5rem;
-    text-align: center;
-}
-
-.help-links a {
-    display: inline-block;
-    padding: 0.75rem 1.5rem;
-    background: #2E7D32;
-    color: white !important;
-    text-decoration: none;
-    border-radius: 0.5rem;
-    font-size: 1rem;
-    font-weight: 600;
-    transition: background 0.2s;
-    border: none;
-    cursor: pointer;
-}
-
-.help-links a:hover {
-    background: #1B5E20;
-}
-
-.help-content a {
-    color: #2E7D32;
-    text-decoration: none;
-    font-weight: 600;
-}
-
-.help-content a:hover {
-    text-decoration: underline;
-}
-
-/* Ensure button text is visible */
-.help-links a:visited,
-.help-links a:link,
-.help-links a:active {
-    color: white !important;
-}
-
-/* Update section in help modal */
-.help-update-section {
-    margin-top: 1rem;
-    padding: 0.5rem 0 0 0;
-    border-top: 1px solid rgba(0, 0, 0, 0.1);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.8rem;
-}
-
-.version-text {
-    color: #666;
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-}
-
-.version-text #app-version {
-    font-weight: 500;
-    color: #2E7D32;
-}
-
-.update-check-time {
-    font-size: 0.75rem;
-    color: #999;
-}
-
-.update-check-btn {
-    background: transparent;
-    color: #2E7D32;
-    border: 1px solid #2E7D32;
-    padding: 0.25rem 0.5rem;
-    border-radius: 0.25rem;
-    cursor: pointer;
-    font-size: 0.75rem;
-    transition: all 0.2s;
-}
-
-.update-check-btn:hover {
-    background: #2E7D32;
-    color: white;
-}
-
-.update-check-btn:disabled {
-    background: transparent;
-    color: #ccc;
-    border-color: #ccc;
-    cursor: not-allowed;
-}
-
-/* Update notification styles */
+/* -----------------------------------------------------------------------------
+   21. UPDATE NOTIFICATION COMPONENT
+   ----------------------------------------------------------------------------- */
 .update-notification {
     position: fixed;
     bottom: 20px;
@@ -1261,17 +935,17 @@ body {
     animation: slideInUp 0.3s ease-out;
 }
 
-.update-notification .update-message {
+.update-notification__message {
     flex: 1;
     line-height: 1.4;
 }
 
-.update-notification .update-message small {
+.update-notification__message-detail {
     opacity: 0.9;
     font-size: 0.85rem;
 }
 
-.update-notification .update-btn-primary {
+.update-notification__btn {
     background: rgba(255,255,255,0.9);
     color: #2E7D32;
     font-weight: 600;
@@ -1284,13 +958,13 @@ body {
     font-size: 0.95rem;
 }
 
-.update-notification .update-btn-primary:hover {
+.update-notification__btn:hover {
     background: white;
     transform: translateY(-1px);
     box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 
-.update-notification .update-btn-dismiss {
+.update-notification__dismiss {
     background: transparent;
     color: rgba(255,255,255,0.8);
     border: none;
@@ -1303,14 +977,12 @@ body {
     transition: background-color 0.2s;
 }
 
-.update-notification .update-btn-dismiss:hover {
+.update-notification__dismiss:hover {
     background: rgba(255,255,255,0.1);
 }
 
 /* Update status messages */
-.update-checking,
-.no-update-message,
-.update-error {
+.update-status {
     position: fixed;
     top: 50%;
     left: 50%;
@@ -1324,66 +996,129 @@ body {
     animation: fadeIn 0.3s ease-out;
 }
 
-.update-checking {
+.update-status--checking {
     background: #E3F2FD;
     border-left: 4px solid #2196F3;
 }
 
-.no-update-message {
+.update-status--success {
     background: #E8F5E8;
     border-left: 4px solid #4CAF50;
 }
 
-.update-error {
+.update-status--error {
     background: #FFEBEE;
     border-left: 4px solid #F44336;
 }
 
-@keyframes slideInUp {
-    from {
-        transform: translateY(100%);
-        opacity: 0;
-    }
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
+/* -----------------------------------------------------------------------------
+   22. HELP COMPONENT
+   ----------------------------------------------------------------------------- */
+.help__title {
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+    color: #2E7D32;
+    font-weight: 600;
 }
 
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(0.9);
-    }
-    to {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1);
-    }
+.help__content {
+    line-height: 1.6;
 }
 
-@media (max-width: 640px) {
-    .help-modal {
-        padding: 1rem 0.5rem;
-        padding-top: 5vh !important;
-    }
-    
-    .help-modal .modal-content {
-        margin: 0;
-        border-radius: 0.75rem;
-    }
-    
-    .help-modal .modal-body {
-        padding: 1.5rem;
-    }
-    
-    .help-content p {
-        font-size: 1rem;
-        margin-bottom: 0.7rem;
-        line-height: 1.5;
-    }
-    
-    .help-links a {
-        font-size: 1rem;
-        padding: 0.8rem 1.6rem;
-    }
+.help__content p {
+    margin-bottom: 0.75rem;
+    font-size: 1.1rem;
+}
+
+.help__content p:last-of-type {
+    margin-bottom: 1rem;
+}
+
+.help__content a {
+    color: #2E7D32;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.help__content a:hover {
+    text-decoration: underline;
+}
+
+.help__links {
+    margin-top: 0.5rem;
+    text-align: center;
+}
+
+.help__links a {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background: #2E7D32;
+    color: white !important;
+    text-decoration: none;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: background 0.2s;
+    border: none;
+    cursor: pointer;
+}
+
+.help__links a:hover {
+    background: #1B5E20;
+}
+
+.help__links a:visited,
+.help__links a:link,
+.help__links a:active {
+    color: white !important;
+}
+
+.help__update-section {
+    margin-top: 1rem;
+    padding: 0.5rem 0 0 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+}
+
+.help__version {
+    color: #666;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.help__version-number {
+    font-weight: 500;
+    color: #2E7D32;
+}
+
+.help__check-time {
+    font-size: 0.75rem;
+    color: #999;
+}
+
+.help__update-btn {
+    background: transparent;
+    color: #2E7D32;
+    border: 1px solid #2E7D32;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    font-size: 0.75rem;
+    transition: all 0.2s;
+}
+
+.help__update-btn:hover {
+    background: #2E7D32;
+    color: white;
+}
+
+.help__update-btn:disabled {
+    background: transparent;
+    color: #ccc;
+    border-color: #ccc;
+    cursor: not-allowed;
 }

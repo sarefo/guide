@@ -48,14 +48,14 @@ class SpeciesManager {
         });
 
         // Use event delegation for filter buttons (handles dynamic buttons too)
-        const filterContainer = document.querySelector('.filter-container');
+        const filterContainer = document.querySelector('.filter__container');
         if (filterContainer) {
             filterContainer.addEventListener('click', (e) => {
-                const filterBtn = e.target.closest('.filter-btn');
+                const filterBtn = e.target.closest('.filter__btn');
                 if (!filterBtn) return;
                 
                 // Handle remove custom button clicks
-                if (e.target.classList.contains('remove-custom')) {
+                if (e.target.classList.contains('filter__remove')) {
                     e.stopPropagation();
                     const taxonId = filterBtn.dataset.group;
                     this.removeCustomTaxon(taxonId);
@@ -377,19 +377,20 @@ class SpeciesManager {
             <div class="species-card" data-species-id="${species.id}">
                 ${hasPhoto ? `
                     <img 
-                        class="species-image" 
+                        class="species-card__image" 
                         data-src="${photoUrl}"
                         alt="${vernacularName}"
                         loading="lazy"
-                        onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\\'species-image offline-placeholder\\'><div class=\\'offline-text\\'>' + (window.i18n ? window.i18n.t('image.offline') : 'Offline') + '</div></div>';"
+                        onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=\\'species-card__placeholder\\'><div class=\\'species-card__placeholder-text\\'>' + (window.i18n ? window.i18n.t('image.offline') : 'Offline') + '</div></div>';"
                     />
                 ` : `
-                    <div class="species-image no-photo">
-                        <div class="no-photo-icon">📸</div>
+                    <div class="species-card__placeholder species-card__placeholder--no-photo">
+                        <div class="species-card__placeholder-icon">📸</div>
                     </div>
                 `}
-                <div class="species-overlay">
-                    <div class="species-name${isUsingScientificName ? ' scientific-name' : ''}">${vernacularName}</div>
+                <div class="species-card__overlay">
+                    <div class="species-card__name${isUsingScientificName ? ' species-card__name--scientific' : ''}">${vernacularName}</div>
+                    ${!isUsingScientificName && species.scientificName ? `<div class="species-card__scientific">${species.scientificName}</div>` : ''}
                 </div>
             </div>
         `;
@@ -402,9 +403,9 @@ class SpeciesManager {
         // No longer automatically remove custom taxa when switching filters
         // Custom taxa persist until explicitly removed by user
         
-        const filterButtons = document.querySelectorAll('.filter-btn');
+        const filterButtons = document.querySelectorAll('.filter__btn');
         filterButtons.forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.group === group);
+            btn.classList.toggle('is-active', btn.dataset.group === group);
         });
         
         // Ensure filter button content is preserved after class changes
@@ -603,7 +604,7 @@ class SpeciesManager {
                     <img 
                         src="${mediumPhotoUrl || thumbPhotoUrl}" 
                         alt="${species.name}"
-                        class="species-modal-image"
+                        class="species-modal__image"
                         data-thumb-url="${thumbPhotoUrl || ''}"
                         style="width: min(40vh, 350px); height: min(40vh, 350px); max-width: 100%; object-fit: cover; border-radius: 0.5rem; margin: 0 auto 1rem; display: block;"
                     />
@@ -629,7 +630,7 @@ class SpeciesManager {
         `;
 
         // Set up image fallback handler
-        const modalImage = modal.querySelector('.species-modal-image');
+        const modalImage = modal.querySelector('.species-modal__image');
         if (modalImage && modalImage.dataset.thumbUrl) {
             modalImage.addEventListener('error', function(e) {
                 const thumbUrl = this.dataset.thumbUrl;
@@ -681,7 +682,7 @@ class SpeciesManager {
         this.updateModalActionButtons(modal, navigator.onLine);
 
         // Close button handler (redundant with global handler but kept for explicitness)
-        const closeBtn = modal.querySelector('.modal-close');
+        const closeBtn = modal.querySelector('.modal__close');
         if (closeBtn) {
             closeBtn.addEventListener('click', () => {
                 if (window.modalManager) {
@@ -772,7 +773,7 @@ class SpeciesManager {
         // Set the filter UI state without reloading species (already loaded)
         const filterButtons = document.querySelectorAll('.filter-btn');
         filterButtons.forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.group === this.pendingLifeGroupFromURL);
+            btn.classList.toggle('is-active', btn.dataset.group === this.pendingLifeGroupFromURL);
         });
         
         this.pendingLifeGroupFromURL = null;
@@ -826,7 +827,7 @@ class SpeciesManager {
         });
 
         // Close button handler (redundant with global handler but kept for explicitness)
-        const closeBtn = modal.querySelector('.modal-close');
+        const closeBtn = modal.querySelector('.modal__close');
         if (closeBtn) {
             closeBtn.addEventListener('click', () => {
                 clearTimeout(searchTimeout);
@@ -985,7 +986,7 @@ class SpeciesManager {
 
     addCustomFilterButton(taxonName, taxonRank, taxonId) {
         // Check if this taxon already has a button
-        const existingCustomBtn = document.querySelector(`.filter-btn[data-group="${taxonId}"]`);
+        const existingCustomBtn = document.querySelector(`.filter__btn[data-group="${taxonId}"]`);
         
         // If button already exists for this taxon, don't recreate it
         if (existingCustomBtn) {
@@ -993,12 +994,12 @@ class SpeciesManager {
         }
 
         // Create new custom filter button
-        const filterContainer = document.querySelector('.filter-container');
-        const otherBtn = document.querySelector('.filter-btn[data-group="other"]');
+        const filterContainer = document.querySelector('.filter__container');
+        const otherBtn = document.querySelector('.filter__btn[data-group="other"]');
         
         if (filterContainer && otherBtn) {
             const customBtn = document.createElement('button');
-            customBtn.className = 'filter-btn';
+            customBtn.className = 'filter__btn';
             customBtn.dataset.group = taxonId;
             
             // Ensure capitalization and truncate long names
@@ -1008,9 +1009,9 @@ class SpeciesManager {
             const displayName = capitalizedName.length > 12 ? capitalizedName.substring(0, 12) + '...' : capitalizedName;
             
             customBtn.innerHTML = `
-                <span class="filter-icon">◯</span>
-                <span class="filter-text">${displayName}</span>
-                <span class="remove-custom" title="Remove filter">&times;</span>
+                <span class="filter__icon">◯</span>
+                <span class="filter__text">${displayName}</span>
+                <span class="filter__remove" title="Remove filter">&times;</span>
             `;
 
             // Insert before the "Other" button
@@ -1029,7 +1030,7 @@ class SpeciesManager {
         this.saveCustomTaxaToStorage();
         
         // Remove custom filter button
-        const customBtn = document.querySelector(`.filter-btn[data-group="${taxonId}"]`);
+        const customBtn = document.querySelector(`.filter__btn[data-group="${taxonId}"]`);
         if (customBtn) {
             customBtn.remove();
         }
@@ -1169,7 +1170,7 @@ class SpeciesManager {
     ensureFilterButtonsTranslated() {
         // Ensure all filter buttons have proper text content
         // This prevents the "All" button and others from becoming empty
-        const filterButtons = document.querySelectorAll('.filter-btn[data-group]');
+        const filterButtons = document.querySelectorAll('.filter__btn[data-group]');
         filterButtons.forEach(btn => {
             const filterTextSpan = btn.querySelector('.filter-text[data-i18n]');
             if (filterTextSpan) {
@@ -1272,7 +1273,7 @@ class SpeciesManager {
     
     updateOfflineUiElements(isOnline) {
         // Update "other" filter button state
-        const otherBtn = document.querySelector('.filter-btn[data-group="other"]');
+        const otherBtn = document.querySelector('.filter__btn[data-group="other"]');
         if (otherBtn) {
             if (isOnline) {
                 otherBtn.disabled = false;

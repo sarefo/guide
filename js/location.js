@@ -38,7 +38,7 @@ class LocationManager {
         const locationName = document.getElementById('location-name');
         const locationModal = document.getElementById('location-modal');
         const searchInput = document.getElementById('location-search');
-        const modalCloses = document.querySelectorAll('.modal-close');
+        const modalCloses = document.querySelectorAll('.modal__close');
         const languageSelect = document.getElementById('language-select');
         const helpBtn = document.getElementById('help-btn');
         
@@ -61,7 +61,7 @@ class LocationManager {
         
         modalCloses.forEach(close => {
             close.addEventListener('click', (e) => {
-                const modal = e.target.closest('.location-modal, .species-modal, .share-modal, .help-modal, .taxon-modal');
+                const modal = e.target.closest('.modal');
                 if (modal) {
                     if (window.modalManager) {
                         window.modalManager.closeModal(modal);

@@ -30,32 +30,32 @@
 </head>
 
 <body>
-    <div id="app">
-        <header class="app-header">
-            <div class="header-content">
-                <h1 class="app-title">
-                    <span id="location-name" data-i18n="loading.location">Loading location...</span>
+    <div id="app" class="app">
+        <header class="header">
+            <div class="header__content">
+                <h1 class="header__title">
+                    <span id="location-name" class="header__location u-text-truncate" data-i18n="loading.location">Loading location...</span>
                 </h1>
-                <div class="header-controls">
-                    <button id="location-btn" class="icon-btn" aria-label="Change location">
+                <div class="header__controls">
+                    <button id="location-btn" class="btn btn--icon" aria-label="Change location">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                             <path
                                 d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
                         </svg>
                     </button>
-                    <button id="share-btn" class="icon-btn" aria-label="Share location">
+                    <button id="share-btn" class="btn btn--icon" aria-label="Share location">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                             <path
                                 d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.50-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z" />
                         </svg>
                     </button>
                     <!-- Offline Status Badge - replaces location/share buttons when offline -->
-                    <div id="offline-badge" class="offline-badge" style="display: none;">
-                        <div class="offline-badge-content">
-                            <span class="offline-text" data-i18n="status.offline">Offline</span>
+                    <div id="offline-badge" class="status-badge status-badge--offline" style="display: none;">
+                        <div class="status-badge__content">
+                            <span class="status-badge__text" data-i18n="status.offline">Offline</span>
                         </div>
                     </div>
-                    <button id="cache-btn" class="icon-btn" data-i18n-title="cache.button.tooltip" title="Download for offline use">
+                    <button id="cache-btn" class="btn btn--icon" data-i18n-title="cache.button.tooltip" title="Download for offline use">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="cache-icon">
                             <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
                         </svg>
@@ -66,13 +66,13 @@
                             <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/>
                         </svg>
                     </button>
-                    <select id="language-select" class="language-select">
+                    <select id="language-select" class="select">
                         <option value="en">🇬🇧 EN</option>
                         <option value="es">🇪🇸 ES</option>
                         <option value="fr">🇫🇷 FR</option>
                         <option value="de">🇩🇪 DE</option>
                     </select>
-                    <button id="help-btn" class="icon-btn" aria-label="Help">
+                    <button id="help-btn" class="btn btn--icon" aria-label="Help">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                             <path
                                 d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z" />
@@ -82,62 +82,62 @@
             </div>
         </header>
 
-        <main class="main-content">
-            <nav class="life-group-filter">
-                <div class="filter-container">
-                    <button class="filter-btn active" data-group="all">
-                        <span class="filter-icon">🌈</span>
-                        <span class="filter-text" data-i18n="filter.all">All</span>
+        <main class="app__content">
+            <nav class="filter">
+                <div class="filter__container">
+                    <button class="filter__btn is-active" data-group="all">
+                        <span class="filter__icon">🌈</span>
+                        <span class="filter__text" data-i18n="filter.all">All</span>
                     </button>
-                    <button class="filter-btn" data-group="3">
-                        <span class="filter-icon">🐦</span>
-                        <span class="filter-text" data-i18n="filter.birds">Birds</span>
+                    <button class="filter__btn" data-group="3">
+                        <span class="filter__icon">🐦</span>
+                        <span class="filter__text" data-i18n="filter.birds">Birds</span>
                     </button>
-                    <button class="filter-btn" data-group="40151">
-                        <span class="filter-icon">🐯</span>
-                        <span class="filter-text" data-i18n="filter.mammals">Mammals</span>
+                    <button class="filter__btn" data-group="40151">
+                        <span class="filter__icon">🐯</span>
+                        <span class="filter__text" data-i18n="filter.mammals">Mammals</span>
                     </button>
-                    <button class="filter-btn" data-group="47126">
-                        <span class="filter-icon">🌱</span>
-                        <span class="filter-text" data-i18n="filter.plants">Plants</span>
+                    <button class="filter__btn" data-group="47126">
+                        <span class="filter__icon">🌱</span>
+                        <span class="filter__text" data-i18n="filter.plants">Plants</span>
                     </button>
-                    <button class="filter-btn" data-group="47158">
-                        <span class="filter-icon">🦋</span>
-                        <span class="filter-text" data-i18n="filter.insects">Insects</span>
+                    <button class="filter__btn" data-group="47158">
+                        <span class="filter__icon">🦋</span>
+                        <span class="filter__text" data-i18n="filter.insects">Insects</span>
                     </button>
-                    <button class="filter-btn" data-group="47119">
-                        <span class="filter-icon">🕷️</span>
-                        <span class="filter-text" data-i18n="filter.arachnids">Arachnids</span>
+                    <button class="filter__btn" data-group="47119">
+                        <span class="filter__icon">🕷️</span>
+                        <span class="filter__text" data-i18n="filter.arachnids">Arachnids</span>
                     </button>
-                    <button class="filter-btn" data-group="26036">
-                        <span class="filter-icon">🦎</span>
-                        <span class="filter-text" data-i18n="filter.reptiles">Reptiles</span>
+                    <button class="filter__btn" data-group="26036">
+                        <span class="filter__icon">🦎</span>
+                        <span class="filter__text" data-i18n="filter.reptiles">Reptiles</span>
                     </button>
-                    <button class="filter-btn" data-group="20978">
-                        <span class="filter-icon">🐸</span>
-                        <span class="filter-text" data-i18n="filter.amphibians">Amphibians</span>
+                    <button class="filter__btn" data-group="20978">
+                        <span class="filter__icon">🐸</span>
+                        <span class="filter__text" data-i18n="filter.amphibians">Amphibians</span>
                     </button>
-                    <button class="filter-btn" data-group="47178">
-                        <span class="filter-icon">🐟</span>
-                        <span class="filter-text" data-i18n="filter.fishes">Fishes</span>
+                    <button class="filter__btn" data-group="47178">
+                        <span class="filter__icon">🐟</span>
+                        <span class="filter__text" data-i18n="filter.fishes">Fishes</span>
                     </button>
-                    <button class="filter-btn" data-group="47170">
-                        <span class="filter-icon">🍄</span>
-                        <span class="filter-text" data-i18n="filter.fungi">Fungi</span>
+                    <button class="filter__btn" data-group="47170">
+                        <span class="filter__icon">🍄</span>
+                        <span class="filter__text" data-i18n="filter.fungi">Fungi</span>
                     </button>
-                    <button class="filter-btn" data-group="47115">
-                        <span class="filter-icon">🐚</span>
-                        <span class="filter-text" data-i18n="filter.molluscs">Molluscs</span>
+                    <button class="filter__btn" data-group="47115">
+                        <span class="filter__icon">🐚</span>
+                        <span class="filter__text" data-i18n="filter.molluscs">Molluscs</span>
                     </button>
-                    <button class="filter-btn" data-group="other">
-                        <span class="filter-icon">🔍</span>
-                        <span class="filter-text" data-i18n="filter.other">Other</span>
+                    <button class="filter__btn" data-group="other">
+                        <span class="filter__icon">🔍</span>
+                        <span class="filter__text" data-i18n="filter.other">Other</span>
                     </button>
                 </div>
             </nav>
 
-            <div id="loading" class="loading-state">
-                <div class="loading-spinner"></div>
+            <div id="loading" class="loading">
+                <div class="loading__spinner"></div>
                 <p data-i18n="loading.species">Loading species data...</p>
             </div>
 
@@ -145,57 +145,57 @@
                 <!-- Species cards will be populated by JavaScript -->
             </div>
 
-            <div id="error-state" class="error-state" style="display: none;">
+            <div id="error-state" class="error" style="display: none;">
                 <p data-i18n="error.species">Unable to load species data. Please check your connection and try again.
                 </p>
-                <button id="retry-btn" class="retry-btn" data-i18n="error.retry">Retry</button>
+                <button id="retry-btn" class="btn btn--secondary" data-i18n="error.retry">Retry</button>
             </div>
         </main>
     </div>
 
     <!-- Species Detail Modal -->
-    <div id="species-modal" class="species-modal">
-        <div class="modal-content">
-            <button class="modal-close" aria-label="Close">&times;</button>
-            <div id="modal-body" class="modal-body">
+    <div id="species-modal" class="modal modal--species">
+        <div class="modal__content">
+            <button class="modal__close" aria-label="Close">&times;</button>
+            <div id="modal-body" class="modal__body">
                 <!-- Species details populated by JavaScript -->
             </div>
         </div>
     </div>
 
     <!-- Location Search Modal -->
-    <div id="location-modal" class="location-modal">
-        <div class="modal-content">
-            <button class="modal-close" aria-label="Close">&times;</button>
-            <div class="modal-body">
-                <h2 data-i18n="location.search.title">Choose Location</h2>
+    <div id="location-modal" class="modal modal--location">
+        <div class="modal__content">
+            <button class="modal__close" aria-label="Close">&times;</button>
+            <div class="modal__body">
+                <h2 class="modal__title" data-i18n="location.search.title">Choose Location</h2>
                 
                 <!-- My Location Button -->
-                <button id="my-location-btn" class="my-location-btn" data-i18n="location.myLocation">
+                <button id="my-location-btn" class="btn btn--primary" data-i18n="location.myLocation">
                     📍 My Location
                 </button>
                 
                 <!-- Search Input -->
-                <input type="text" id="location-search" data-i18n-placeholder="location.search.placeholder"
+                <input type="text" id="location-search" class="input" data-i18n-placeholder="location.search.placeholder"
                     placeholder="Search for a location..." />
                 
                 <!-- Search Results -->
-                <div id="location-results" class="location-results">
+                <div id="location-results" class="search-results search-results--location">
                     <!-- Search results populated by JavaScript -->
                 </div>
                 
                 <!-- Map Container -->
-                <div id="location-map" class="location-map">
+                <div id="location-map" class="map">
                     <!-- Leaflet map will be initialized here -->
                 </div>
                 
                 <!-- Location Confirmation -->
                 <div id="location-confirm" class="location-confirm" style="display: none;">
-                    <div class="selected-location">
-                        <span id="selected-location-name">No location selected</span>
-                        <small id="selected-location-coords"></small>
+                    <div class="location-confirm__selection">
+                        <span id="selected-location-name" class="location-confirm__name">No location selected</span>
+                        <small id="selected-location-coords" class="location-confirm__coords"></small>
                     </div>
-                    <button id="use-location-btn" class="use-location-btn" data-i18n="location.useLocation">
+                    <button id="use-location-btn" class="btn btn--primary" data-i18n="location.useLocation">
                         Use This Location
                     </button>
                 </div>
@@ -204,25 +204,25 @@
     </div>
 
     <!-- QR Share Modal -->
-    <div id="share-modal" class="share-modal">
-        <div class="modal-content">
-            <button class="modal-close" aria-label="Close">&times;</button>
-            <div class="modal-body">
-                <h2 data-i18n="share.title">Share This Location</h2>
-                <div id="qr-code" class="qr-code-container"></div>
-                <p class="share-url" id="share-url"></p>
-                <button id="copy-url" class="copy-btn" data-i18n="share.url.copy">Copy URL</button>
+    <div id="share-modal" class="modal modal--share">
+        <div class="modal__content">
+            <button class="modal__close" aria-label="Close">&times;</button>
+            <div class="modal__body">
+                <h2 class="modal__title" data-i18n="share.title">Share This Location</h2>
+                <div id="qr-code" class="share__qr"></div>
+                <p class="share__url" id="share-url"></p>
+                <button id="copy-url" class="btn btn--primary" data-i18n="share.url.copy">Copy URL</button>
             </div>
         </div>
     </div>
 
     <!-- Help Modal -->
-    <div id="help-modal" class="help-modal">
-        <div class="modal-content">
-            <button class="modal-close" aria-label="Close">&times;</button>
-            <div class="modal-body">
-                <h2 data-i18n="help.title">About LocNat</h2>
-                <div class="help-content">
+    <div id="help-modal" class="modal modal--help">
+        <div class="modal__content">
+            <button class="modal__close" aria-label="Close">&times;</button>
+            <div class="modal__body">
+                <h2 class="help__title" data-i18n="help.title">About LocNat</h2>
+                <div class="help__content">
                     <p data-i18n="help.description">Discover local wildlife through photos. Scan QR codes at nature
                         spots or search any location.</p>
 
@@ -233,19 +233,19 @@
                             target="_blank" rel="noopener">iNaturalist</a> - a community of millions of naturalists
                         worldwide.</p>
 
-                    <div class="help-links">
+                    <div class="help__links">
                         <a href="https://www.inaturalist.org" target="_blank" rel="noopener"
                             data-i18n="help.links.visit">Visit iNaturalist</a>
                         <a href="https://www.inaturalist.org/donate" target="_blank" rel="noopener"
                             data-i18n="help.links.donate">Donate</a>
                     </div>
 
-                    <div class="help-update-section">
-                        <span class="version-text">
-                            <span data-i18n="help.version">Version:</span> <span id="app-version">Loading...</span>
-                            <span id="last-update-check" class="update-check-time"></span>
+                    <div class="help__update-section">
+                        <span class="help__version">
+                            <span data-i18n="help.version">Version:</span> <span id="app-version" class="help__version-number">Loading...</span>
+                            <span id="last-update-check" class="help__check-time"></span>
                         </span>
-                        <button id="manual-update-btn" class="update-check-btn" data-i18n="help.checkUpdates">Check for
+                        <button id="manual-update-btn" class="help__update-btn" data-i18n="help.checkUpdates">Check for
                             Updates</button>
                     </div>
                 </div>
@@ -254,14 +254,14 @@
     </div>
 
     <!-- Taxon Search Modal -->
-    <div id="taxon-modal" class="taxon-modal">
-        <div class="modal-content">
-            <button class="modal-close" aria-label="Close">&times;</button>
-            <div class="modal-body">
-                <h2 data-i18n="taxon.search.title">Search Taxon</h2>
-                <input type="text" id="taxon-search" data-i18n-placeholder="taxon.search.placeholder"
+    <div id="taxon-modal" class="modal modal--taxon">
+        <div class="modal__content">
+            <button class="modal__close" aria-label="Close">&times;</button>
+            <div class="modal__body">
+                <h2 class="modal__title" data-i18n="taxon.search.title">Search Taxon</h2>
+                <input type="text" id="taxon-search" class="input" data-i18n-placeholder="taxon.search.placeholder"
                     placeholder="Search for any taxon..." />
-                <div id="taxon-results" class="taxon-results">
+                <div id="taxon-results" class="search-results">
                     <!-- Search results populated by JavaScript -->
                 </div>
             </div>

@@ -1034,7 +1034,7 @@ class ModalManager {
         // Global click handler for closing modals when clicking outside
         document.addEventListener('click', (e) => {
             // Find if the click was on a modal backdrop
-            const modal = e.target.closest('.species-modal, .location-modal, .share-modal, .help-modal, .taxon-modal');
+            const modal = e.target.closest('.modal');
             if (modal && e.target === modal) {
                 this.closeModal(modal);
             }

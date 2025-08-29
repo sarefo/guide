@@ -3,7 +3,7 @@ class CacheService {
         this.memoryCache = new Map();
         this.db = null;
         this.dbName = 'BiodiversityCache';
-        this.dbVersion = 1;
+        this.dbVersion = 2;
         this.cacheExpiry = window.APP_CONFIG.cacheExpiry;
         this.initIndexedDB();
     }
@@ -159,9 +159,15 @@ class CacheService {
         
         try {
             const storeNames = ['speciesCache', 'locationCache'];
-            const transaction = this.db.transaction(storeNames, 'readwrite');
+            const availableStores = storeNames.filter(name => 
+                this.db.objectStoreNames.contains(name)
+            );
             
-            storeNames.forEach(storeName => {
+            if (availableStores.length === 0) return;
+            
+            const transaction = this.db.transaction(availableStores, 'readwrite');
+            
+            availableStores.forEach(storeName => {
                 const store = transaction.objectStore(storeName);
                 store.clear();
             });
@@ -185,12 +191,18 @@ class CacheService {
         });
         keysToDelete.forEach(key => this.memoryCache.delete(key));
         
-        // Clean IndexedDB
+        // Clean IndexedDB - only access stores that exist
         try {
             const storeNames = ['speciesCache', 'locationCache'];
-            const transaction = this.db.transaction(storeNames, 'readwrite');
+            const availableStores = storeNames.filter(name => 
+                this.db.objectStoreNames.contains(name)
+            );
             
-            storeNames.forEach(storeName => {
+            if (availableStores.length === 0) return;
+            
+            const transaction = this.db.transaction(availableStores, 'readwrite');
+            
+            availableStores.forEach(storeName => {
                 const store = transaction.objectStore(storeName);
                 const index = store.index('timestamp');
                 const range = IDBKeyRange.upperBound(cutoff);

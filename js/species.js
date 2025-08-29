@@ -614,8 +614,14 @@ class SpeciesManager {
                     `<p style="margin-bottom: 1rem;"><strong>${window.i18n.t('species.scientificName')}:</strong> <em>${species.scientificName}</em></p>` : ''
                 }
                 <div class="modal-actions" style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; margin-bottom: 1rem;">
-                    <a href="#" target="_blank" class="modal-action-btn wiki-btn" style="opacity: 0.5; pointer-events: none; cursor: not-allowed;" title="Loading Wikipedia..." data-original-text="${window.i18n.t('modal.wikipedia')}">
-                        ${window.i18n.t('modal.wikipedia')}
+                    <a class="modal-action-btn wiki-btn" style="opacity: 0.5; pointer-events: none; cursor: not-allowed;" title="Loading Wikipedia..." data-original-text="${window.i18n.t('modal.wikipedia')}" onclick="return false;">
+                        <svg class="wiki-spinner" width="16" height="16" viewBox="0 0 24 24" fill="none" style="animation: spin 1s linear infinite; margin-right: 0.5rem;">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" stroke-dasharray="31.416" stroke-dashoffset="31.416">
+                                <animate attributeName="stroke-dasharray" dur="2s" values="0 31.416;15.708 15.708;0 31.416" repeatCount="indefinite"/>
+                                <animate attributeName="stroke-dashoffset" dur="2s" values="0;-15.708;-31.416" repeatCount="indefinite"/>
+                            </circle>
+                        </svg>
+                        <span class="wiki-text">${window.i18n.t('modal.wikipedia')}</span>
                     </a>
                     <a href="${species.inatUrl}" target="_blank" class="modal-action-btn inat-btn">
                         ${window.i18n.t('modal.inaturalist')}
@@ -701,9 +707,14 @@ class SpeciesManager {
         const wikiBtn = modal.querySelector('.wiki-btn');
         if (!wikiBtn) return;
 
-        // Reset button text to original
+        const wikiSpinner = wikiBtn.querySelector('.wiki-spinner');
+        const wikiText = wikiBtn.querySelector('.wiki-text');
         const originalText = wikiBtn.dataset.originalText || window.i18n.t('modal.wikipedia');
-        wikiBtn.textContent = originalText;
+
+        // Ensure spinner is visible while loading
+        if (wikiSpinner) {
+            wikiSpinner.style.display = 'inline-block';
+        }
 
         try {
             // Check for the best Wikipedia URL (with language fallback)
@@ -712,17 +723,29 @@ class SpeciesManager {
             if (wikipediaResult) {
                 // Enable the Wikipedia button
                 wikiBtn.href = wikipediaResult.url;
+                wikiBtn.target = '_blank';
                 wikiBtn.style.opacity = '1';
                 wikiBtn.style.pointerEvents = 'auto';
                 wikiBtn.style.cursor = 'pointer';
                 wikiBtn.removeAttribute('title');
+                wikiBtn.removeAttribute('onclick');
+                
+                // Hide spinner and update text
+                if (wikiSpinner) {
+                    wikiSpinner.style.display = 'none';
+                }
                 
                 // Update button text to indicate language fallback
                 let buttonText = originalText;
                 if (!wikipediaResult.isOriginalLang) {
                     buttonText = `${originalText} (${wikipediaResult.lang.toUpperCase()})`;
                 }
-                wikiBtn.textContent = buttonText;
+                
+                if (wikiText) {
+                    wikiText.textContent = buttonText;
+                } else {
+                    wikiBtn.innerHTML = buttonText;
+                }
                 
                 console.log('✅ Wikipedia button enabled:', {
                     url: wikipediaResult.url,
@@ -732,23 +755,48 @@ class SpeciesManager {
                 });
             } else {
                 // No Wikipedia article found - disable the button
-                wikiBtn.href = '#';
+                wikiBtn.removeAttribute('href');
+                wikiBtn.removeAttribute('target');
+                wikiBtn.setAttribute('onclick', 'return false;');
                 wikiBtn.style.opacity = '0.5';
                 wikiBtn.style.pointerEvents = 'none';
                 wikiBtn.style.cursor = 'not-allowed';
                 wikiBtn.setAttribute('title', 'No Wikipedia article found');
-                wikiBtn.textContent = originalText;
+                
+                // Hide spinner and show disabled state
+                if (wikiSpinner) {
+                    wikiSpinner.style.display = 'none';
+                }
+                
+                if (wikiText) {
+                    wikiText.textContent = originalText;
+                } else {
+                    wikiBtn.innerHTML = originalText;
+                }
+                
                 console.log('❌ No Wikipedia article found - button disabled');
             }
         } catch (error) {
             console.error('Error checking Wikipedia:', error);
             // On error, disable the button
-            wikiBtn.href = '#';
+            wikiBtn.removeAttribute('href');
+            wikiBtn.removeAttribute('target');
+            wikiBtn.setAttribute('onclick', 'return false;');
             wikiBtn.style.opacity = '0.5';
             wikiBtn.style.pointerEvents = 'none';
             wikiBtn.style.cursor = 'not-allowed';
             wikiBtn.setAttribute('title', 'Wikipedia check failed');
-            wikiBtn.textContent = originalText;
+            
+            // Hide spinner and show error state
+            if (wikiSpinner) {
+                wikiSpinner.style.display = 'none';
+            }
+            
+            if (wikiText) {
+                wikiText.textContent = originalText;
+            } else {
+                wikiBtn.innerHTML = originalText;
+            }
         }
     }
 

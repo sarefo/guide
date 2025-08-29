@@ -1188,6 +1188,11 @@ style.textContent = `
     .notification-error {
         background: #f44336 !important;
     }
+    
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
 `;
 document.head.appendChild(style);
 

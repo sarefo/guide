@@ -833,14 +833,24 @@ class SpeciesManager {
                     buttonText
                 });
             } else {
-                // No Wikipedia article found - hide the button
-                wikiBtn.style.display = 'none';
-                console.log('❌ No Wikipedia article found - button hidden');
+                // No Wikipedia article found - disable the button
+                wikiBtn.href = '#';
+                wikiBtn.style.opacity = '0.5';
+                wikiBtn.style.pointerEvents = 'none';
+                wikiBtn.style.cursor = 'not-allowed';
+                wikiBtn.setAttribute('title', 'No Wikipedia article found');
+                wikiBtn.textContent = originalText;
+                console.log('❌ No Wikipedia article found - button disabled');
             }
         } catch (error) {
             console.error('Error checking Wikipedia:', error);
-            // On error, hide the button
-            wikiBtn.style.display = 'none';
+            // On error, disable the button
+            wikiBtn.href = '#';
+            wikiBtn.style.opacity = '0.5';
+            wikiBtn.style.pointerEvents = 'none';
+            wikiBtn.style.cursor = 'not-allowed';
+            wikiBtn.setAttribute('title', 'Wikipedia check failed');
+            wikiBtn.textContent = originalText;
         }
     }
 

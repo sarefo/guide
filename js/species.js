@@ -430,11 +430,11 @@ class SpeciesManager {
 
         const cards = grid.querySelectorAll('.species-card');
         cards.forEach(card => {
-            card.addEventListener('click', (e) => {
+            card.addEventListener('click', async (e) => {
                 const speciesId = e.currentTarget.dataset.speciesId;
                 const species = this.currentSpecies.find(s => s.id == speciesId);
                 if (species) {
-                    this.showSpeciesModal(species);
+                    await this.showSpeciesModal(species);
                 }
             });
         });
@@ -699,10 +699,7 @@ class SpeciesManager {
         const thumbPhotoUrl = species.photo?.thumbUrl;
         const hasPhoto = (mediumPhotoUrl && mediumPhotoUrl !== 'null') || (thumbPhotoUrl && thumbPhotoUrl !== 'null');
 
-        const wikipediaUrl = species.wikipediaUrl ? 
-            window.api.convertWikipediaURL(species.wikipediaUrl) :
-            window.api.buildWikipediaSearchURL(species.scientificName, species.name);
-
+        // Open modal immediately with disabled Wikipedia button
         modalBody.innerHTML = `
             <div style="text-align: center;">
                 ${hasPhoto ? `
@@ -719,7 +716,7 @@ class SpeciesManager {
                     `<p style="margin-bottom: 1rem;"><strong>${window.i18n.t('species.scientificName')}:</strong> <em>${species.scientificName}</em></p>` : ''
                 }
                 <div class="modal-actions" style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; margin-bottom: 1rem;">
-                    <a href="${wikipediaUrl}" target="_blank" class="modal-action-btn wiki-btn">
+                    <a href="#" target="_blank" class="modal-action-btn wiki-btn" style="opacity: 0.5; pointer-events: none; cursor: not-allowed;" title="Loading Wikipedia..." data-original-text="${window.i18n.t('modal.wikipedia')}">
                         ${window.i18n.t('modal.wikipedia')}
                     </a>
                     <a href="${species.inatUrl}" target="_blank" class="modal-action-btn inat-btn">
@@ -796,6 +793,54 @@ class SpeciesManager {
                     modal.style.display = 'none';
                 }
             });
+        }
+
+        // Check Wikipedia asynchronously after modal is shown
+        this.checkAndEnableWikipedia(modal, species);
+    }
+
+    async checkAndEnableWikipedia(modal, species) {
+        const wikiBtn = modal.querySelector('.wiki-btn');
+        if (!wikiBtn) return;
+
+        // Reset button text to original
+        const originalText = wikiBtn.dataset.originalText || window.i18n.t('modal.wikipedia');
+        wikiBtn.textContent = originalText;
+
+        try {
+            // Check for the best Wikipedia URL (with language fallback)
+            const wikipediaResult = await window.api.findBestWikipediaUrl(species);
+            
+            if (wikipediaResult) {
+                // Enable the Wikipedia button
+                wikiBtn.href = wikipediaResult.url;
+                wikiBtn.style.opacity = '1';
+                wikiBtn.style.pointerEvents = 'auto';
+                wikiBtn.style.cursor = 'pointer';
+                wikiBtn.removeAttribute('title');
+                
+                // Update button text to indicate language fallback
+                let buttonText = originalText;
+                if (!wikipediaResult.isOriginalLang) {
+                    buttonText = `${originalText} (${wikipediaResult.lang.toUpperCase()})`;
+                }
+                wikiBtn.textContent = buttonText;
+                
+                console.log('✅ Wikipedia button enabled:', {
+                    url: wikipediaResult.url,
+                    lang: wikipediaResult.lang,
+                    fallback: !wikipediaResult.isOriginalLang,
+                    buttonText
+                });
+            } else {
+                // No Wikipedia article found - hide the button
+                wikiBtn.style.display = 'none';
+                console.log('❌ No Wikipedia article found - button hidden');
+            }
+        } catch (error) {
+            console.error('Error checking Wikipedia:', error);
+            // On error, hide the button
+            wikiBtn.style.display = 'none';
         }
     }
 

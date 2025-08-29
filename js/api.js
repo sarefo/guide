@@ -546,9 +546,77 @@ class iNaturalistAPI {
     }
 
     buildWikipediaSearchURL(scientificName, commonName) {
-        const searchTerm = commonName || scientificName;
+        // Always use scientific name for Wikipedia searches
+        const searchTerm = scientificName;
         const lang = window.i18n ? window.i18n.getCurrentLang() : 'en';
         return `https://${lang}.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(searchTerm)}`;
+    }
+
+    async checkWikipediaArticleExists(articleTitle, lang = 'en') {
+        try {
+            const response = await fetch(`https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(articleTitle)}`, {
+                method: 'HEAD'
+            });
+            return response.status === 200;
+        } catch (error) {
+            console.log(`Wikipedia article check failed for ${articleTitle} (${lang}):`, error);
+            return false;
+        }
+    }
+
+    async findBestWikipediaUrl(species) {
+        const currentLang = window.i18n ? window.i18n.getCurrentLang() : 'en';
+        const fallbackLang = 'en';
+        
+        console.log('🔍 Wikipedia check for:', {
+            vernacularName: species.name,
+            scientificName: species.scientificName,
+            currentLang
+        });
+        
+        const speciesName = species.scientificName;
+        const genusName = species.scientificName.split(' ')[0];
+
+        // Always prioritize scientific name over iNaturalist's Wikipedia URL
+        // First, try species name in current language
+        console.log(`🔍 Checking ${currentLang} Wikipedia for:`, speciesName);
+        if (await this.checkWikipediaArticleExists(speciesName, currentLang)) {
+            console.log(`✅ Found ${currentLang} Wikipedia article for:`, speciesName);
+            return {
+                url: `https://${currentLang}.wikipedia.org/wiki/${encodeURIComponent(speciesName)}`,
+                lang: currentLang,
+                isOriginalLang: true
+            };
+        }
+
+        // Then try species name in English fallback
+        if (currentLang !== fallbackLang) {
+            console.log(`🔍 Checking ${fallbackLang} Wikipedia for:`, speciesName);
+            if (await this.checkWikipediaArticleExists(speciesName, fallbackLang)) {
+                console.log(`✅ Found ${fallbackLang} Wikipedia article for:`, speciesName);
+                return {
+                    url: `https://${fallbackLang}.wikipedia.org/wiki/${encodeURIComponent(speciesName)}`,
+                    lang: fallbackLang,
+                    isOriginalLang: false
+                };
+            }
+        }
+
+        // Last resort: try genus name in English only (if no English species page exists)
+        console.log(`🔍 Last resort - checking ${fallbackLang} Wikipedia for genus:`, genusName);
+        if (await this.checkWikipediaArticleExists(genusName, fallbackLang)) {
+            console.log(`✅ Found ${fallbackLang} Wikipedia article for genus:`, genusName);
+            return {
+                url: `https://${fallbackLang}.wikipedia.org/wiki/${encodeURIComponent(genusName)}`,
+                lang: fallbackLang,
+                isOriginalLang: false,
+                isGenusOnly: true
+            };
+        }
+
+        // No valid Wikipedia article found
+        console.log('❌ No Wikipedia article found for any search terms');
+        return null;
     }
 
     convertWikipediaURL(wikipediaUrl) {

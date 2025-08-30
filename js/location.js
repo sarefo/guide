@@ -654,9 +654,9 @@ class LocationManager {
                 place_rank: place.place_rank
             });
             return `
-                <div class="location-result" data-lat="${place.lat}" data-lng="${place.lng}" data-name="${name}" data-metadata="${metadata.replace(/"/g, '&quot;')}">
-                    <div class="location-info">
-                        <h3 class="location-result-name">${name}</h3>
+                <div class="search-results__item location-result" data-lat="${place.lat}" data-lng="${place.lng}" data-name="${name}" data-metadata="${metadata.replace(/"/g, '&quot;')}">
+                    <div class="search-results__names">
+                        <div class="search-results__primary-name">${name}</div>
                     </div>
                 </div>
             `;

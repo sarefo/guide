@@ -742,7 +742,8 @@ class SpeciesManager {
                 
                 // Update button text to indicate language fallback
                 let buttonText = originalText;
-                if (!wikipediaResult.isOriginalLang) {
+                const currentLang = window.i18n ? window.i18n.getCurrentLang() : 'en';
+                if (!wikipediaResult.isOriginalLang && currentLang !== 'en') {
                     buttonText = `${originalText} (${wikipediaResult.lang.toUpperCase()})`;
                 }
                 

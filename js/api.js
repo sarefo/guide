@@ -602,7 +602,21 @@ class iNaturalistAPI {
             }
         }
 
-        // Last resort: try genus name in English only (if no English species page exists)
+        // Try genus name in current language (if not English and no species page exists)
+        if (currentLang !== fallbackLang) {
+            console.log(`🔍 Checking ${currentLang} Wikipedia for genus:`, genusName);
+            if (await this.checkWikipediaArticleExists(genusName, currentLang)) {
+                console.log(`✅ Found ${currentLang} Wikipedia article for genus:`, genusName);
+                return {
+                    url: `https://${currentLang}.wikipedia.org/wiki/${encodeURIComponent(genusName)}`,
+                    lang: currentLang,
+                    isOriginalLang: true,
+                    isGenusOnly: true
+                };
+            }
+        }
+
+        // Last resort: try genus name in English only
         console.log(`🔍 Last resort - checking ${fallbackLang} Wikipedia for genus:`, genusName);
         if (await this.checkWikipediaArticleExists(genusName, fallbackLang)) {
             console.log(`✅ Found ${fallbackLang} Wikipedia article for genus:`, genusName);

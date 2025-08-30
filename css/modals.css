@@ -74,6 +74,13 @@
     overflow-y: auto;
 }
 
+/* Ensure location search input is always visible */
+.modal--location #location-search {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
 .modal__title {
     margin-bottom: 1rem;
     color: #333;

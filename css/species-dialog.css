@@ -234,9 +234,9 @@
     }
     
     .species-dialog__action-btn {
-        padding: 0.8rem 1rem;
-        font-size: 0.9rem;
-        min-width: 100px;
+        padding: 1rem 1.25rem;
+        font-size: 1rem;
+        min-width: 120px;
     }
 }
 
@@ -259,9 +259,9 @@
     }
     
     .species-dialog__action-btn {
-        padding: 0.7rem 0.9rem;
-        font-size: 0.85rem;
-        min-width: 90px;
+        padding: 0.9rem 1.1rem;
+        font-size: 0.95rem;
+        min-width: 110px;
     }
 }
 

@@ -578,8 +578,9 @@ class SpeciesManager {
         if (grid) {
             grid.innerHTML = `
                 <div class="empty-state">
+                    <div class="empty-state__icon">🔍</div>
                     <p>${window.i18n.t('species.empty')}</p>
-                    <button class="retry-btn" onclick="window.speciesManager.loadSpecies()">
+                    <button class="retry-btn" onclick="window.speciesManager.openTaxonModal()">
                         ${window.i18n.t('species.empty.try')}
                     </button>
                 </div>

@@ -84,6 +84,58 @@
     font-style: italic;
 }
 
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem 3rem 2rem;
+    color: #666;
+    text-align: center;
+    width: 100%;
+    margin: 0 auto;
+    grid-column: 1 / -1; /* Span all grid columns */
+}
+
+.empty-state__icon {
+    font-size: 3rem;
+    margin-bottom: 1.5rem;
+    opacity: 0.6;
+}
+
+.empty-state p {
+    font-size: 1.1rem;
+    line-height: 1.5;
+    margin: 0 0 2rem 0;
+    color: #555;
+}
+
+.empty-state .retry-btn {
+    background: linear-gradient(135deg, #2E7D32 0%, #388E3C 100%);
+    color: white;
+    padding: 0.875rem 2.5rem;
+    border-radius: 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(46, 125, 50, 0.25);
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 280px;
+    white-space: nowrap;
+}
+
+.empty-state .retry-btn:hover {
+    background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%);
+    box-shadow: 0 4px 12px rgba(46, 125, 50, 0.35);
+    transform: translateY(-2px);
+}
+
+.empty-state .retry-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(46, 125, 50, 0.25);
+}
+
 /* Update Notification Component */
 .update-notification {
     position: fixed;
@@ -176,4 +228,56 @@
 .update-status--error {
     background: #FFEBEE;
     border-left: 4px solid #F44336;
+}
+
+/* Mobile responsive styles for empty state */
+@media (max-width: 480px) {
+    .empty-state {
+        padding: 3rem 1.5rem 2rem 1.5rem;
+    }
+    
+    .empty-state p {
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .empty-state .retry-btn {
+        padding: 1rem 2rem;
+        font-size: 1rem;
+        min-width: 260px;
+        border-radius: 1.5rem;
+    }
+}
+
+/* Mobile responsive styles for update notification */
+@media (max-width: 480px) {
+    .update-notification {
+        bottom: 10px;
+        left: 10px;
+        right: 10px;
+        padding: 0.75rem;
+        flex-direction: column;
+        gap: 0.75rem;
+        align-items: stretch;
+    }
+    
+    .update-notification__message {
+        text-align: center;
+        margin-bottom: 0;
+    }
+    
+    .update-notification__btn {
+        margin-left: 0;
+        width: 100%;
+        padding: 1rem;
+        font-size: 1rem;
+        font-weight: 700;
+    }
+    
+    .update-notification__dismiss {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        margin-left: 0;
+    }
 }

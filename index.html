@@ -38,6 +38,7 @@
     <link rel="stylesheet" href="css/filter.css">
     <link rel="stylesheet" href="css/species.css">
     <link rel="stylesheet" href="css/modals.css">
+    <link rel="stylesheet" href="css/species-dialog.css">
     <link rel="stylesheet" href="css/status.css">
     
     <!-- Responsive Styles -->
@@ -169,10 +170,12 @@
     </div>
 
     <!-- Species Detail Modal -->
-    <div id="species-modal" class="modal modal--species">
-        <div class="modal__content">
-            <button class="modal__close" aria-label="Close">&times;</button>
-            <div id="modal-body" class="modal__body">
+    <div id="species-modal" class="modal modal--species species-dialog">
+        <div class="modal__content species-dialog__content">
+            <div id="species-image-container" class="species-dialog__image-container">
+                <!-- Image and close button will be populated by JavaScript -->
+            </div>
+            <div id="modal-body" class="modal__body species-dialog__body">
                 <!-- Species details populated by JavaScript -->
             </div>
         </div>

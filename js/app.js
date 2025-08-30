@@ -498,11 +498,11 @@ class BiodiversityApp {
         updateNotification.id = 'update-notification';
         updateNotification.innerHTML = `
             <div class="update-notification">
-                <div class="update-message">
+                <div class="update-notification__message">
                     <strong data-i18n="update.available">New version available!</strong>
                 </div>
-                <button id="update-btn" class="update-btn-primary" data-i18n="update.button">Update Now</button>
-                <button id="dismiss-update" class="update-btn-dismiss" aria-label="Dismiss">&times;</button>
+                <button id="update-btn" class="update-notification__btn" data-i18n="update.button">Update Now</button>
+                <button id="dismiss-update" class="update-notification__dismiss" aria-label="Dismiss">&times;</button>
             </div>
         `;
 

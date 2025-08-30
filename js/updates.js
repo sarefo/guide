@@ -99,11 +99,11 @@ class UpdateService {
         updateNotification.id = 'update-notification';
         updateNotification.innerHTML = `
             <div class="update-notification">
-                <div class="update-message">
+                <div class="update-notification__message">
                     <strong data-i18n="update.available">New version available!</strong>
                 </div>
-                <button id="update-btn" class="update-btn-primary" data-i18n="update.button">Update Now</button>
-                <button id="dismiss-update" class="update-btn-dismiss" aria-label="Dismiss">&times;</button>
+                <button id="update-btn" class="update-notification__btn" data-i18n="update.button">Update Now</button>
+                <button id="dismiss-update" class="update-notification__dismiss" aria-label="Dismiss">&times;</button>
             </div>
         `;
 
@@ -166,7 +166,7 @@ class UpdateService {
         const indicator = document.createElement('div');
         indicator.id = 'updating-indicator';
         indicator.innerHTML = `
-            <div class="update-checking">
+            <div class="update-status update-status--checking">
                 <span data-i18n="update.updating">Updating app... Please wait.</span>
             </div>
         `;
@@ -228,7 +228,7 @@ class UpdateService {
         const indicator = document.createElement('div');
         indicator.id = 'update-checking';
         indicator.innerHTML = `
-            <div class="update-checking">
+            <div class="update-status update-status--checking">
                 <span data-i18n="update.checking">Checking for updates...</span>
             </div>
         `;
@@ -244,7 +244,7 @@ class UpdateService {
         const error = document.createElement('div');
         error.id = 'update-error';
         error.innerHTML = `
-            <div class="update-error">
+            <div class="update-status update-status--error">
                 <span data-i18n="update.error">Update check failed. Please try again.</span>
             </div>
         `;

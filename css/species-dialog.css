@@ -1,0 +1,315 @@
+/* =============================================================================
+   SPECIES DIALOG COMPONENT (BEM Structure)
+   ============================================================================= */
+
+/* Species Dialog Base Styles */
+.species-dialog {
+    /* Inherits from .modal--species */
+}
+
+.species-dialog__content {
+    background: white;
+    border-radius: 1rem;
+    max-width: min(90vw, 500px); /* Expanded width while respecting viewport */
+    width: 100%;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    animation: modalSlideIn 0.3s ease;
+    overflow: hidden;
+}
+
+.species-dialog__image-container {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #f8f9fa;
+    min-height: 200px;
+}
+
+.species-dialog__image {
+    width: 100%;
+    height: auto;
+    max-width: 100%;
+    max-height: 60vh; /* Ensure image doesn't exceed 60% of viewport height */
+    object-fit: contain; /* Changed from cover to contain to show full image */
+    border-radius: 1rem 1rem 0 0;
+    display: block;
+}
+
+.species-dialog__placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    background: #f8f9fa;
+    color: #666;
+    font-size: 1rem;
+    border-radius: 1rem 1rem 0 0;
+}
+
+.species-dialog__close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(0, 0, 0, 0.7);
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1002;
+    transition: background-color 0.2s ease;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.species-dialog__close:hover {
+    background: rgba(0, 0, 0, 0.9);
+}
+
+.species-dialog__body {
+    padding: 1.5rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+.species-dialog__title {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #333;
+    text-align: center;
+}
+
+.species-dialog__scientific-name {
+    margin: 0;
+    font-style: italic;
+    color: #666;
+    text-align: center;
+    font-size: 1rem;
+}
+
+.species-dialog__actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 0.5rem;
+}
+
+.species-dialog__action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 1.5rem;
+    background: #2E7D32;
+    color: white;
+    text-decoration: none;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    min-width: 120px;
+    justify-content: center;
+}
+
+.species-dialog__action-btn:hover {
+    background: #1B5E20;
+}
+
+.species-dialog__action-btn:disabled,
+.species-dialog__action-btn--disabled {
+    opacity: 0.5;
+    pointer-events: none;
+    cursor: not-allowed;
+}
+
+.species-dialog__attribution {
+    font-size: 0.8rem;
+    color: #666;
+    text-align: center;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid #eee;
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    .species-dialog__content {
+        background: #1e1e1e;
+        color: #ffffff;
+    }
+    
+    .species-dialog__image-container {
+        background: #2a2a2a;
+    }
+    
+    .species-dialog__title {
+        color: #e8e8e8;
+    }
+    
+    .species-dialog__scientific-name {
+        color: #b8b8b8;
+    }
+    
+    .species-dialog__attribution {
+        color: #aaa;
+        border-top-color: #444;
+    }
+    
+    .species-dialog__action-btn {
+        background: #4CAF50;
+    }
+    
+    .species-dialog__action-btn:hover {
+        background: #66BB6A;
+    }
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+    .species-dialog__content {
+        max-width: calc(100vw - 2rem);
+        margin: 1rem;
+        max-height: 85vh;
+        border-radius: 0.75rem;
+    }
+    
+    .species-dialog__image {
+        border-radius: 0.75rem 0.75rem 0 0;
+        max-height: 50vh;
+    }
+    
+    .species-dialog__body {
+        padding: 1rem;
+    }
+    
+    .species-dialog__close {
+        top: 0.75rem;
+        right: 0.75rem;
+        width: 32px;
+        height: 32px;
+        font-size: 1.25rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .species-dialog__content {
+        max-width: calc(100vw - 1rem);
+        margin: 0.5rem;
+        max-height: 90vh;
+        border-radius: 0.5rem;
+    }
+    
+    .species-dialog__image {
+        border-radius: 0.5rem 0.5rem 0 0;
+        max-height: 45vh;
+    }
+    
+    .species-dialog__body {
+        padding: 0.75rem;
+        gap: 0.75rem;
+    }
+    
+    .species-dialog__title {
+        font-size: 1.25rem;
+    }
+    
+    .species-dialog__actions {
+        gap: 0.5rem;
+    }
+    
+    .species-dialog__action-btn {
+        padding: 0.8rem 1rem;
+        font-size: 0.9rem;
+        min-width: 100px;
+    }
+}
+
+/* Very Small Screens */
+@media (max-width: 360px) {
+    .species-dialog__content {
+        max-height: 95vh;
+    }
+    
+    .species-dialog__image {
+        max-height: 40vh;
+    }
+    
+    .species-dialog__body {
+        padding: 0.5rem;
+    }
+    
+    .species-dialog__title {
+        font-size: 1.1rem;
+    }
+    
+    .species-dialog__action-btn {
+        padding: 0.7rem 0.9rem;
+        font-size: 0.85rem;
+        min-width: 90px;
+    }
+}
+
+/* Landscape Orientation */
+@media screen and (max-height: 500px) and (orientation: landscape) {
+    .species-dialog__content {
+        max-height: 95vh;
+        max-width: min(85vw, 600px);
+    }
+    
+    .species-dialog__image {
+        max-height: 35vh;
+    }
+    
+    .species-dialog__body {
+        padding: 0.75rem;
+    }
+    
+    .species-dialog__close {
+        top: 0.5rem;
+        right: 0.5rem;
+    }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+    .species-dialog__close {
+        background: #000;
+        border: 2px solid #fff;
+    }
+    
+    .species-dialog__close:hover {
+        background: #333;
+    }
+    
+    .species-dialog__action-btn {
+        border: 2px solid #fff;
+    }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    .species-dialog__content {
+        animation: none;
+    }
+    
+    .species-dialog__close,
+    .species-dialog__action-btn {
+        transition: none;
+    }
+}

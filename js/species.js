@@ -589,54 +589,66 @@ class SpeciesManager {
 
     async showSpeciesModal(species) {
         const modal = document.getElementById('species-modal');
+        const imageContainer = document.getElementById('species-image-container');
         const modalBody = document.getElementById('modal-body');
         
-        if (!modal || !modalBody) return;
+        if (!modal || !imageContainer || !modalBody) return;
 
         const mediumPhotoUrl = species.photo?.url;
         const thumbPhotoUrl = species.photo?.thumbUrl;
         const hasPhoto = (mediumPhotoUrl && mediumPhotoUrl !== 'null') || (thumbPhotoUrl && thumbPhotoUrl !== 'null');
 
-        // Open modal immediately with disabled Wikipedia button
-        modalBody.innerHTML = `
-            <div style="text-align: center;">
-                ${hasPhoto ? `
-                    <img 
-                        src="${mediumPhotoUrl || thumbPhotoUrl}" 
-                        alt="${species.name}"
-                        class="species-modal__image"
-                        data-thumb-url="${thumbPhotoUrl || ''}"
-                        style="width: min(40vh, 350px); height: min(40vh, 350px); max-width: 100%; object-fit: cover; border-radius: 0.5rem; margin: 0 auto 1rem; display: block;"
-                    />
-                ` : ''}
-                <h2 style="margin-bottom: 1rem;">${species.name}</h2>
-                ${species.scientificName !== species.name ? 
-                    `<p style="margin-bottom: 1rem;"><strong>${window.i18n.t('species.scientificName')}:</strong> <em>${species.scientificName}</em></p>` : ''
-                }
-                <div class="modal-actions" style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; margin-bottom: 1rem;">
-                    <a class="modal-action-btn wiki-btn" style="opacity: 0.5; pointer-events: none; cursor: not-allowed;" title="Loading Wikipedia..." data-original-text="${window.i18n.t('modal.wikipedia')}" onclick="return false;">
-                        <svg class="wiki-spinner" width="16" height="16" viewBox="0 0 24 24" fill="none" style="animation: spin 1s linear infinite; margin-right: 0.5rem;">
-                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" stroke-dasharray="31.416" stroke-dashoffset="31.416">
-                                <animate attributeName="stroke-dasharray" dur="2s" values="0 31.416;15.708 15.708;0 31.416" repeatCount="indefinite"/>
-                                <animate attributeName="stroke-dashoffset" dur="2s" values="0;-15.708;-31.416" repeatCount="indefinite"/>
-                            </circle>
-                        </svg>
-                        <span class="wiki-text">${window.i18n.t('modal.wikipedia')}</span>
-                    </a>
-                    <a href="${species.inatUrl}" target="_blank" class="modal-action-btn inat-btn">
-                        ${window.i18n.t('modal.inaturalist')}
-                    </a>
-                </div>
-                ${species.photo?.attribution ? `
-                    <div class="photo-attribution" style="font-size: 0.8rem;">
-                        ${window.i18n.t('modal.photo.credit')}: ${species.photo.attribution}
-                    </div>
-                ` : ''}
+        // Populate image container with image and close button
+        imageContainer.innerHTML = hasPhoto ? `
+            <img 
+                src="${mediumPhotoUrl || thumbPhotoUrl}" 
+                alt="${species.name}"
+                class="species-dialog__image"
+                data-thumb-url="${thumbPhotoUrl || ''}"
+            />
+            <button class="species-dialog__close" aria-label="Close">&times;</button>
+        ` : `
+            <div class="species-dialog__placeholder">
+                <span>📸 No image available</span>
             </div>
+            <button class="species-dialog__close" aria-label="Close">&times;</button>
+        `;
+
+        // Check if we're using scientific name as main title (no vernacular name available)
+        const isUsingScientificName = species.name === species.scientificName;
+        
+        // Populate modal body with content
+        modalBody.innerHTML = `
+            <h2 class="species-dialog__title">${species.name}</h2>
+            ${!isUsingScientificName && species.scientificName ? 
+                `<p class="species-dialog__scientific-name">${species.scientificName}</p>` : ''
+            }
+            <div class="species-dialog__actions">
+                <a class="species-dialog__action-btn species-dialog__action-btn--disabled wiki-btn" 
+                   title="Loading Wikipedia..." 
+                   data-original-text="${window.i18n.t('modal.wikipedia')}" 
+                   onclick="return false;">
+                    <svg class="wiki-spinner" width="16" height="16" viewBox="0 0 24 24" fill="none" style="animation: spin 1s linear infinite;">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" stroke-dasharray="31.416" stroke-dashoffset="31.416">
+                            <animate attributeName="stroke-dasharray" dur="2s" values="0 31.416;15.708 15.708;0 31.416" repeatCount="indefinite"/>
+                            <animate attributeName="stroke-dashoffset" dur="2s" values="0;-15.708;-31.416" repeatCount="indefinite"/>
+                        </animate>
+                    </svg>
+                    <span class="wiki-text">${window.i18n.t('modal.wikipedia')}</span>
+                </a>
+                <a href="${species.inatUrl}" target="_blank" class="species-dialog__action-btn inat-btn">
+                    ${window.i18n.t('modal.inaturalist')}
+                </a>
+            </div>
+            ${species.photo?.attribution ? `
+                <div class="species-dialog__attribution">
+                    ${window.i18n.t('modal.photo.credit')}: ${species.photo.attribution}
+                </div>
+            ` : ''}
         `;
 
         // Set up image fallback handler
-        const modalImage = modal.querySelector('.species-modal__image');
+        const modalImage = imageContainer.querySelector('.species-dialog__image');
         if (modalImage && modalImage.dataset.thumbUrl) {
             modalImage.addEventListener('error', function(e) {
                 const thumbUrl = this.dataset.thumbUrl;
@@ -648,8 +660,9 @@ class SpeciesManager {
                     console.log('📸 No thumbnail available, showing placeholder');
                     this.style.display = 'none';
                     const placeholder = document.createElement('div');
-                    placeholder.style.cssText = 'width: min(40vh, 350px); height: min(40vh, 350px); max-width: 100%; border-radius: 0.5rem; margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; background: #f5f5f5; color: #666;';
+                    placeholder.className = 'species-dialog__placeholder';
                     placeholder.innerHTML = '<span>📸 Image unavailable offline</span>';
+                    placeholder.style.cssText = 'display: flex; align-items: center; justify-content: center; background: #f5f5f5; color: #666; min-height: 200px;';
                     this.parentNode.insertBefore(placeholder, this.nextSibling);
                 }
             });
@@ -662,33 +675,11 @@ class SpeciesManager {
             modal.style.display = 'flex';
         }
 
-        const actionBtns = modal.querySelectorAll('.modal-action-btn');
-        actionBtns.forEach(btn => {
-            btn.style.cssText = `
-                display: inline-flex;
-                align-items: center;
-                gap: 0.5rem;
-                padding: 0.75rem 1rem;
-                background: #2E7D32;
-                color: white;
-                text-decoration: none;
-                border-radius: 0.5rem;
-                font-weight: 500;
-                transition: background-color 0.2s ease;
-            `;
-            btn.addEventListener('mouseenter', () => {
-                btn.style.background = '#1B5E20';
-            });
-            btn.addEventListener('mouseleave', () => {
-                btn.style.background = '#2E7D32';
-            });
-        });
-
-        // Set up offline/online state for action buttons AFTER styling is applied
+        // Set up offline/online state for action buttons
         this.updateModalActionButtons(modal, navigator.onLine);
 
-        // Close button handler (redundant with global handler but kept for explicitness)
-        const closeBtn = modal.querySelector('.modal__close');
+        // Close button handler
+        const closeBtn = imageContainer.querySelector('.species-dialog__close');
         if (closeBtn) {
             closeBtn.addEventListener('click', () => {
                 if (window.modalManager) {
@@ -724,9 +715,7 @@ class SpeciesManager {
                 // Enable the Wikipedia button
                 wikiBtn.href = wikipediaResult.url;
                 wikiBtn.target = '_blank';
-                wikiBtn.style.opacity = '1';
-                wikiBtn.style.pointerEvents = 'auto';
-                wikiBtn.style.cursor = 'pointer';
+                wikiBtn.classList.remove('species-dialog__action-btn--disabled');
                 wikiBtn.removeAttribute('title');
                 wikiBtn.removeAttribute('onclick');
                 
@@ -758,9 +747,7 @@ class SpeciesManager {
                 wikiBtn.removeAttribute('href');
                 wikiBtn.removeAttribute('target');
                 wikiBtn.setAttribute('onclick', 'return false;');
-                wikiBtn.style.opacity = '0.5';
-                wikiBtn.style.pointerEvents = 'none';
-                wikiBtn.style.cursor = 'not-allowed';
+                wikiBtn.classList.add('species-dialog__action-btn--disabled');
                 wikiBtn.setAttribute('title', 'No Wikipedia article found');
                 
                 // Hide spinner and show disabled state
@@ -782,9 +769,7 @@ class SpeciesManager {
             wikiBtn.removeAttribute('href');
             wikiBtn.removeAttribute('target');
             wikiBtn.setAttribute('onclick', 'return false;');
-            wikiBtn.style.opacity = '0.5';
-            wikiBtn.style.pointerEvents = 'none';
-            wikiBtn.style.cursor = 'not-allowed';
+            wikiBtn.classList.add('species-dialog__action-btn--disabled');
             wikiBtn.setAttribute('title', 'Wikipedia check failed');
             
             // Hide spinner and show error state
@@ -1357,26 +1342,21 @@ class SpeciesManager {
             return;
         }
         
-        const wikiBtn = modal.querySelector('.wiki-btn');
-        const inatBtn = modal.querySelector('.inat-btn');
+        const actionBtns = modal.querySelectorAll('.species-dialog__action-btn');
         
         console.log('🔧 Updating modal buttons:', { 
-            wikiBtn: !!wikiBtn, 
-            inatBtn: !!inatBtn, 
+            actionBtns: actionBtns.length, 
             isOnline 
         });
         
-        [wikiBtn, inatBtn].forEach(btn => {
-            if (btn) {
-                if (isOnline) {
-                    btn.style.opacity = '1';
-                    btn.style.pointerEvents = 'auto';
-                    btn.style.cursor = 'pointer';
-                    btn.removeAttribute('title');
-                } else {
-                    btn.style.opacity = '0.5';
-                    btn.style.pointerEvents = 'none';
-                    btn.style.cursor = 'not-allowed';
+        actionBtns.forEach(btn => {
+            if (isOnline) {
+                btn.classList.remove('species-dialog__action-btn--disabled');
+                btn.removeAttribute('title');
+            } else {
+                if (!btn.classList.contains('wiki-btn') || !btn.querySelector('.wiki-spinner')) {
+                    // Don't disable if Wikipedia is still loading
+                    btn.classList.add('species-dialog__action-btn--disabled');
                     btn.setAttribute('title', 'Requires internet connection');
                 }
             }

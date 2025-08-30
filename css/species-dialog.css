@@ -92,9 +92,6 @@
     text-align: center;
 }
 
-.species-dialog__title--scientific {
-    font-style: italic;
-}
 
 .species-dialog__scientific-name {
     margin: 0;
@@ -165,9 +162,6 @@
         color: #e8e8e8;
     }
     
-    .species-dialog__title--scientific {
-        color: #e8e8e8;
-    }
     
     .species-dialog__scientific-name {
         color: #b8b8b8;

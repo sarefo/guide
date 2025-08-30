@@ -620,9 +620,22 @@ class SpeciesManager {
         const isUsingScientificName = species.name === species.scientificName || 
                                      species.name.endsWith(' sp.');
         
+        // Format the display name with proper italics for scientific names
+        let displayName = species.name;
+        if (isUsingScientificName) {
+            if (species.name.endsWith(' sp.')) {
+                // For genus sp. format, only italicize the genus name, not "sp."
+                const genusName = species.name.replace(' sp.', '');
+                displayName = `<em>${genusName}</em> sp.`;
+            } else {
+                // For full scientific names, italicize the entire name
+                displayName = `<em>${species.name}</em>`;
+            }
+        }
+        
         // Populate modal body with content
         modalBody.innerHTML = `
-            <h2 class="species-dialog__title ${isUsingScientificName ? 'species-dialog__title--scientific' : ''}">${species.name}</h2>
+            <h2 class="species-dialog__title">${displayName}</h2>
             ${!isUsingScientificName && species.scientificName ? 
                 `<p class="species-dialog__scientific-name">${species.scientificName}</p>` : ''
             }

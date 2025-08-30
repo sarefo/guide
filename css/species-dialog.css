@@ -31,10 +31,9 @@
 
 .species-dialog__image {
     width: 100%;
-    height: auto;
+    height: min(50vh, 400px); /* Use up to 50% of viewport height, max 400px */
     max-width: 100%;
-    max-height: 60vh; /* Ensure image doesn't exceed 60% of viewport height */
-    object-fit: contain; /* Changed from cover to contain to show full image */
+    object-fit: cover; /* Fill width and crop vertically if needed */
     border-radius: 1rem 1rem 0 0;
     display: block;
 }
@@ -91,6 +90,10 @@
     font-weight: 600;
     color: #333;
     text-align: center;
+}
+
+.species-dialog__title--scientific {
+    font-style: italic;
 }
 
 .species-dialog__scientific-name {
@@ -162,6 +165,10 @@
         color: #e8e8e8;
     }
     
+    .species-dialog__title--scientific {
+        color: #e8e8e8;
+    }
+    
     .species-dialog__scientific-name {
         color: #b8b8b8;
     }
@@ -191,7 +198,7 @@
     
     .species-dialog__image {
         border-radius: 0.75rem 0.75rem 0 0;
-        max-height: 50vh;
+        height: min(45vh, 350px); /* Use up to 45% of viewport height on tablets */
     }
     
     .species-dialog__body {
@@ -217,7 +224,7 @@
     
     .species-dialog__image {
         border-radius: 0.5rem 0.5rem 0 0;
-        max-height: 45vh;
+        height: min(40vh, 300px); /* Up to 40% of viewport height on small mobile */
     }
     
     .species-dialog__body {
@@ -247,7 +254,7 @@
     }
     
     .species-dialog__image {
-        max-height: 40vh;
+        height: min(35vh, 250px); /* Up to 35% of viewport height on tiny screens */
     }
     
     .species-dialog__body {
@@ -273,7 +280,7 @@
     }
     
     .species-dialog__image {
-        max-height: 35vh;
+        height: min(30vh, 200px); /* Conservative height for landscape orientation */
     }
     
     .species-dialog__body {

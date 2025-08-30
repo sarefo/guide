@@ -616,11 +616,13 @@ class SpeciesManager {
         `;
 
         // Check if we're using scientific name as main title (no vernacular name available)
-        const isUsingScientificName = species.name === species.scientificName;
+        // This includes both direct scientific names and genus-level "Genus sp." format
+        const isUsingScientificName = species.name === species.scientificName || 
+                                     species.name.endsWith(' sp.');
         
         // Populate modal body with content
         modalBody.innerHTML = `
-            <h2 class="species-dialog__title">${species.name}</h2>
+            <h2 class="species-dialog__title ${isUsingScientificName ? 'species-dialog__title--scientific' : ''}">${species.name}</h2>
             ${!isUsingScientificName && species.scientificName ? 
                 `<p class="species-dialog__scientific-name">${species.scientificName}</p>` : ''
             }

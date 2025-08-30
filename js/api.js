@@ -416,7 +416,7 @@ class iNaturalistAPI {
         
         // For genus-level taxa, show "Genus sp." format if no vernacular name
         if (taxon.rank === 'genus' && (vernacularName === taxon.name || !taxon.preferred_common_name)) {
-            vernacularName = `<em>${taxon.name}</em> sp.`;
+            vernacularName = `${taxon.name} sp.`;
         }
         
         return {

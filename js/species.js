@@ -927,12 +927,12 @@ class SpeciesManager {
             const buttonName = displayName || scientificName;
             
             return `
-                <div class="taxon-result" data-taxon-id="${taxon.id}" data-taxon-name="${buttonName}" data-taxon-rank="${rank}">
-                    <div class="taxon-names">
-                        ${displayName ? `<div class="taxon-common-name">${displayName}</div>` : ''}
-                        <div class="taxon-scientific-name"><em>${scientificName}</em></div>
+                <div class="search-results__item search-results__item--taxon" data-taxon-id="${taxon.id}" data-taxon-name="${buttonName}" data-taxon-rank="${rank}">
+                    <div class="search-results__names">
+                        ${displayName ? `<div class="search-results__primary-name">${displayName}</div>` : ''}
+                        <div class="search-results__secondary-name"><em>${scientificName}</em></div>
                     </div>
-                    <div class="taxon-rank">${rank}</div>
+                    <div class="search-results__rank">${rank}</div>
                 </div>
             `;
         }).join('');
@@ -940,7 +940,7 @@ class SpeciesManager {
         container.innerHTML = resultsHTML;
 
         // Add click handlers to results
-        container.querySelectorAll('.taxon-result').forEach(result => {
+        container.querySelectorAll('.search-results__item--taxon').forEach(result => {
             result.addEventListener('click', (e) => {
                 const taxonId = e.currentTarget.dataset.taxonId;
                 const taxonName = e.currentTarget.dataset.taxonName;

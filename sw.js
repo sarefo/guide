@@ -1,4 +1,8 @@
-const VERSION = '1.1.12'; // UPDATE THIS VERSION IN app.js TOO!
+// Import centralized configuration
+importScripts('./js/config.js');
+
+// Use version from centralized config - SINGLE SOURCE OF TRUTH
+const VERSION = APP_CONFIG.version;
 const CACHE_NAME = `biodiversity-explorer-v${VERSION}`;
 const API_CACHE_NAME = `biodiversity-api-v${VERSION}`;
 
@@ -9,9 +13,9 @@ const STATIC_ASSETS = [
     './',
     './index.html',
     './manifest.json',
+    './js/config.js', // Must be first for importScripts to work
     './css/main.css',
     './css/mobile.css',
-    './js/config.js',
     './js/notifications.js',
     './js/cache.js',
     './js/updates.js',

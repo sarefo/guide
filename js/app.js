@@ -79,9 +79,13 @@ class BiodiversityApp {
         this.requestPersistentStorage();
         
         // Delay initial update check to avoid conflicts with SW installation
-        setTimeout(() => {
-            this.checkForUpdates();
-        }, 5000); // 5 seconds delay
+        setTimeout(async () => {
+            try {
+                await this.checkForUpdates();
+            } catch (error) {
+                console.error('Initial update check failed:', error);
+            }
+        }, window.APP_CONFIG.timing.updateCheckDelay);
         
         this.startPeriodicUpdateChecks();
         
@@ -96,7 +100,7 @@ class BiodiversityApp {
     }
 
     setupAppEventListeners() {
-        document.addEventListener('visibilitychange', () => {
+        document.addEventListener('visibilitychange', async () => {
             if (document.hidden) {
                 this.onAppHidden();
             } else {
@@ -104,7 +108,11 @@ class BiodiversityApp {
                 // Only check for updates if significant time has passed (2+ hours)
                 const timeSinceLastCheck = Date.now() - (this.lastUpdateCheck?.getTime() || 0);
                 if (timeSinceLastCheck > 2 * 60 * 60 * 1000) { // 2 hours
-                    this.checkForUpdates();
+                    try {
+                        await this.checkForUpdates();
+                    } catch (error) {
+                        console.error('Visibility update check failed:', error);
+                    }
                 }
             }
         });
@@ -166,9 +174,13 @@ class BiodiversityApp {
 
     startPeriodicUpdateChecks() {
         // Check for updates using config interval
-        this.updateCheckInterval = setInterval(() => {
+        this.updateCheckInterval = setInterval(async () => {
             if (!document.hidden) {
-                this.checkForUpdates();
+                try {
+                    await this.checkForUpdates();
+                } catch (error) {
+                    console.error('Periodic update check failed:', error);
+                }
             }
         }, window.APP_CONFIG.updateCheckInterval);
     }
@@ -306,8 +318,8 @@ class BiodiversityApp {
                 if (notification.parentNode) {
                     notification.parentNode.removeChild(notification);
                 }
-            }, 300);
-        }, 3000);
+            }, window.APP_CONFIG.timing.modalTransition);
+        }, window.APP_CONFIG.timing.notificationDuration);
     }
 
     showNetworkStatus(status) {
@@ -345,20 +357,20 @@ class BiodiversityApp {
                 textEl.textContent = translation !== 'status.online' ? translation : 'Online';
             }
             
-            // Hide badge and restore buttons after 3 seconds
+            // Hide badge and restore buttons after notification duration
             setTimeout(() => {
                 if (navigator.onLine && offlineBadge.classList.contains('online')) {
                     offlineBadge.classList.add('hiding');
                     setTimeout(() => {
                         offlineBadge.style.display = 'none';
                         offlineBadge.classList.remove('online', 'hiding');
-                        
+
                         // Restore the buttons
                         if (locationBtn) locationBtn.style.display = 'flex';
                         if (shareBtn) shareBtn.style.display = 'flex';
-                    }, 300); // Match animation duration
+                    }, window.APP_CONFIG.timing.modalTransition);
                 }
-            }, 3000);
+            }, window.APP_CONFIG.timing.notificationDuration);
         }
     }
 
@@ -772,10 +784,14 @@ class BiodiversityApp {
             this.setCacheButtonState('complete');
             this.showCacheStatus('cached');
             
-            // Keep cached state visible for 3 seconds, then hide badge
+            // Keep cached state visible for notification duration, then hide badge
             setTimeout(() => {
-                this.hideCacheStatus();
-            }, 3000);
+                try {
+                    this.hideCacheStatus();
+                } catch (error) {
+                    console.error('Hide cache status failed:', error);
+                }
+            }, window.APP_CONFIG.timing.notificationDuration);
             
         } catch (error) {
             console.error('Caching failed:', error);

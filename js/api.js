@@ -8,11 +8,11 @@ class iNaturalistAPI {
         this.currentRequests = new Map(); // Track active requests
     }
 
-    async makeRequest(endpoint, params = {}, requestKey = null) {
+    async makeRequest(endpoint, params = {}, requestKey = null, externalSignal = null) {
         await this.respectRateLimit();
-        
+
         const url = new URL(`${this.baseURL}${endpoint}`);
-        
+
         Object.keys(params).forEach(key => {
             if (params[key] !== null && params[key] !== undefined) {
                 if (Array.isArray(params[key])) {
@@ -33,35 +33,43 @@ class iNaturalistAPI {
             this.currentRequests.set(requestKey, controller);
         }
 
-        
+        // Listen to external abort signal if provided
+        if (externalSignal) {
+            externalSignal.addEventListener('abort', () => {
+                controller.abort();
+            }, { once: true });
+        }
+
+
         try {
             const response = await fetch(url, {
-                signal: controller.signal
+                signal: controller.signal,
+                timeout: window.APP_CONFIG.api.requestTimeout
             });
-            
+
             if (!response.ok) {
                 throw new Error(`API request failed: ${response.status} ${response.statusText}`);
             }
-            
+
             const data = await response.json();
             this.requestCount++;
-            
+
             // Clean up the request tracker
             if (requestKey) {
                 this.currentRequests.delete(requestKey);
             }
-            
+
             return data;
         } catch (error) {
             // Clean up the request tracker
             if (requestKey) {
                 this.currentRequests.delete(requestKey);
             }
-            
+
             if (error.name === 'AbortError') {
                 throw new Error('Request cancelled');
             }
-            
+
             // Only log errors when online - offline errors are expected
             if (navigator.onLine) {
                 console.error('API request error:', error);
@@ -195,7 +203,8 @@ class iNaturalistAPI {
             quality = 'research',
             photos = true,
             includeGenusLevel = true,
-            locationData = null  // New parameter to pass country information
+            locationData = null,  // New parameter to pass country information
+            signal = null  // AbortSignal for request cancellation
         } = options;
 
         try {
@@ -254,12 +263,12 @@ class iNaturalistAPI {
                         ...baseParams,
                         hrank: 'species',
                         lrank: 'species'
-                    }, `${requestKey}_species`),
+                    }, `${requestKey}_species`, signal),
                     this.makeRequest('/observations/species_counts', {
                         ...baseParams,
                         hrank: 'genus',
                         lrank: 'genus'
-                    }, `${requestKey}_genus`)
+                    }, `${requestKey}_genus`, signal)
                 ]);
                 
                 const species = speciesData.results || [];
@@ -282,9 +291,9 @@ class iNaturalistAPI {
             } else if (includeGenusLevel && taxonId) {
                 // For custom taxa, we need to use different approach
                 // Get species from species_counts (research grade)
-                const speciesData = await this.makeRequest('/observations/species_counts', baseParams, requestKey);
+                const speciesData = await this.makeRequest('/observations/species_counts', baseParams, requestKey, signal);
                 const species = speciesData.results || [];
-                
+
                 // Get genus-level observations separately (without quality_grade restriction)
                 const genusParams = {
                     taxon_id: taxonId,
@@ -294,7 +303,7 @@ class iNaturalistAPI {
                     locale: locale,
                     verifiable: true
                 };
-                
+
                 // Add location parameters based on type
                 if (isCountryWithPlace) {
                     genusParams.place_id = locationData.inatPlaceId;
@@ -303,12 +312,12 @@ class iNaturalistAPI {
                     genusParams.lng = lng;
                     genusParams.radius = radius;
                 }
-                
+
                 if (photos) {
                     genusParams.photos = 'true';
                 }
-                
-                const genusObsData = await this.makeRequest('/observations', genusParams, `${requestKey}_genus_obs`);
+
+                const genusObsData = await this.makeRequest('/observations', genusParams, `${requestKey}_genus_obs`, signal);
                 const genusObservations = genusObsData.results || [];
                 
                 // Convert genus observations to species_counts format and count by taxon
@@ -343,7 +352,7 @@ class iNaturalistAPI {
                 return [...species, ...uniqueGenera];
             } else {
                 // Original behavior: species only
-                const data = await this.makeRequest('/observations/species_counts', baseParams, requestKey);
+                const data = await this.makeRequest('/observations/species_counts', baseParams, requestKey, signal);
                 return data.results || [];
             }
         } catch (error) {

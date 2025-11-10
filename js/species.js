@@ -8,6 +8,8 @@ class SpeciesManager {
         this.loading = false;
         this.loadTimeout = null;
         this.loadPromise = null; // Track current loading promise
+        this.currentAbortController = null; // Track current request for cancellation
+        this.requestId = 0; // Incremental ID to identify requests
         this.isShowingOfflineMessage = false; // Track if currently showing offline message
         this.customTaxa = new Map(); // Store multiple custom taxa {id -> {name, rank}}
         this.predefinedIconicTaxa = ['all', '3', '40151', '47126', '47158', '47119', '26036', '20978', '47178', '47170', '47115'];
@@ -34,13 +36,13 @@ class SpeciesManager {
             this.createStoredCustomTaxaButtons();
             this.loadSpecies();
         });
-        
+
         window.addEventListener('lifeGroupFromURL', (event) => {
-            
+
             this.currentFilter = event.detail.lifeGroup;
             this.pendingLifeGroupFromURL = event.detail.lifeGroup;
-            
-            
+
+
             // If this is a custom taxon ID (not in predefined list), we need to fetch its details
             if (!this.predefinedIconicTaxa.includes(event.detail.lifeGroup)) {
                 this.restoreCustomTaxonFromURL(event.detail.lifeGroup);
@@ -53,7 +55,7 @@ class SpeciesManager {
             filterContainer.addEventListener('click', (e) => {
                 const filterBtn = e.target.closest('.filter__btn');
                 if (!filterBtn) return;
-                
+
                 // Handle remove custom button clicks
                 if (e.target.classList.contains('filter__remove')) {
                     e.stopPropagation();
@@ -61,7 +63,7 @@ class SpeciesManager {
                     this.removeCustomTaxon(taxonId);
                     return;
                 }
-                
+
                 // Handle filter button clicks
                 const group = filterBtn.dataset.group;
                 if (group === 'other') {
@@ -70,11 +72,28 @@ class SpeciesManager {
                     this.setFilter(group);
                 }
             });
-            
+
             // Initial offline state setup
             this.updateOfflineUiElements(navigator.onLine);
         } else {
             console.error('🔧 Filter container not found!');
+        }
+
+        // Event delegation for species cards (prevents memory leaks)
+        const speciesGrid = document.getElementById('species-grid');
+        if (speciesGrid) {
+            speciesGrid.addEventListener('click', async (e) => {
+                const card = e.target.closest('.species-card');
+                if (!card) return;
+
+                const speciesId = card.dataset.speciesId;
+                const species = this.currentSpecies.find(s => s.id == speciesId);
+                if (species) {
+                    await this.showSpeciesModal(species);
+                }
+            });
+        } else {
+            console.error('🔧 Species grid not found!');
         }
 
         const retryBtn = document.getElementById('retry-btn');
@@ -104,17 +123,23 @@ class SpeciesManager {
     }
 
     debouncedLoadSpecies() {
-        
+
         // Clear any existing timeout
         if (this.loadTimeout) {
             clearTimeout(this.loadTimeout);
         }
-        
+
+        // Cancel any existing request
+        if (this.currentAbortController) {
+            this.currentAbortController.abort();
+            this.currentAbortController = null;
+        }
+
         // Cancel any existing loading promise
         if (this.loadPromise) {
             this.loadPromise = null;
         }
-        
+
         // Check if we already have fresh data for this location and filter
         if (this.isDataFresh()) {
             console.log('📅 Using fresh species data, skipping reload', {
@@ -133,15 +158,15 @@ class SpeciesManager {
             this.displaySpecies();
             return;
         }
-        
+
         // Set loading immediately to prevent multiple calls
         this.loading = true;
         this.showLoadingOverlay();
-        
-        // Debounce the actual loading by 300ms (increased)
+
+        // Debounce the actual loading
         this.loadTimeout = setTimeout(() => {
             this._performLoad();
-        }, 300);
+        }, window.APP_CONFIG.timing.debounceDelay);
     }
 
     async _performLoad() {
@@ -201,6 +226,13 @@ class SpeciesManager {
     }
 
     async _doLoadSpecies() {
+        // Create new abort controller for this request
+        this.currentAbortController = new AbortController();
+        const signal = this.currentAbortController.signal;
+
+        // Assign unique request ID to detect stale responses
+        const currentRequestId = ++this.requestId;
+
         try {
             // Check if we're offline first
             if (!navigator.onLine) {
@@ -217,15 +249,16 @@ class SpeciesManager {
                     return;
                 }
             }
-            
+
             const options = {
                 iconicTaxonId: null,
                 taxonId: null,
                 locale: this.currentLocale,
-                perPage: 50,
+                perPage: window.APP_CONFIG.api.defaultPerPage,
                 quality: 'research',
                 photos: true,
-                locationData: this.currentLocation  // Pass full location data for country detection
+                locationData: this.currentLocation, // Pass full location data for country detection
+                signal: signal // Pass abort signal to API
             };
 
             // Determine if we're using iconic taxa or custom taxon
@@ -238,18 +271,30 @@ class SpeciesManager {
                 // Use custom taxon filter
                 options.taxonId = this.currentFilter;
             }
-            
+
 
             const speciesData = await window.api.getSpeciesObservations(
-                this.currentLocation.lat, 
-                this.currentLocation.lng, 
-                this.currentLocation.radius || 50, 
+                this.currentLocation.lat,
+                this.currentLocation.lng,
+                this.currentLocation.radius || window.APP_CONFIG.location.defaultRadius,
                 options
             );
-            
+
+            // Check if this request was superseded by a newer one
+            if (currentRequestId !== this.requestId) {
+                console.log('🚫 Ignoring stale response from request', currentRequestId);
+                return;
+            }
+
+            // Check if request was aborted
+            if (signal.aborted) {
+                console.log('🚫 Request was aborted');
+                return;
+            }
+
             // Only update if we got actual data (not cancelled request)
             if (speciesData && speciesData.length >= 0) {
-                this.currentSpecies = speciesData.map(species => 
+                this.currentSpecies = speciesData.map(species =>
                     window.api.formatSpeciesData(species)
                 );
 
@@ -262,23 +307,24 @@ class SpeciesManager {
                 this.lastLoadFilter = this.currentFilter;
 
                 this.displaySpecies();
-                
+
                 // Handle pending life group from URL
                 if (this.pendingLifeGroupFromURL) {
                     this.handlePendingLifeGroupFromURL();
                 }
             }
-            
+
         } catch (error) {
             // Don't show error for cancelled requests
-            if (error.message === 'Request cancelled') {
+            if (error.name === 'AbortError' || error.message === 'Request cancelled') {
+                console.log('🚫 Request aborted');
                 return;
             }
-            
+
             // Only log errors when online - offline errors are expected
             if (navigator.onLine) {
                 console.error('Failed to load species:', error);
-                
+
                 // Try to load from cache as fallback when API fails
                 const cacheLoaded = this.loadCachedSpeciesData();
                 if (cacheLoaded) {
@@ -287,7 +333,7 @@ class SpeciesManager {
                     return;
                 }
             }
-            
+
             // Check if we're offline and show appropriate message
             if (!navigator.onLine || error.message.includes('Failed to fetch') || error.message === 'Unable to load species data') {
                 // Try cache one more time for offline scenarios
@@ -301,6 +347,11 @@ class SpeciesManager {
             } else {
                 this.showError();
             }
+        } finally {
+            // Clean up abort controller if this is still the current request
+            if (currentRequestId === this.requestId) {
+                this.currentAbortController = null;
+            }
         }
     }
 
@@ -313,34 +364,26 @@ class SpeciesManager {
             return;
         }
 
-        const speciesHTML = this.currentSpecies.map(species => 
+        const speciesHTML = this.currentSpecies.map(species =>
             this.createSpeciesCard(species)
         ).join('');
 
         grid.innerHTML = speciesHTML;
-        
+
         // Ensure grid is visible
         grid.style.display = 'grid';
 
         const images = grid.querySelectorAll('img[data-src]');
         images.forEach(img => this.imageObserver.observe(img));
 
-        const cards = grid.querySelectorAll('.species-card');
-        cards.forEach(card => {
-            card.addEventListener('click', async (e) => {
-                const speciesId = e.currentTarget.dataset.speciesId;
-                const species = this.currentSpecies.find(s => s.id == speciesId);
-                if (species) {
-                    await this.showSpeciesModal(species);
-                }
-            });
-        });
+        // Event delegation is set up once in setupEventListeners()
+        // No need to add listeners to individual cards here
 
         this.hideError();
-        
+
         // Clear offline message flag since we're showing species
         this.isShowingOfflineMessage = false;
-        
+
         // Preload all thumbnails for offline caching
         this.preloadThumbnails();
     }

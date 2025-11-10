@@ -48,10 +48,45 @@ This is a **mobile-first Progressive Web App** for displaying location-based bio
 
 ## Version Management
 When incrementing version (user request):
-1. Update `js/app.js` line 3: `this.version = '1.0.X'`
-2. Update `sw.js` line 1: `const VERSION = '1.0.X'`  
+1. Update `js/config.js` line 4: `version: '1.X.X'` - **SINGLE SOURCE OF TRUTH**
+2. sw.js automatically imports from config.js
 3. Increment only the last digit (patch version)
-4. HTML version updates automatically from app.js
+4. HTML version updates automatically from config
+
+## Git Workflow & Merging Claude's Changes
+
+**Environment**: Claude runs in a sandboxed environment with git proxy access to your repository.
+
+**Branch Pattern**: Claude works on feature branches named `claude/<description>-<session-id>`
+- Example: `claude/code-review-improvements-011CUzZRApfAQRrBKWechRkZ`
+- Changes are automatically pushed to origin
+- You need to merge to main manually
+
+**Quick Merge to Main** (from your local machine):
+```bash
+# Fetch latest changes
+git fetch origin
+
+# Switch to main
+git checkout main
+
+# Merge Claude's feature branch
+git merge origin/claude/code-review-improvements-011CUzZRApfAQRrBKWechRkZ
+
+# Push to main
+git push origin main
+```
+
+**Alternative: Create PR** (for code review):
+```bash
+gh pr create --base main --head claude/code-review-improvements-011CUzZRApfAQRrBKWechRkZ --title "Code quality improvements" --body "See commits for details"
+```
+
+**Check what's new on Claude's branch**:
+```bash
+git fetch origin
+git log main..origin/claude/code-review-improvements-011CUzZRApfAQRrBKWechRkZ --oneline
+```
 
 ## Documentation Maintenance
 **IMPORTANT**: After implementing features or making significant changes:

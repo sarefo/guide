@@ -5,7 +5,8 @@ class iNaturalistAPI {
         this.lastRequestTime = 0;
         this.minRequestInterval = 100; // Minimum 100ms between requests
         this.currentLocale = 'en';
-        this.currentRequests = new Map(); // Track active requests
+        this.currentRequests = new Map(); // Track active requests (AbortControllers)
+        this.pendingRequests = new Map(); // Track pending promises for deduplication
     }
 
     async makeRequest(endpoint, params = {}, requestKey = null, externalSignal = null) {
@@ -22,6 +23,14 @@ class iNaturalistAPI {
                 }
             }
         });
+
+        const urlString = url.toString();
+
+        // Request deduplication: if an identical request is in-flight, return the same promise
+        if (this.pendingRequests.has(urlString)) {
+            console.log('🔄 Reusing in-flight request:', urlString);
+            return this.pendingRequests.get(urlString);
+        }
 
         // Cancel any existing request with the same key
         if (requestKey && this.currentRequests.has(requestKey)) {
@@ -40,42 +49,45 @@ class iNaturalistAPI {
             }, { once: true });
         }
 
+        // Create the request promise
+        const requestPromise = (async () => {
+            try {
+                const response = await fetch(url, {
+                    signal: controller.signal,
+                    timeout: window.APP_CONFIG.api.requestTimeout
+                });
 
-        try {
-            const response = await fetch(url, {
-                signal: controller.signal,
-                timeout: window.APP_CONFIG.api.requestTimeout
-            });
+                if (!response.ok) {
+                    throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+                }
 
-            if (!response.ok) {
-                throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+                const data = await response.json();
+                this.requestCount++;
+
+                return data;
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    throw new Error('Request cancelled');
+                }
+
+                // Only log errors when online - offline errors are expected
+                if (navigator.onLine) {
+                    console.error('API request error:', error);
+                }
+                throw error;
+            } finally {
+                // Clean up tracking
+                if (requestKey) {
+                    this.currentRequests.delete(requestKey);
+                }
+                this.pendingRequests.delete(urlString);
             }
+        })();
 
-            const data = await response.json();
-            this.requestCount++;
+        // Store promise for deduplication
+        this.pendingRequests.set(urlString, requestPromise);
 
-            // Clean up the request tracker
-            if (requestKey) {
-                this.currentRequests.delete(requestKey);
-            }
-
-            return data;
-        } catch (error) {
-            // Clean up the request tracker
-            if (requestKey) {
-                this.currentRequests.delete(requestKey);
-            }
-
-            if (error.name === 'AbortError') {
-                throw new Error('Request cancelled');
-            }
-
-            // Only log errors when online - offline errors are expected
-            if (navigator.onLine) {
-                console.error('API request error:', error);
-            }
-            throw error;
-        }
+        return requestPromise;
     }
 
     async respectRateLimit() {
@@ -174,17 +186,24 @@ class iNaturalistAPI {
         }
     }
 
+    /**
+     * Search for taxa by name using iNaturalist autocomplete
+     * @param {string} query - The search query
+     * @param {number} [limit=20] - Maximum number of results
+     * @param {string|null} [locale=null] - Language code for results
+     * @returns {Promise<Array>} Array of matching taxa
+     */
     async searchTaxa(query, limit = 20, locale = null) {
         try {
             const params = {
                 q: query,
                 per_page: limit
             };
-            
+
             if (locale) {
                 params.locale = locale;
             }
-            
+
             const data = await this.makeRequest('/taxa/autocomplete', params);
             return data.results || [];
         } catch (error) {
@@ -193,6 +212,22 @@ class iNaturalistAPI {
         }
     }
 
+    /**
+     * Get species observations for a location with optional filtering
+     * @param {number} lat - Latitude
+     * @param {number} lng - Longitude
+     * @param {number} [radius=50] - Search radius in kilometers
+     * @param {Object} [options={}] - Additional options
+     * @param {string} [options.iconicTaxonId] - Filter by iconic taxon ID
+     * @param {string} [options.taxonId] - Filter by specific taxon ID
+     * @param {string} [options.locale='en'] - Language for names
+     * @param {number} [options.perPage=50] - Results per page
+     * @param {string} [options.quality='research'] - Quality grade filter
+     * @param {boolean} [options.photos=true] - Require photos
+     * @param {Object} [options.locationData] - Full location data for country detection
+     * @param {AbortSignal} [options.signal] - AbortSignal for cancellation
+     * @returns {Promise<Array>} Array of species observations
+     */
     async getSpeciesObservations(lat, lng, radius = 50, options = {}) {
         const {
             iconicTaxonId = null,
@@ -573,73 +608,78 @@ class iNaturalistAPI {
         }
     }
 
+    /**
+     * Find the best available Wikipedia URL for a species with language fallback
+     * Checks species and genus names in parallel across multiple languages
+     * @param {Object} species - Species object with scientificName property
+     * @returns {Promise<Object|null>} Wikipedia URL info or null if not found
+     */
     async findBestWikipediaUrl(species) {
         const currentLang = window.i18n ? window.i18n.getCurrentLang() : 'en';
         const fallbackLang = 'en';
-        
+
         console.log('🔍 Wikipedia check for:', {
             vernacularName: species.name,
             scientificName: species.scientificName,
             currentLang
         });
-        
+
         const speciesName = species.scientificName;
         const genusName = species.scientificName.split(' ')[0];
 
-        // Always prioritize scientific name over iNaturalist's Wikipedia URL
-        // First, try species name in current language
-        console.log(`🔍 Checking ${currentLang} Wikipedia for:`, speciesName);
-        if (await this.checkWikipediaArticleExists(speciesName, currentLang)) {
-            console.log(`✅ Found ${currentLang} Wikipedia article for:`, speciesName);
-            return {
-                url: `https://${currentLang}.wikipedia.org/wiki/${encodeURIComponent(speciesName)}`,
-                lang: currentLang,
-                isOriginalLang: true
-            };
-        }
+        // Build list of URLs to check in priority order
+        const checksToPerform = [
+            { name: speciesName, lang: currentLang, isOriginalLang: true, isGenus: false, priority: 1 },
+        ];
 
-        // Then try species name in English fallback
+        // Add English fallback for species if not already checking English
         if (currentLang !== fallbackLang) {
-            console.log(`🔍 Checking ${fallbackLang} Wikipedia for:`, speciesName);
-            if (await this.checkWikipediaArticleExists(speciesName, fallbackLang)) {
-                console.log(`✅ Found ${fallbackLang} Wikipedia article for:`, speciesName);
-                return {
-                    url: `https://${fallbackLang}.wikipedia.org/wiki/${encodeURIComponent(speciesName)}`,
-                    lang: fallbackLang,
-                    isOriginalLang: false
-                };
-            }
+            checksToPerform.push({ name: speciesName, lang: fallbackLang, isOriginalLang: false, isGenus: false, priority: 2 });
+            checksToPerform.push({ name: genusName, lang: currentLang, isOriginalLang: true, isGenus: true, priority: 3 });
         }
 
-        // Try genus name in current language (if not English and no species page exists)
-        if (currentLang !== fallbackLang) {
-            console.log(`🔍 Checking ${currentLang} Wikipedia for genus:`, genusName);
-            if (await this.checkWikipediaArticleExists(genusName, currentLang)) {
-                console.log(`✅ Found ${currentLang} Wikipedia article for genus:`, genusName);
-                return {
-                    url: `https://${currentLang}.wikipedia.org/wiki/${encodeURIComponent(genusName)}`,
-                    lang: currentLang,
-                    isOriginalLang: true,
-                    isGenusOnly: true
-                };
-            }
+        // Always add English genus as last resort
+        checksToPerform.push({ name: genusName, lang: fallbackLang, isOriginalLang: false, isGenus: true, priority: 4 });
+
+        console.log(`🔍 Checking ${checksToPerform.length} Wikipedia URLs in parallel...`);
+
+        // Check all URLs in parallel
+        const checkPromises = checksToPerform.map(async (check) => {
+            const exists = await this.checkWikipediaArticleExists(check.name, check.lang);
+            return exists ? check : null;
+        });
+
+        const results = await Promise.all(checkPromises);
+
+        // Find the best match (lowest priority number = highest priority)
+        const validResults = results.filter(r => r !== null);
+        if (validResults.length === 0) {
+            console.log('❌ No Wikipedia article found for any search terms');
+            return null;
         }
 
-        // Last resort: try genus name in English only
-        console.log(`🔍 Last resort - checking ${fallbackLang} Wikipedia for genus:`, genusName);
-        if (await this.checkWikipediaArticleExists(genusName, fallbackLang)) {
-            console.log(`✅ Found ${fallbackLang} Wikipedia article for genus:`, genusName);
-            return {
-                url: `https://${fallbackLang}.wikipedia.org/wiki/${encodeURIComponent(genusName)}`,
-                lang: fallbackLang,
-                isOriginalLang: false,
-                isGenusOnly: true
-            };
+        // Sort by priority and pick the best one
+        validResults.sort((a, b) => a.priority - b.priority);
+        const bestMatch = validResults[0];
+
+        const result = {
+            url: `https://${bestMatch.lang}.wikipedia.org/wiki/${encodeURIComponent(bestMatch.name)}`,
+            lang: bestMatch.lang,
+            isOriginalLang: bestMatch.isOriginalLang
+        };
+
+        if (bestMatch.isGenus) {
+            result.isGenusOnly = true;
         }
 
-        // No valid Wikipedia article found
-        console.log('❌ No Wikipedia article found for any search terms');
-        return null;
+        console.log(`✅ Found Wikipedia article:`, {
+            name: bestMatch.name,
+            lang: bestMatch.lang,
+            priority: bestMatch.priority,
+            url: result.url
+        });
+
+        return result;
     }
 
     convertWikipediaURL(wikipediaUrl) {

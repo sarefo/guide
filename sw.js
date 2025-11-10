@@ -14,6 +14,7 @@ const STATIC_ASSETS = [
     './index.html',
     './manifest.json',
     './js/config.js', // Must be first for importScripts to work
+    './js/storage.js',
     './css/main.css',
     './css/mobile.css',
     './js/notifications.js',

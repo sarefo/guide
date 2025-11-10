@@ -5,14 +5,19 @@ class LocationManager {
         this.defaultLocation = { lat: 22.3193, lng: 114.1694, radius: 50, name: 'Hong Kong' }; // Default location
         this.radius = 50; // Always 50km as requested
         this.isGettingLocation = false;
-        
+
         // Search state management
         this.currentSearchQuery = '';
         this.searchState = 'idle'; // 'idle' | 'searching' | 'complete'
         this.currentSearchController = null;
         this.isRapidTyping = false;
         this.lastInputTime = 0;
-        
+
+        // Cache last saved values to avoid unnecessary localStorage operations
+        this.lastSavedLocation = null;
+        this.lastSavedLanguage = null;
+        this.lastSavedLifeGroup = null;
+
         this.init();
     }
 
@@ -294,33 +299,32 @@ class LocationManager {
 
     // localStorage persistence methods
     saveLocationToStorage() {
-        if (this.currentLocation) {
-            try {
-                const locationData = {
-                    lat: this.currentLocation.lat,
-                    lng: this.currentLocation.lng,
-                    name: this.currentLocation.name,
-                    radius: this.currentLocation.radius,
-                    isCountry: this.currentLocation.isCountry,
-                    timestamp: Date.now()
-                };
-                
-                // Only save if location has actually changed
-                const existing = localStorage.getItem('savedLocation');
-                if (existing) {
-                    const existingData = JSON.parse(existing);
-                    if (Math.abs(existingData.lat - locationData.lat) < 0.001 && 
-                        Math.abs(existingData.lng - locationData.lng) < 0.001 &&
-                        existingData.name === locationData.name) {
-                        return; // Same location, skip save
-                    }
-                }
-                
-                localStorage.setItem('savedLocation', JSON.stringify(locationData));
-                console.log('📍 Location saved to storage:', locationData.name);
-            } catch (error) {
-                console.warn('Failed to save location to storage:', error);
+        if (!this.currentLocation) return;
+
+        try {
+            const locationData = {
+                lat: this.currentLocation.lat,
+                lng: this.currentLocation.lng,
+                name: this.currentLocation.name,
+                radius: this.currentLocation.radius,
+                isCountry: this.currentLocation.isCountry,
+                timestamp: Date.now()
+            };
+
+            // Check against cached value to avoid unnecessary localStorage operations
+            if (this.lastSavedLocation &&
+                Math.abs(this.lastSavedLocation.lat - locationData.lat) < 0.001 &&
+                Math.abs(this.lastSavedLocation.lng - locationData.lng) < 0.001 &&
+                this.lastSavedLocation.name === locationData.name) {
+                return; // Same location, skip save
             }
+
+            // Save to localStorage and update cache
+            localStorage.setItem('savedLocation', JSON.stringify(locationData));
+            this.lastSavedLocation = locationData;
+            console.log('📍 Location saved to storage:', locationData.name);
+        } catch (error) {
+            console.warn('Failed to save location to storage:', error);
         }
     }
 
@@ -329,10 +333,12 @@ class LocationManager {
             const saved = localStorage.getItem('savedLocation');
             if (saved) {
                 const locationData = JSON.parse(saved);
-                // Check if location is not too old (e.g., within 30 days)
-                const maxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
+                // Check if location is not too old
+                const maxAge = window.APP_CONFIG.location.locationCacheAge;
                 if (Date.now() - locationData.timestamp < maxAge) {
                     console.log('📍 Loaded location from storage:', locationData.name);
+                    // Cache the loaded location
+                    this.lastSavedLocation = locationData;
                     return locationData;
                 } else {
                     console.log('📍 Saved location is too old, clearing it');
@@ -349,6 +355,7 @@ class LocationManager {
     clearLocationFromStorage() {
         try {
             localStorage.removeItem('savedLocation');
+            this.lastSavedLocation = null;
             console.log('📍 Cleared saved location from storage');
         } catch (error) {
             console.warn('Failed to clear location from storage:', error);
@@ -357,12 +364,14 @@ class LocationManager {
 
     saveLanguageToStorage(lang) {
         try {
-            // Only save if language has changed
-            const currentLang = localStorage.getItem('savedLanguage');
-            if (currentLang !== lang) {
-                localStorage.setItem('savedLanguage', lang);
-                console.log('🌐 Language saved to storage:', lang);
+            // Check against cached value to avoid localStorage read
+            if (this.lastSavedLanguage === lang) {
+                return; // No change, skip save
             }
+
+            localStorage.setItem('savedLanguage', lang);
+            this.lastSavedLanguage = lang;
+            console.log('🌐 Language saved to storage:', lang);
         } catch (error) {
             console.warn('Failed to save language to storage:', error);
         }
@@ -373,6 +382,7 @@ class LocationManager {
             const saved = localStorage.getItem('savedLanguage');
             if (saved) {
                 console.log('🌐 Loaded language from storage:', saved);
+                this.lastSavedLanguage = saved;
                 return saved;
             }
         } catch (error) {
@@ -383,21 +393,22 @@ class LocationManager {
 
     saveLifeGroupToStorage(lifeGroup) {
         try {
-            const currentLifeGroup = localStorage.getItem('savedLifeGroup');
-            
-            if (lifeGroup && lifeGroup !== 'all') {
-                // Only save if life group has changed
-                if (currentLifeGroup !== lifeGroup) {
-                    localStorage.setItem('savedLifeGroup', lifeGroup);
-                    console.log('🦋 Life group saved to storage:', lifeGroup);
-                }
-            } else {
-                // Only remove if there was something to remove
-                if (currentLifeGroup) {
-                    localStorage.removeItem('savedLifeGroup');
-                    console.log('🦋 Life group cleared from storage (all selected)');
-                }
+            const normalizedGroup = (lifeGroup && lifeGroup !== 'all') ? lifeGroup : null;
+
+            // Check against cached value to avoid localStorage operations
+            if (this.lastSavedLifeGroup === normalizedGroup) {
+                return; // No change, skip save
             }
+
+            if (normalizedGroup) {
+                localStorage.setItem('savedLifeGroup', normalizedGroup);
+                console.log('🦋 Life group saved to storage:', normalizedGroup);
+            } else {
+                localStorage.removeItem('savedLifeGroup');
+                console.log('🦋 Life group cleared from storage (all selected)');
+            }
+
+            this.lastSavedLifeGroup = normalizedGroup;
         } catch (error) {
             console.warn('Failed to save life group to storage:', error);
         }
@@ -408,8 +419,10 @@ class LocationManager {
             const saved = localStorage.getItem('savedLifeGroup');
             if (saved) {
                 console.log('🦋 Loaded life group from storage:', saved);
+                this.lastSavedLifeGroup = saved;
                 return saved;
             }
+            this.lastSavedLifeGroup = null;
         } catch (error) {
             console.warn('Failed to load life group from storage:', error);
         }

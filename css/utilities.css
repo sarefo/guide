@@ -23,3 +23,38 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+/* Notification Styles */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 1rem 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 10000;
+    color: white;
+    font-weight: 500;
+    animation: slideIn 0.3s ease;
+    pointer-events: all;
+}
+
+.notification--info {
+    background: #4CAF50;
+}
+
+.notification--success {
+    background: #4CAF50;
+}
+
+.notification--error {
+    background: #f44336;
+}
+
+.notification--warning {
+    background: #ff9800;
+}
+
+.notification--slide-out {
+    animation: slideOut 0.3s ease forwards;
+}

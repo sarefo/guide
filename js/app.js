@@ -675,6 +675,118 @@ class BiodiversityApp {
         }
     }
 
+    /**
+     * Get list of all life groups to cache (predefined + custom)
+     * @returns {Array<string>} Array of life group IDs
+     * @private
+     */
+    _getLifeGroupsToCache() {
+        const lifeGroups = ['all', '3', '40151', '47126', '47158', '47119', '26036', '20978', '47178', '47170', '47115'];
+
+        if (window.speciesManager && window.speciesManager.customTaxa) {
+            const customTaxaIds = Array.from(window.speciesManager.customTaxa.keys());
+            lifeGroups.push(...customTaxaIds);
+            console.log(`📦 Found ${customTaxaIds.length} custom taxa to cache:`, customTaxaIds);
+        }
+
+        return lifeGroups;
+    }
+
+    /**
+     * Build cache options for a specific life group
+     * @param {string} group - Life group ID
+     * @param {Object} location - Location data
+     * @returns {Object} Options object for API request
+     * @private
+     */
+    _buildCacheOptions(group, location) {
+        const predefinedGroups = ['3', '40151', '47126', '47158', '47119', '26036', '20978', '47178', '47170', '47115'];
+
+        const options = {
+            iconicTaxonId: null,
+            taxonId: null,
+            locale: window.i18n ? window.i18n.getCurrentLang() : 'en',
+            perPage: 50,
+            quality: 'research',
+            photos: true,
+            locationData: location
+        };
+
+        if (group === 'all') {
+            // No filter for "all"
+        } else if (predefinedGroups.includes(group)) {
+            // Use iconic taxon filter for predefined groups
+            options.iconicTaxonId = group;
+        } else {
+            // Use custom taxon filter for custom taxa
+            options.taxonId = group;
+        }
+
+        return options;
+    }
+
+    /**
+     * Format and cache species data for a life group
+     * @param {string} group - Life group ID
+     * @param {Object} location - Location data
+     * @param {Array} speciesData - Raw species data from API
+     * @private
+     */
+    _cacheLifeGroupData(group, location, speciesData) {
+        if (!window.speciesManager || !speciesData) return;
+
+        const formattedSpecies = speciesData.map(species =>
+            window.api.formatSpeciesData(species)
+        );
+
+        // Create cache key using same logic as species manager
+        const cacheKey = `${JSON.stringify(location)}_${group}`;
+        window.speciesManager.speciesCache.set(cacheKey, {
+            species: formattedSpecies,
+            timestamp: Date.now()
+        });
+
+        console.log(`✅ Cached ${formattedSpecies.length} species for group ${group}`);
+    }
+
+    /**
+     * Preload thumbnail images for species data
+     * @param {Array} speciesData - Raw species data from API
+     * @private
+     */
+    _preloadThumbnails(speciesData) {
+        speciesData.forEach(speciesCount => {
+            const species = window.api.formatSpeciesData(speciesCount);
+            const photoUrl = species.photo?.thumbUrl || species.photo?.url;
+            if (photoUrl && photoUrl !== 'null') {
+                const img = new Image();
+                img.src = photoUrl;
+            }
+        });
+    }
+
+    /**
+     * Handle successful cache completion
+     * @param {Object} location - Location data
+     * @private
+     */
+    _handleCacheCompletion(location) {
+        this.markLocationAsCached(location);
+        this.setCacheButtonState('complete');
+        this.showCacheStatus('cached');
+
+        setTimeout(() => {
+            try {
+                this.hideCacheStatus();
+            } catch (error) {
+                console.error('Hide cache status failed:', error);
+            }
+        }, window.APP_CONFIG.timing.notificationDuration);
+    }
+
+    /**
+     * Cache all life groups for the current location
+     */
     async cacheAllLifeGroups() {
         if (!window.locationManager || !window.locationManager.currentLocation) {
             console.log('No current location available for caching');
@@ -689,98 +801,32 @@ class BiodiversityApp {
         this.showCacheStatus('caching');
 
         try {
-            // Get predefined life groups (same list as in species.js)
-            const lifeGroups = ['all', '3', '40151', '47126', '47158', '47119', '26036', '20978', '47178', '47170', '47115'];
+            const lifeGroups = this._getLifeGroupsToCache();
             const location = window.locationManager.currentLocation;
-            
-            // Add existing custom life groups to cache list
-            if (window.speciesManager && window.speciesManager.customTaxa) {
-                const customTaxaIds = Array.from(window.speciesManager.customTaxa.keys());
-                lifeGroups.push(...customTaxaIds);
-                console.log(`📦 Found ${customTaxaIds.length} custom taxa to cache:`, customTaxaIds);
-            }
-            
+
             for (const group of lifeGroups) {
                 console.log(`📦 Caching life group: ${group}`);
-                
+
                 try {
-                    // Determine options for this life group (same logic as in species.js)
-                    const options = {
-                        iconicTaxonId: null,
-                        taxonId: null,
-                        locale: window.i18n ? window.i18n.getCurrentLang() : 'en',
-                        perPage: 50,
-                        quality: 'research',
-                        photos: true,
-                        locationData: location
-                    };
-                    
-                    // Set the appropriate filter option
-                    if (group === 'all') {
-                        // No filter for "all"
-                    } else if (['3', '40151', '47126', '47158', '47119', '26036', '20978', '47178', '47170', '47115'].includes(group)) {
-                        // Use iconic taxon filter for predefined groups
-                        options.iconicTaxonId = group;
-                    } else {
-                        // Use custom taxon filter for custom taxa
-                        options.taxonId = group;
-                    }
-                    
-                    // Fetch species data for this life group
+                    const options = this._buildCacheOptions(group, location);
+
                     const speciesData = await window.api.getSpeciesObservations(
                         location.lat,
                         location.lng,
                         location.radius,
                         options
                     );
-                    
-                    // Format and cache the species data in the species manager's cache
-                    if (window.speciesManager && speciesData) {
-                        const formattedSpecies = speciesData.map(species => 
-                            window.api.formatSpeciesData(species)
-                        );
-                        
-                        // Create cache key using same logic as species manager
-                        const cacheKey = `${JSON.stringify(location)}_${group}`;
-                        window.speciesManager.speciesCache.set(cacheKey, {
-                            species: formattedSpecies,
-                            timestamp: Date.now()
-                        });
-                        
-                        console.log(`✅ Cached ${formattedSpecies.length} species for group ${group}`);
-                    }
-                    
-                    // Preload thumbnails for this group
-                    speciesData.forEach(speciesCount => {
-                        const species = window.api.formatSpeciesData(speciesCount);
-                        const photoUrl = species.photo?.thumbUrl || species.photo?.url;
-                        if (photoUrl && photoUrl !== 'null') {
-                            const img = new Image();
-                            img.src = photoUrl;
-                        }
-                    });
-                    
+
+                    this._cacheLifeGroupData(group, location, speciesData);
+                    this._preloadThumbnails(speciesData);
+
                 } catch (error) {
                     console.warn(`Failed to cache life group ${group}:`, error);
                 }
             }
-            
-            // Mark location as cached
-            this.markLocationAsCached(location);
-            
-            // Show success state
-            this.setCacheButtonState('complete');
-            this.showCacheStatus('cached');
-            
-            // Keep cached state visible for notification duration, then hide badge
-            setTimeout(() => {
-                try {
-                    this.hideCacheStatus();
-                } catch (error) {
-                    console.error('Hide cache status failed:', error);
-                }
-            }, window.APP_CONFIG.timing.notificationDuration);
-            
+
+            this._handleCacheCompletion(location);
+
         } catch (error) {
             console.error('Caching failed:', error);
             this.setCacheButtonState('idle');

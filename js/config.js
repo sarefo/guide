@@ -1,7 +1,7 @@
 // Centralized configuration
 // SINGLE SOURCE OF TRUTH: Only update version here!
 const APP_CONFIG = {
-    version: '1.1.16',
+    version: '1.1.17',
     buildDate: '2025-11-10',
 
     // Cache settings

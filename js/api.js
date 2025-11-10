@@ -213,6 +213,137 @@ class iNaturalistAPI {
     }
 
     /**
+     * Build base request parameters for location
+     * @private
+     */
+    _buildLocationParams(lat, lng, radius, perPage, page, locale, quality, locationData) {
+        const isCountryWithPlace = locationData && locationData.isCountry && locationData.inatPlaceId;
+
+        if (isCountryWithPlace) {
+            console.log(`🌍 Using iNat place_id ${locationData.inatPlaceId} for country "${locationData.name}"`);
+            return {
+                place_id: locationData.inatPlaceId,
+                per_page: perPage,
+                page: page,
+                locale: locale,
+                verifiable: true,
+                quality_grade: quality,
+                isCountryWithPlace: true
+            };
+        }
+
+        return {
+            lat: lat,
+            lng: lng,
+            radius: radius,
+            per_page: perPage,
+            page: page,
+            locale: locale,
+            verifiable: true,
+            quality_grade: quality,
+            isCountryWithPlace: false
+        };
+    }
+
+    /**
+     * Filter out genera that have species-level observations
+     * @private
+     */
+    _filterUniqueGenera(species, genera) {
+        const speciesGenera = new Set();
+        species.forEach(s => {
+            if (s.taxon.ancestor_ids) {
+                s.taxon.ancestor_ids.forEach(ancestorId => {
+                    speciesGenera.add(ancestorId);
+                });
+            }
+        });
+        return genera.filter(g => !speciesGenera.has(g.taxon.id));
+    }
+
+    /**
+     * Convert genus observations to species_counts format
+     * @private
+     */
+    _convertGenusObservationsToCounts(genusObservations) {
+        const genusCounts = new Map();
+        genusObservations.forEach(obs => {
+            const taxonId = obs.taxon.id;
+            if (genusCounts.has(taxonId)) {
+                genusCounts.get(taxonId).count++;
+            } else {
+                genusCounts.set(taxonId, {
+                    count: 1,
+                    taxon: obs.taxon
+                });
+            }
+        });
+        return Array.from(genusCounts.values());
+    }
+
+    /**
+     * Fetch species and genus data for iconic taxa
+     * @private
+     */
+    async _fetchIconicTaxaWithGenus(baseParams, requestKey, signal) {
+        const [speciesData, genusData] = await Promise.all([
+            this.makeRequest('/observations/species_counts', {
+                ...baseParams,
+                hrank: 'species',
+                lrank: 'species'
+            }, `${requestKey}_species`, signal),
+            this.makeRequest('/observations/species_counts', {
+                ...baseParams,
+                hrank: 'genus',
+                lrank: 'genus'
+            }, `${requestKey}_genus`, signal)
+        ]);
+
+        const species = speciesData.results || [];
+        const genera = genusData.results || [];
+        const uniqueGenera = this._filterUniqueGenera(species, genera);
+
+        return [...species, ...uniqueGenera];
+    }
+
+    /**
+     * Fetch species and genus data for custom taxon
+     * @private
+     */
+    async _fetchCustomTaxonWithGenus(baseParams, taxonId, perPage, locale, photos, lat, lng, radius, requestKey, signal) {
+        const speciesData = await this.makeRequest('/observations/species_counts', baseParams, requestKey, signal);
+        const species = speciesData.results || [];
+
+        const genusParams = {
+            taxon_id: taxonId,
+            hrank: 'genus',
+            lrank: 'genus',
+            per_page: perPage,
+            locale: locale,
+            verifiable: true
+        };
+
+        if (baseParams.place_id) {
+            genusParams.place_id = baseParams.place_id;
+        } else {
+            genusParams.lat = lat;
+            genusParams.lng = lng;
+            genusParams.radius = radius;
+        }
+
+        if (photos) {
+            genusParams.photos = 'true';
+        }
+
+        const genusObsData = await this.makeRequest('/observations', genusParams, `${requestKey}_genus_obs`, signal);
+        const genusObservations = genusObsData.results || [];
+        const genera = this._convertGenusObservationsToCounts(genusObservations);
+        const uniqueGenera = this._filterUniqueGenera(species, genera);
+
+        return [...species, ...uniqueGenera];
+    }
+
+    /**
      * Get species observations for a location with optional filtering
      * @param {number} lat - Latitude
      * @param {number} lng - Longitude
@@ -238,163 +369,40 @@ class iNaturalistAPI {
             quality = 'research',
             photos = true,
             includeGenusLevel = true,
-            locationData = null,  // New parameter to pass country information
-            signal = null  // AbortSignal for request cancellation
+            locationData = null,
+            signal = null
         } = options;
 
         try {
-            // Check if this is a country with iNaturalist place_id
-            const isCountryWithPlace = locationData && locationData.isCountry && locationData.inatPlaceId;
-            
-            let baseParams;
-            
-            if (isCountryWithPlace) {
-                // Use place_id for countries to get proper boundary coverage
-                console.log(`🌍 Using iNat place_id ${locationData.inatPlaceId} for country "${locationData.name}"`);
-                baseParams = {
-                    place_id: locationData.inatPlaceId,
-                    per_page: perPage,
-                    page: page,
-                    locale: locale,
-                    verifiable: true,
-                    quality_grade: quality
-                };
-            } else {
-                // Use lat/lng/radius for cities and regions
-                baseParams = {
-                    lat: lat,
-                    lng: lng,
-                    radius: radius,
-                    per_page: perPage,
-                    page: page,
-                    locale: locale,
-                    verifiable: true,
-                    quality_grade: quality
-                };
-            }
+            const baseParams = this._buildLocationParams(lat, lng, radius, perPage, page, locale, quality, locationData);
+            const { isCountryWithPlace, ...params } = baseParams;
 
             if (iconicTaxonId && iconicTaxonId !== 'all') {
-                baseParams.iconic_taxa = iconicTaxonId;
+                params.iconic_taxa = iconicTaxonId;
             } else if (taxonId) {
-                baseParams.taxon_id = taxonId;
+                params.taxon_id = taxonId;
             }
 
             if (photos) {
-                baseParams.photos = 'true';
+                params.photos = 'true';
             }
 
-            // Create unique request key to cancel previous requests
             const filterKey = iconicTaxonId || taxonId || 'all';
-            const locationKey = isCountryWithPlace ? 
-                `place_${locationData.inatPlaceId}` : 
-                `${lat}_${lng}`;
+            const locationKey = isCountryWithPlace ? `place_${locationData.inatPlaceId}` : `${lat}_${lng}`;
             const requestKey = `species_${locationKey}_${filterKey}`;
-            
+
             if (includeGenusLevel && !taxonId) {
-                // Only use rank filtering for iconic taxa, not custom taxa
-                // Make parallel requests for species and genus levels
-                const [speciesData, genusData] = await Promise.all([
-                    this.makeRequest('/observations/species_counts', {
-                        ...baseParams,
-                        hrank: 'species',
-                        lrank: 'species'
-                    }, `${requestKey}_species`, signal),
-                    this.makeRequest('/observations/species_counts', {
-                        ...baseParams,
-                        hrank: 'genus',
-                        lrank: 'genus'
-                    }, `${requestKey}_genus`, signal)
-                ]);
-                
-                const species = speciesData.results || [];
-                const genera = genusData.results || [];
-                
-                // Filter out genera that have species-level observations
-                const speciesGenera = new Set();
-                species.forEach(s => {
-                    if (s.taxon.ancestor_ids) {
-                        s.taxon.ancestor_ids.forEach(ancestorId => {
-                            speciesGenera.add(ancestorId);
-                        });
-                    }
-                });
-                
-                const uniqueGenera = genera.filter(g => !speciesGenera.has(g.taxon.id));
-                
-                // Combine species and unique genera
-                return [...species, ...uniqueGenera];
+                return await this._fetchIconicTaxaWithGenus(params, requestKey, signal);
             } else if (includeGenusLevel && taxonId) {
-                // For custom taxa, we need to use different approach
-                // Get species from species_counts (research grade)
-                const speciesData = await this.makeRequest('/observations/species_counts', baseParams, requestKey, signal);
-                const species = speciesData.results || [];
-
-                // Get genus-level observations separately (without quality_grade restriction)
-                const genusParams = {
-                    taxon_id: taxonId,
-                    hrank: 'genus',
-                    lrank: 'genus',
-                    per_page: perPage,
-                    locale: locale,
-                    verifiable: true
-                };
-
-                // Add location parameters based on type
-                if (isCountryWithPlace) {
-                    genusParams.place_id = locationData.inatPlaceId;
-                } else {
-                    genusParams.lat = lat;
-                    genusParams.lng = lng;
-                    genusParams.radius = radius;
-                }
-
-                if (photos) {
-                    genusParams.photos = 'true';
-                }
-
-                const genusObsData = await this.makeRequest('/observations', genusParams, `${requestKey}_genus_obs`, signal);
-                const genusObservations = genusObsData.results || [];
-                
-                // Convert genus observations to species_counts format and count by taxon
-                const genusCounts = new Map();
-                genusObservations.forEach(obs => {
-                    const taxonId = obs.taxon.id;
-                    if (genusCounts.has(taxonId)) {
-                        genusCounts.get(taxonId).count++;
-                    } else {
-                        genusCounts.set(taxonId, {
-                            count: 1,
-                            taxon: obs.taxon
-                        });
-                    }
-                });
-                
-                const genera = Array.from(genusCounts.values());
-                
-                // Filter out genera that have species-level observations
-                const speciesGenera = new Set();
-                species.forEach(s => {
-                    if (s.taxon.ancestor_ids) {
-                        s.taxon.ancestor_ids.forEach(ancestorId => {
-                            speciesGenera.add(ancestorId);
-                        });
-                    }
-                });
-                
-                const uniqueGenera = genera.filter(g => !speciesGenera.has(g.taxon.id));
-                
-                // Combine species and unique genera
-                return [...species, ...uniqueGenera];
+                return await this._fetchCustomTaxonWithGenus(params, taxonId, perPage, locale, photos, lat, lng, radius, requestKey, signal);
             } else {
-                // Original behavior: species only
-                const data = await this.makeRequest('/observations/species_counts', baseParams, requestKey, signal);
+                const data = await this.makeRequest('/observations/species_counts', params, requestKey, signal);
                 return data.results || [];
             }
         } catch (error) {
             if (error.message === 'Request cancelled') {
-                return []; // Return empty array for cancelled requests
+                return [];
             }
-            // Only log errors when online - offline errors are expected
             if (navigator.onLine) {
                 console.error('Failed to get species observations:', error);
             }

@@ -48,10 +48,45 @@ This is a **mobile-first Progressive Web App** for displaying location-based bio
 
 ## Version Management
 When incrementing version (user request):
-1. Update `js/app.js` line 3: `this.version = '1.0.X'`
-2. Update `sw.js` line 1: `const VERSION = '1.0.X'`  
+1. Update `js/config.js` line 4: `version: '1.X.X'` - **SINGLE SOURCE OF TRUTH**
+2. sw.js automatically imports from config.js
 3. Increment only the last digit (patch version)
-4. HTML version updates automatically from app.js
+4. HTML version updates automatically from config
+
+## Git Workflow & Merging Claude's Changes
+
+**Environment**: Claude runs in a sandboxed environment with git proxy access to your repository.
+
+**Branch Pattern**: Claude works on feature branches named `claude/<description>-<session-id>`
+- Example: `claude/code-review-improvements-011CUzZRApfAQRrBKWechRkZ`
+- Changes are automatically pushed to origin
+- You need to merge to main manually
+
+**🌐 Web-Based Merge** (No command line! Just click the link):
+
+Visit this URL to create a Pull Request with one click:
+```
+https://github.com/sarefo/guide/compare/main...claude/code-review-improvements-011CUzZRApfAQRrBKWechRkZ
+```
+
+Then on GitHub:
+1. Click "Create pull request"
+2. Review changes
+3. Click "Merge pull request"
+4. Click "Confirm merge"
+5. Done! ✅
+
+**Alternative: Command Line Merge** (from your local machine):
+```bash
+# One-liner: Fetch, checkout main, merge, and push
+git fetch origin && git checkout main && git merge origin/claude/code-review-improvements-011CUzZRApfAQRrBKWechRkZ && git push origin main
+```
+
+**Check what's new on Claude's branch**:
+```bash
+git fetch origin
+git log main..origin/claude/code-review-improvements-011CUzZRApfAQRrBKWechRkZ --oneline
+```
 
 ## Documentation Maintenance
 **IMPORTANT**: After implementing features or making significant changes:

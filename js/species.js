@@ -225,54 +225,115 @@ class SpeciesManager {
         }
     }
 
+    /**
+     * Handle offline species loading from cache
+     * @private
+     */
+    _handleOfflineLoad() {
+        const cacheLoaded = this.loadCachedSpeciesData();
+        if (cacheLoaded) {
+            console.log('📦 Loaded species from cache (offline)');
+            this.displaySpecies();
+            return true;
+        }
+        console.log('📵 No cached data available for current filter');
+        this.showOfflineMessage();
+        return true;
+    }
+
+    /**
+     * Build API options for species loading
+     * @private
+     */
+    _buildSpeciesLoadOptions(signal) {
+        const options = {
+            iconicTaxonId: null,
+            taxonId: null,
+            locale: this.currentLocale,
+            perPage: window.APP_CONFIG.api.defaultPerPage,
+            quality: 'research',
+            photos: true,
+            locationData: this.currentLocation,
+            signal: signal
+        };
+
+        if (this.currentFilter !== 'all') {
+            if (this.predefinedIconicTaxa.includes(this.currentFilter)) {
+                options.iconicTaxonId = this.currentFilter;
+            } else {
+                options.taxonId = this.currentFilter;
+            }
+        }
+
+        return options;
+    }
+
+    /**
+     * Process successful species response
+     * @private
+     */
+    _processSpeciesResponse(speciesData) {
+        this.currentSpecies = speciesData.map(species =>
+            window.api.formatSpeciesData(species)
+        );
+
+        this.cacheSpeciesData();
+
+        this.lastLoadTime = Date.now();
+        this.lastLoadLocation = JSON.stringify(this.currentLocation);
+        this.lastLoadFilter = this.currentFilter;
+
+        this.displaySpecies();
+
+        if (this.pendingLifeGroupFromURL) {
+            this.handlePendingLifeGroupFromURL();
+        }
+    }
+
+    /**
+     * Handle species load error with cache fallback
+     * @private
+     */
+    _handleSpeciesLoadError(error) {
+        if (error.name === 'AbortError' || error.message === 'Request cancelled') {
+            console.log('🚫 Request aborted');
+            return;
+        }
+
+        if (navigator.onLine) {
+            console.error('Failed to load species:', error);
+            const cacheLoaded = this.loadCachedSpeciesData();
+            if (cacheLoaded) {
+                console.log('📦 Loaded species from cache (API failed)');
+                this.displaySpecies();
+                return;
+            }
+        }
+
+        if (!navigator.onLine || error.message.includes('Failed to fetch') || error.message === 'Unable to load species data') {
+            const cacheLoaded = this.loadCachedSpeciesData();
+            if (cacheLoaded) {
+                console.log('📦 Loaded species from cache (offline fallback)');
+                this.displaySpecies();
+                return;
+            }
+            this.showOfflineMessage();
+        } else {
+            this.showError();
+        }
+    }
+
     async _doLoadSpecies() {
-        // Create new abort controller for this request
         this.currentAbortController = new AbortController();
         const signal = this.currentAbortController.signal;
-
-        // Assign unique request ID to detect stale responses
         const currentRequestId = ++this.requestId;
 
         try {
-            // Check if we're offline first
             if (!navigator.onLine) {
-                // Try to load from cache when offline
-                const cacheLoaded = this.loadCachedSpeciesData();
-                if (cacheLoaded) {
-                    console.log('📦 Loaded species from cache (offline)');
-                    this.displaySpecies();
-                    return;
-                } else {
-                    // No cached data available
-                    console.log('📵 No cached data available for current filter');
-                    this.showOfflineMessage();
-                    return;
-                }
+                return this._handleOfflineLoad();
             }
 
-            const options = {
-                iconicTaxonId: null,
-                taxonId: null,
-                locale: this.currentLocale,
-                perPage: window.APP_CONFIG.api.defaultPerPage,
-                quality: 'research',
-                photos: true,
-                locationData: this.currentLocation, // Pass full location data for country detection
-                signal: signal // Pass abort signal to API
-            };
-
-            // Determine if we're using iconic taxa or custom taxon
-            if (this.currentFilter === 'all') {
-                // No filter
-            } else if (this.predefinedIconicTaxa.includes(this.currentFilter)) {
-                // Use iconic taxon filter
-                options.iconicTaxonId = this.currentFilter;
-            } else {
-                // Use custom taxon filter
-                options.taxonId = this.currentFilter;
-            }
-
-
+            const options = this._buildSpeciesLoadOptions(signal);
             const speciesData = await window.api.getSpeciesObservations(
                 this.currentLocation.lat,
                 this.currentLocation.lng,
@@ -280,75 +341,22 @@ class SpeciesManager {
                 options
             );
 
-            // Check if this request was superseded by a newer one
             if (currentRequestId !== this.requestId) {
                 console.log('🚫 Ignoring stale response from request', currentRequestId);
                 return;
             }
 
-            // Check if request was aborted
             if (signal.aborted) {
                 console.log('🚫 Request was aborted');
                 return;
             }
 
-            // Only update if we got actual data (not cancelled request)
             if (speciesData && speciesData.length >= 0) {
-                this.currentSpecies = speciesData.map(species =>
-                    window.api.formatSpeciesData(species)
-                );
-
-                // Cache the species data
-                this.cacheSpeciesData();
-
-                // Update load tracking
-                this.lastLoadTime = Date.now();
-                this.lastLoadLocation = JSON.stringify(this.currentLocation);
-                this.lastLoadFilter = this.currentFilter;
-
-                this.displaySpecies();
-
-                // Handle pending life group from URL
-                if (this.pendingLifeGroupFromURL) {
-                    this.handlePendingLifeGroupFromURL();
-                }
+                this._processSpeciesResponse(speciesData);
             }
-
         } catch (error) {
-            // Don't show error for cancelled requests
-            if (error.name === 'AbortError' || error.message === 'Request cancelled') {
-                console.log('🚫 Request aborted');
-                return;
-            }
-
-            // Only log errors when online - offline errors are expected
-            if (navigator.onLine) {
-                console.error('Failed to load species:', error);
-
-                // Try to load from cache as fallback when API fails
-                const cacheLoaded = this.loadCachedSpeciesData();
-                if (cacheLoaded) {
-                    console.log('📦 Loaded species from cache (API failed)');
-                    this.displaySpecies();
-                    return;
-                }
-            }
-
-            // Check if we're offline and show appropriate message
-            if (!navigator.onLine || error.message.includes('Failed to fetch') || error.message === 'Unable to load species data') {
-                // Try cache one more time for offline scenarios
-                const cacheLoaded = this.loadCachedSpeciesData();
-                if (cacheLoaded) {
-                    console.log('📦 Loaded species from cache (offline fallback)');
-                    this.displaySpecies();
-                    return;
-                }
-                this.showOfflineMessage();
-            } else {
-                this.showError();
-            }
+            this._handleSpeciesLoadError(error);
         } finally {
-            // Clean up abort controller if this is still the current request
             if (currentRequestId === this.requestId) {
                 this.currentAbortController = null;
             }
@@ -634,21 +642,20 @@ class SpeciesManager {
         }
     }
 
-    async showSpeciesModal(species) {
-        const modal = document.getElementById('species-modal');
-        const imageContainer = document.getElementById('species-image-container');
-        const modalBody = document.getElementById('modal-body');
-        
-        if (!modal || !imageContainer || !modalBody) return;
-
+    /**
+     * Build HTML for modal image container
+     * @param {Object} species - Species data
+     * @returns {string} HTML string for image container
+     * @private
+     */
+    _buildModalImageHTML(species) {
         const mediumPhotoUrl = species.photo?.url;
         const thumbPhotoUrl = species.photo?.thumbUrl;
         const hasPhoto = (mediumPhotoUrl && mediumPhotoUrl !== 'null') || (thumbPhotoUrl && thumbPhotoUrl !== 'null');
 
-        // Populate image container with image and close button
-        imageContainer.innerHTML = hasPhoto ? `
-            <img 
-                src="${mediumPhotoUrl || thumbPhotoUrl}" 
+        return hasPhoto ? `
+            <img
+                src="${mediumPhotoUrl || thumbPhotoUrl}"
                 alt="${species.name}"
                 class="species-dialog__image"
                 data-thumb-url="${thumbPhotoUrl || ''}"
@@ -660,13 +667,18 @@ class SpeciesManager {
             </div>
             <button class="species-dialog__close" aria-label="Close">&times;</button>
         `;
+    }
 
-        // Check if we're using scientific name as main title (no vernacular name available)
-        // This includes both direct scientific names and genus-level "Genus sp." format
-        const isUsingScientificName = species.name === species.scientificName || 
+    /**
+     * Format species display name with proper italics for scientific names
+     * @param {Object} species - Species data
+     * @returns {Object} Object with displayName (HTML string) and isUsingScientificName (boolean)
+     * @private
+     */
+    _formatSpeciesDisplayName(species) {
+        const isUsingScientificName = species.name === species.scientificName ||
                                      species.name.endsWith(' sp.');
-        
-        // Format the display name with proper italics for scientific names
+
         let displayName = species.name;
         if (isUsingScientificName) {
             if (species.name.endsWith(' sp.')) {
@@ -678,17 +690,28 @@ class SpeciesManager {
                 displayName = `<em>${species.name}</em>`;
             }
         }
-        
-        // Populate modal body with content
-        modalBody.innerHTML = `
+
+        return { displayName, isUsingScientificName };
+    }
+
+    /**
+     * Build HTML for modal body content
+     * @param {Object} species - Species data
+     * @param {string} displayName - Formatted display name (may contain HTML)
+     * @param {boolean} isUsingScientificName - Whether the display name is scientific
+     * @returns {string} HTML string for modal body
+     * @private
+     */
+    _buildModalBodyHTML(species, displayName, isUsingScientificName) {
+        return `
             <h2 class="species-dialog__title">${displayName}</h2>
-            ${!isUsingScientificName && species.scientificName ? 
+            ${!isUsingScientificName && species.scientificName ?
                 `<p class="species-dialog__scientific-name">${species.scientificName}</p>` : ''
             }
             <div class="species-dialog__actions">
-                <a class="species-dialog__action-btn species-dialog__action-btn--disabled wiki-btn" 
-                   title="Loading Wikipedia..." 
-                   data-original-text="${window.i18n.t('modal.wikipedia')}" 
+                <a class="species-dialog__action-btn species-dialog__action-btn--disabled wiki-btn"
+                   title="Loading Wikipedia..."
+                   data-original-text="${window.i18n.t('modal.wikipedia')}"
                    onclick="return false;">
                     <svg class="wiki-spinner" width="16" height="16" viewBox="0 0 24 24" fill="none" style="animation: spin 1s linear infinite;">
                         <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" stroke-dasharray="31.416" stroke-dashoffset="31.416">
@@ -708,8 +731,14 @@ class SpeciesManager {
                 </div>
             ` : ''}
         `;
+    }
 
-        // Set up image fallback handler
+    /**
+     * Set up image fallback handler for modal images
+     * @param {HTMLElement} imageContainer - Image container element
+     * @private
+     */
+    _setupImageFallback(imageContainer) {
         const modalImage = imageContainer.querySelector('.species-dialog__image');
         if (modalImage && modalImage.dataset.thumbUrl) {
             modalImage.addEventListener('error', function(e) {
@@ -729,7 +758,16 @@ class SpeciesManager {
                 }
             });
         }
+    }
 
+    /**
+     * Open modal and set up event handlers
+     * @param {HTMLElement} modal - Modal element
+     * @param {HTMLElement} imageContainer - Image container element
+     * @param {Object} species - Species data
+     * @private
+     */
+    _openModalAndSetupHandlers(modal, imageContainer, species) {
         // Use unified modal manager
         if (window.modalManager) {
             window.modalManager.openModal(modal);
@@ -754,6 +792,33 @@ class SpeciesManager {
 
         // Check Wikipedia asynchronously after modal is shown
         this.checkAndEnableWikipedia(modal, species);
+    }
+
+    /**
+     * Show modal with species details
+     * @param {Object} species - Species data to display
+     */
+    async showSpeciesModal(species) {
+        const modal = document.getElementById('species-modal');
+        const imageContainer = document.getElementById('species-image-container');
+        const modalBody = document.getElementById('modal-body');
+
+        if (!modal || !imageContainer || !modalBody) return;
+
+        // Build and populate image container
+        imageContainer.innerHTML = this._buildModalImageHTML(species);
+
+        // Format display name
+        const { displayName, isUsingScientificName } = this._formatSpeciesDisplayName(species);
+
+        // Build and populate modal body
+        modalBody.innerHTML = this._buildModalBodyHTML(species, displayName, isUsingScientificName);
+
+        // Set up image fallback handler
+        this._setupImageFallback(imageContainer);
+
+        // Open modal and set up handlers
+        this._openModalAndSetupHandlers(modal, imageContainer, species);
     }
 
     async checkAndEnableWikipedia(modal, species) {

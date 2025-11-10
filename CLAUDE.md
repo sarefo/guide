@@ -62,24 +62,24 @@ When incrementing version (user request):
 - Changes are automatically pushed to origin
 - You need to merge to main manually
 
-**Quick Merge to Main** (from your local machine):
-```bash
-# Fetch latest changes
-git fetch origin
+**🌐 Web-Based Merge** (No command line! Just click the link):
 
-# Switch to main
-git checkout main
-
-# Merge Claude's feature branch
-git merge origin/claude/code-review-improvements-011CUzZRApfAQRrBKWechRkZ
-
-# Push to main
-git push origin main
+Visit this URL to create a Pull Request with one click:
+```
+https://github.com/sarefo/guide/compare/main...claude/code-review-improvements-011CUzZRApfAQRrBKWechRkZ
 ```
 
-**Alternative: Create PR** (for code review):
+Then on GitHub:
+1. Click "Create pull request"
+2. Review changes
+3. Click "Merge pull request"
+4. Click "Confirm merge"
+5. Done! ✅
+
+**Alternative: Command Line Merge** (from your local machine):
 ```bash
-gh pr create --base main --head claude/code-review-improvements-011CUzZRApfAQRrBKWechRkZ --title "Code quality improvements" --body "See commits for details"
+# One-liner: Fetch, checkout main, merge, and push
+git fetch origin && git checkout main && git merge origin/claude/code-review-improvements-011CUzZRApfAQRrBKWechRkZ && git push origin main
 ```
 
 **Check what's new on Claude's branch**:

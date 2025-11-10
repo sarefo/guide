@@ -364,17 +364,11 @@ class SpeciesManager {
             return;
         }
 
-        const speciesHTML = this.currentSpecies.map(species =>
-            this.createSpeciesCard(species)
-        ).join('');
-
-        grid.innerHTML = speciesHTML;
+        // Use smart DOM updates instead of innerHTML replacement
+        this.updateSpeciesGrid(grid);
 
         // Ensure grid is visible
         grid.style.display = 'grid';
-
-        const images = grid.querySelectorAll('img[data-src]');
-        images.forEach(img => this.imageObserver.observe(img));
 
         // Event delegation is set up once in setupEventListeners()
         // No need to add listeners to individual cards here
@@ -386,6 +380,81 @@ class SpeciesManager {
 
         // Preload all thumbnails for offline caching
         this.preloadThumbnails();
+    }
+
+    /**
+     * Smart DOM update: only adds/removes/updates changed cards
+     * Preserves existing DOM nodes when possible for better performance
+     */
+    updateSpeciesGrid(grid) {
+        // Create map of existing cards for fast lookup
+        const existingCards = new Map();
+        const existingElements = grid.querySelectorAll('.species-card');
+        existingElements.forEach(card => {
+            const id = card.dataset.speciesId;
+            if (id) existingCards.set(id, card);
+        });
+
+        // Create map of new species for fast lookup
+        const newSpeciesMap = new Map();
+        this.currentSpecies.forEach(species => {
+            newSpeciesMap.set(String(species.id), species);
+        });
+
+        // Remove cards that are no longer needed
+        existingCards.forEach((card, id) => {
+            if (!newSpeciesMap.has(id)) {
+                // Stop observing images before removing
+                const img = card.querySelector('img[data-src]');
+                if (img) this.imageObserver.unobserve(img);
+                card.remove();
+            }
+        });
+
+        // Add or update cards
+        const fragment = document.createDocumentFragment();
+        let insertPosition = 0;
+
+        this.currentSpecies.forEach((species, index) => {
+            const speciesId = String(species.id);
+            const existingCard = existingCards.get(speciesId);
+
+            if (existingCard) {
+                // Card exists - ensure it's in correct position
+                const currentIndex = Array.from(grid.children).indexOf(existingCard);
+                if (currentIndex !== index) {
+                    // Move to correct position
+                    if (index < grid.children.length) {
+                        grid.insertBefore(existingCard, grid.children[index]);
+                    } else {
+                        grid.appendChild(existingCard);
+                    }
+                }
+            } else {
+                // Create new card
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = this.createSpeciesCard(species);
+                const newCard = tempDiv.firstElementChild;
+
+                // Observe lazy-loaded images
+                const img = newCard.querySelector('img[data-src]');
+                if (img) this.imageObserver.observe(img);
+
+                // Add to fragment for batch insertion
+                if (index < grid.children.length) {
+                    // Insert at specific position
+                    grid.insertBefore(newCard, grid.children[index]);
+                } else {
+                    // Append at end
+                    fragment.appendChild(newCard);
+                }
+            }
+        });
+
+        // Append any remaining new cards
+        if (fragment.children.length > 0) {
+            grid.appendChild(fragment);
+        }
     }
 
     preloadThumbnails() {

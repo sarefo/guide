@@ -271,5 +271,5 @@ class CacheService {
     }
 }
 
-// Initialize cache service
-window.cacheService = new CacheService();
+// Initialize cache service in App namespace
+App.cacheService = new CacheService();

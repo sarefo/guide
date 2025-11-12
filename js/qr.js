@@ -147,4 +147,5 @@ class QRManager {
     }
 }
 
-window.qrManager = new QRManager();
+// Initialize QRManager in App namespace
+App.qrManager = new QRManager();

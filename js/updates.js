@@ -284,5 +284,5 @@ class UpdateService {
     }
 }
 
-// Initialize update service
-window.updateService = new UpdateService();
+// Initialize update service in App namespace
+App.updateService = new UpdateService();

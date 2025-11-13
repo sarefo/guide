@@ -1246,13 +1246,13 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-// Initialize app when DOM is ready
+// Initialize app components in App namespace when DOM is ready
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
-        window.app = new BiodiversityApp();
-        window.modalManager = new ModalManager();
+        App.app = new BiodiversityApp();
+        App.modalManager = new ModalManager();
     });
 } else {
-    window.app = new BiodiversityApp();
-    window.modalManager = new ModalManager();
+    App.app = new BiodiversityApp();
+    App.modalManager = new ModalManager();
 }

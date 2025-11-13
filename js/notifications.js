@@ -116,5 +116,5 @@ class NotificationService {
     }
 }
 
-// Initialize notification service
-window.notificationService = new NotificationService();
+// Initialize notification service in App namespace
+App.notificationService = new NotificationService();

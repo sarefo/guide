@@ -1509,4 +1509,5 @@ class SpeciesManager {
     }
 }
 
-window.speciesManager = new SpeciesManager();
+// Initialize SpeciesManager in App namespace
+App.speciesManager = new SpeciesManager();

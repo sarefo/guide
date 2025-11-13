@@ -735,4 +735,5 @@ class iNaturalistAPI {
     }
 }
 
-window.api = new iNaturalistAPI();
+// Initialize API in App namespace
+App.api = new iNaturalistAPI();

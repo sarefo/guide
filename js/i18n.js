@@ -137,4 +137,5 @@ class I18nManager {
     }
 }
 
-window.i18n = new I18nManager();
+// Initialize I18nManager in App namespace
+App.i18n = new I18nManager();

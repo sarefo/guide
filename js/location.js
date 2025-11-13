@@ -1190,8 +1190,9 @@ class LocationManager {
 }
 
 
+// Initialize LocationManager in App namespace
 try {
-    window.locationManager = new LocationManager();
+    App.locationManager = new LocationManager();
 } catch (error) {
     console.error('❌ Failed to create LocationManager:', error);
     console.error('❌ Error stack:', error.stack);

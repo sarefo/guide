@@ -13,16 +13,16 @@ class I18nManager {
     detectLanguage() {
         const urlParams = new URLSearchParams(window.location.search);
         const urlLang = urlParams.get('lang');
-        
-        if (urlLang && ['en', 'es', 'fr', 'de'].includes(urlLang)) {
+
+        if (urlLang && ['en', 'es', 'fr', 'de', 'pt'].includes(urlLang)) {
             return urlLang;
         }
-        
+
         const browserLang = navigator.language.split('-')[0];
-        if (['en', 'es', 'fr', 'de'].includes(browserLang)) {
+        if (['en', 'es', 'fr', 'de', 'pt'].includes(browserLang)) {
             return browserLang;
         }
-        
+
         return 'en';
     }
 

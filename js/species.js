@@ -42,6 +42,11 @@ class SpeciesManager {
             this.currentFilter = event.detail.lifeGroup;
             this.pendingLifeGroupFromURL = event.detail.lifeGroup;
 
+            // Update filter button highlights to reflect URL parameter
+            const filterButtons = document.querySelectorAll('.filter__btn');
+            filterButtons.forEach(btn => {
+                btn.classList.toggle('is-active', btn.dataset.group === event.detail.lifeGroup);
+            });
 
             // If this is a custom taxon ID (not in predefined list), we need to fetch its details
             if (!this.predefinedIconicTaxa.includes(event.detail.lifeGroup)) {
